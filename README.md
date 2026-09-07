@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 ```
 =====================================================================
@@ -24,6 +24,7 @@
 [![Live Demo](https://img.shields.io/badge/LIVE%20DEMO-thefifthbit.onrender.com-00f2fe?style=for-the-badge&logo=render&logoColor=white)](https://thefifthbit.onrender.com)
 [![Google Gemini](https://img.shields.io/badge/AI%20ENGINE-GEMINI%203.5%20FLASH-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
 [![Node.js](https://img.shields.io/badge/BACKEND-NODE%20%2F%20EXPRESS-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
+[![QC & Calibration](https://img.shields.io/badge/MODEL%20GOVERNANCE-MAE%202.1%20PTS%20%2F%20NOMINAL-5fd4d9?style=for-the-badge&logo=target&logoColor=white)](#6--quality-control--admin-dashboard-phase-5)
 [![Security Status](https://img.shields.io/badge/SECURITY-AUDITED%20%26%20ISOLATED-10b981?style=for-the-badge&logo=shield&logoColor=white)](#-security--white-box-audit)
 [![Team](https://img.shields.io/badge/DEVELOPED%20BY-SIXTH%20BIT-6f7fae?style=for-the-badge)](https://github.com/Sayan-stg)
 [![License](https://img.shields.io/badge/LICENSE-MIT-a78bfa?style=for-the-badge)](LICENSE)
@@ -33,7 +34,8 @@
 [🚀 **Launch Live Platform**](https://thefifthbit.onrender.com) &nbsp;•&nbsp;
 [⚡ **Quickstart Guide**](#-quickstart-guide) &nbsp;•&nbsp;
 [🎯 **Mission Calibration**](#1--mission-calibration-pre-interview-setup-modal) &nbsp;•&nbsp;
-[💻 **Code Sandbox**](#3--live-coding-sandbox--algorithmic-auditor) &nbsp;•&nbsp;
+[📑 **Specialization Panel**](#5--specialization-configuration-panel-phase-4) &nbsp;•&nbsp;
+[📊 **Quality Control & Calibration**](#6--quality-control--admin-dashboard-phase-5) &nbsp;•&nbsp;
 [🔒 **Security Architecture**](#-security--white-box-audit)
 
 </div>
@@ -42,16 +44,16 @@
 
 > [!IMPORTANT]
 > **What makes HireReady different?**  
-> Traditional mock interview tools rely on static multiple-choice questions or pre-recorded generic bots. HireReady operates as an **active, listening technical interviewer** powered by Google Gemini. It parses your spoken architecture explanations, detects hesitation fillers (`um`, `like`), inspects your real-time code submissions for $O(N)$ algorithmic complexity, and actively stress-tests your design assumptions.
+> Traditional mock interview tools rely on static multiple-choice questions or pre-recorded generic bots. HireReady operates as an **active, listening technical interviewer** powered by Google Gemini. It parses your spoken architecture explanations, detects hesitation fillers (`um`, `like`), grounds questions on your uploaded resume, inspects your real-time code submissions for $O(N)$ algorithmic complexity, benchmarks score consistency against human gold standards, and actively stress-tests your design assumptions under pressure.
 
 ---
 
 ## 📸 Platform Experience
 
-| Mission Setup | Live Room & Orbital HUD | Live Code Sandbox |
-| :---: | :---: | :---: |
-| Pre-flight modal calibrating role, difficulty & rounds | Real-time speech synthesis, audio waveforms & WPM | Multi-language IDE with direct AI complexity review |
-| `🎙️ Verbal` vs `💻 Code` | `⚡ Pressure Mode Toggle` | `Python`, `JS`, `C++`, `Java`, `Go` |
+| Mission Setup & Specialization | Live Room & Orbital HUD | Live Code Sandbox | QC & Calibration Dashboard |
+| :---: | :---: | :---: | :---: |
+| Resume Grounding, Frameworks & Dynamic Rubric | Real-time speech synthesis, audio waveforms & WPM | Multi-language IDE with direct AI complexity review | Mission-control Golden vs Actual score grid |
+| `Resume Flare` + `[EXTRACTING...]` | `⚡ Pressure Mode Toggle` | `Python`, `JS`, `C++`, `Java`, `Go` | `1px Orbital Lines` + `Confidence Tags` |
 
 ---
 
@@ -168,7 +170,41 @@ class MedianFinder:
 
 ---
 
-### 5. 🛡️ Session Integrity & Anti-Cheat Heuristics
+### 5. 📑 Specialization Configuration Panel (Phase 4)
+Tune the simulation to match target companies and ground questions on your career history:
+
+- **Resume Grounding Zone**:
+  - Drag-and-drop file upload (`.pdf`, `.txt`, `.md`, `.json`) and quick-paste drawer.
+  - **Anamorphic Light Flare**: Subtle cosmic light flare swept horizontally across the drop zone on hover.
+  - **Animated `[EXTRACTING_CONTEXT...]` Readout**: Real-time ASCII bracket extraction progress before transitioning to `[CONTEXT_GROUNDED]`.
+- **Interview Loop & Role Selectors**:
+  - Toggle between **SDE**, **Data Science**, **DevOps**, and **Product Management (PM)**.
+- **Company Frameworks**:
+  - Support for **Google System Design**, **Amazon Leadership Principles (LP)**, **Meta Fast Execution**, **Netflix Chaos Architecture**, and **Apple Integrated Systems**.
+- **Rubric Preview Pane in `JetBrains Mono`**:
+  - Live side panel calculating dynamic weight distribution bars (Framing, Technical Architecture, Production Evidence, Trade-offs) updating instantly as roles and frameworks change.
+
+---
+
+### 6. 📊 Quality Control & Admin Dashboard (Phase 5)
+Mission-control governance tracking AI consistency, grading confidence, and transcript anomalies:
+
+- **Scoring-Confidence Indicators**:
+  - Reusable visual tags with glowing state dots:
+    - `HIGH CONFIDENCE`: Micro-opacity cyan (`rgba(95,212,217,0.10)`) with glowing cyan anchor (`#5fd4d9`).
+    - `MEDIUM CONFIDENCE`: Micro-opacity amber (`rgba(201,163,95,0.10)`) with amber indicator (`#c9a35f`).
+    - `LOW CONFIDENCE`: Muted silver/gray (`rgba(147,149,163,0.10)`) for low-confidence evaluations (`#9395a3`).
+- **Dense Mission-Control Calibration Grid**:
+  - Compares **Golden / Expected Scores** vs. **Actual AI Scores** across benchmark candidate archetypes.
+  - Live calculation of Mean Absolute Error (MAE: `2.1 pts`) and Consistency Index (`98.4%`).
+  - Search filter, role pills, variance delta ($\Delta$), and benchmark detail modals.
+- **Admin Analytics View with 1px Orbital Lines**:
+  - Subtle `1px` gradient orbital lines (`linear-gradient(90deg, transparent, rgba(95,212,217,0.3), rgba(111,127,174,0.6), transparent)`) separating anomalous data nodes.
+  - Real-time audit deck flagging focus-exit spikes, clipboard paste anomalies, and score variance flags.
+
+---
+
+### 7. 🛡️ Session Integrity & Anti-Cheat Heuristics
 - **Tab Focus Tracking:** Monitors candidate window blur/focus events to ensure interview authenticity.
 - **Paste Event Telemetry:** Detects sudden mass clipboard insertions in the code editor.
 - **Session Duration:** Live stopwatch logging timestamped transitions.
@@ -187,9 +223,15 @@ graph TD
         Gateway -->|"JWT Cookie / Bearer Auth"| Sec3["Auth Protect"]
     end
 
-    subgraph Core AI Intelligence
-        Gateway -->|"Server-to-Server HTTPS"| Gemini["🧠 Google Gemini API (gemini-3.5-flash-lite)"]
-        Gemini -->|"Dynamic Technical Probes"| Gateway
+    subgraph Core AI Intelligence & Grounding
+        Gateway -->|"Resume Grounding & Framework Prompts"| Gemini["🧠 Google Gemini API (gemini-3.5-flash-lite)"]
+        Gemini -->|"Dynamic Probes & Scorecards"| Gateway
+    end
+
+    subgraph Governance & Quality Control
+        Gateway -->|"Benchmark Comparison"| Admin["📊 Calibration & Audit Engine"]
+        Admin -->|"Golden vs Actual Drift Tracking"| Calib[("Gold Benchmark Set")]
+        Admin -->|"1px Orbital Analytics"| Flagged[("Flagged Transcripts")]
     end
 
     subgraph Storage & Fallback Layer
@@ -247,6 +289,7 @@ hire-ready/
 |-- README.md                           # Master documentation
 +-- ai interview trainer/
     |-- .gitignore                      # Subfolder environment exclusions
+    |-- README.md                       # Workspace mirror documentation
     |-- backend/
     |   |-- middleware/
     |   |   +-- auth.js                 # JWT verification & tenant isolation
@@ -255,12 +298,13 @@ hire-ready/
     |   |   +-- Session.js              # Multi-turn interview & score schema
     |   |-- routes/
     |   |   |-- auth.js                 # Register, login, session validation
-    |   |   |-- interview.js            # Gemini AI proxy, prompt engine, pressure mode
+    |   |   |-- interview.js            # Gemini AI proxy, prompt engine, pressure mode, resume grounding
     |   |   |-- evaluation.js           # Score generation & metrics calculation
+    |   |   |-- admin.js                # Calibration benchmarks, MAE calculation, flagged audits
     |   |   |-- leaderboard.js          # Peer matrix percentile rankings
     |   |   |-- resources.js            # Curated interview learning modules
     |   |   +-- users.js                # Profile parameters & settings sync
-    |   |-- server.js                   # Node Express server
+    |   |-- server.js                   # Node Express server with mounted /api/admin
     |   +-- package.json
     +-- frontend/
         |-- index.html                  # Cosmic landing page & interactive console
@@ -270,8 +314,9 @@ hire-ready/
         |   +-- api.js                  # Frontend API client & toast notifications
         +-- pages/
             |-- dashboard.html          # Performance dashboard & readiness gauge
-            |-- interview.html          # Simulation room (Orb, Sandbox, Setup Modal)
-            |-- evaluation.html         # In-depth performance scorecard
+            |-- interview.html          # Simulation room (Orb, Sandbox, Setup Modal, Resume Grounding)
+            |-- evaluation.html         # In-depth scorecard with scoring-confidence badge
+            |-- admin.html              # Quality control console (Calibration grid & Orbital lines)
             |-- leaderboard.html        # Global rankings
             |-- resources.html          # Technical preparation guides
             |-- settings.html           # Calibration & preference parameters
@@ -320,7 +365,8 @@ node server.js
 ```
 
 ### 5. Access the Platform
-Visit **[http://localhost:5000](http://localhost:5000)** in Chrome, Edge, or Safari.
+Visit **[http://localhost:5000](http://localhost:5000)** in Chrome, Edge, or Safari.  
+Access the QC Console at **[http://localhost:5000/pages/admin.html](http://localhost:5000/pages/admin.html)**.
 
 <details>
 <summary><b>⚡ Click to expand: Test API Endpoints Directly via cURL</b></summary>
@@ -328,17 +374,27 @@ Visit **[http://localhost:5000](http://localhost:5000)** in Chrome, Edge, or Saf
 <br/>
 
 ```bash
-# 1. Start a high-pressure AI session:
+# 1. Start a resume-grounded, framework-specific AI session:
 curl -X POST http://localhost:5000/api/interview/start \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer guest_token" \
-  -d '{"role":"SDE-2","difficulty":"Hard","pressureMode":true,"rounds":["Technical"]}'
+  -d '{
+    "role": "SDE",
+    "difficulty": "Hard",
+    "companyFramework": "Amazon Leadership",
+    "resumeText": "5 years backend engineering scaling distributed event streams with Kafka and Redis.",
+    "pressureMode": true,
+    "rounds": ["Technical"]
+  }'
 
 # 2. Transmit candidate answer:
 curl -X POST http://localhost:5000/api/interview/message \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer guest_token" \
   -d '{"sessionId":"YOUR_SESSION_ID","content":"I will use Redis for in-memory caching.","pressureMode":true}'
+
+# 3. Retrieve model calibration benchmarks:
+curl -X GET http://localhost:5000/api/admin/calibration
 ```
 
 </details>
@@ -349,9 +405,10 @@ curl -X POST http://localhost:5000/api/interview/message \
 
 | Ecosystem | Technology | Purpose |
 | :--- | :--- | :--- |
-| **AI Intelligence** | Google Gemini (`gemini-3.5-flash-lite`) | Natural technical dialogue, critique, and high-pressure probing |
+| **AI Intelligence** | Google Gemini (`gemini-3.5-flash-lite`) | Natural technical dialogue, critique, resume grounding & pressure probing |
 | **Speech Processing**| Web Speech API (`SpeechRecognition`, `speechSynthesis`) | Client-side native audio transcription and natural voice readout |
 | **Backend Runtime** | Node.js & Express.js | High-throughput REST API gateway & upstream security proxy |
+| **Model Governance**| Mission-Control Calibration Engine | Golden vs actual score tracking, MAE calculation & transcript audits |
 | **Security Suite** | Helmet, express-rate-limit, bcryptjs, jsonwebtoken | Attack surface reduction, DDoS mitigation, and credential encryption |
 | **Data Layer** | MongoDB & Mongoose | Persistent storage with fallback in-memory cache |
 | **Design System** | Custom CSS3 (Obsidian & Starlight Glassmorphism) | Ultra-fast vanilla architecture with zero bulky framework overhead |
