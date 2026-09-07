@@ -418,8 +418,8 @@ curl -X GET http://localhost:5000/api/admin/calibration
 ## 👥 Authors & Team
 
 Crafted with dedication by **Sixth Bit**:
-- **Sayan** -- [*GitHub Profile*](https://github.com/Sayan-stg)
-- **Adeet Singh** -- [*GitHub Profile*](https://github.com/adeetsingh)
+- **Sayan** ([@Sayan-stg](https://github.com/Sayan-stg)) -- [*GitHub Profile*](https://github.com/Sayan-stg)
+- **Adeet Singh** ([@Adeetsingh-0101](https://github.com/Adeetsingh-0101)) -- [*GitHub Profile*](https://github.com/Adeetsingh-0101)
 
 ---
 
