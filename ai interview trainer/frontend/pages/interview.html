@@ -269,42 +269,231 @@ button{ font-family:inherit; }
 }
 .pressure-banner.show{ transform:translateX(-50%) translateY(0); opacity:1; }
 
-/* ---------- PRE-INTERVIEW SETUP MODAL ---------- */
+/* ---------- PRE-INTERVIEW SETUP MODAL (PHASE 4) ---------- */
 .setup-modal-overlay{
   position:fixed; inset:0; z-index:9999;
-  background:rgba(3,4,8,0.88); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  background:rgba(3,4,8,0.88); backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px);
   display:flex; align-items:center; justify-content:center; padding:20px;
   opacity:1; visibility:visible; transition:opacity .35s var(--ease), visibility .35s var(--ease);
 }
 .setup-modal-overlay.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
 .setup-modal-card{
-  width:100%; max-width:620px; background:rgba(13,15,24,0.96);
-  border:1px solid var(--line-strong); border-radius:12px;
-  box-shadow:0 24px 60px -12px rgba(0,0,0,0.8), 0 0 40px rgba(95,212,217,0.08);
+  width:100%; max-width:1040px; background:rgba(12,14,23,0.97);
+  border:1px solid var(--line-strong); border-radius:14px;
+  box-shadow:0 30px 80px -15px rgba(0,0,0,0.85), 0 0 50px rgba(95,212,217,0.07);
   position:relative; overflow:hidden; display:flex; flex-direction:column; max-height:92vh;
 }
-.modal-header{ padding:26px 30px 18px; border-bottom:1px solid var(--line); }
+.modal-header{ padding:22px 30px 16px; border-bottom:1px solid var(--line); }
 .modal-header .eyebrow{
-  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.14em;
-  color:var(--cyan); text-transform:uppercase; margin-bottom:8px;
+  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em;
+  color:var(--cyan); text-transform:uppercase; margin-bottom:6px; display:flex; align-items:center; gap:8px;
+}
+.modal-header .eyebrow .badge-phase{
+  background:rgba(95,212,217,0.12); border:1px solid rgba(95,212,217,0.4);
+  color:var(--cyan); padding:2px 6px; border-radius:3px; font-size:9px; font-weight:600;
 }
 .modal-header h2{
-  font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:600; color:var(--silver); margin-bottom:6px;
+  font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:600; color:var(--silver); margin-bottom:4px;
 }
-.modal-header .modal-sub{ font-size:12.5px; color:var(--silver-faint); line-height:1.5; }
-.modal-body{
-  padding:22px 30px; overflow-y:auto; display:flex; flex-direction:column; gap:18px;
+.modal-header .modal-sub{ font-size:12px; color:var(--silver-faint); line-height:1.4; }
+
+/* 2-column cockpit layout */
+.modal-split-grid{
+  display:grid; grid-template-columns:1.2fr 0.95fr; gap:22px; padding:20px 30px;
+  overflow-y:auto; flex:1; max-height:calc(92vh - 145px);
 }
-.config-group{ display:flex; flex-direction:column; gap:8px; }
+@media(max-width:880px){
+  .modal-split-grid{ grid-template-columns:1fr; }
+}
+
+.modal-left-col{ display:flex; flex-direction:column; gap:16px; }
+.modal-right-col{ display:flex; flex-direction:column; }
+
+.config-group{ display:flex; flex-direction:column; gap:7px; }
 .config-label{
-  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.12em;
-  text-transform:uppercase; color:var(--silver-dim);
+  font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--silver-dim); display:flex; align-items:center; justify-content:space-between;
 }
-.track-choice-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.config-label .label-tag{ color:var(--cyan); opacity:.85; font-size:9px; }
+
+/* Resume Grounding Zone */
+.resume-grounding-zone{
+  position:relative; overflow:hidden;
+  border:1px dashed rgba(95,212,217,0.35); border-radius:8px;
+  background:rgba(95,212,217,0.018); padding:16px; cursor:pointer;
+  transition:all .3s var(--ease); display:flex; flex-direction:column;
+}
+.resume-grounding-zone:hover{
+  border-color:var(--cyan); background:rgba(95,212,217,0.045);
+  box-shadow:0 0 24px rgba(95,212,217,0.12), inset 0 0 16px rgba(95,212,217,0.03);
+}
+.resume-grounding-zone.dragover{
+  border-color:var(--cyan); border-style:solid;
+  background:rgba(95,212,217,0.08); box-shadow:0 0 30px rgba(95,212,217,0.25);
+}
+
+/* Subtle Anamorphic Light Flare on Hover */
+.resume-grounding-zone::before{
+  content:''; position:absolute; top:50%; left:-140%; width:120%; height:3px;
+  background:linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(95,212,217,0.1) 20%,
+    rgba(95,212,217,0.65) 40%,
+    #ffffff 50%,
+    rgba(167,139,250,0.65) 60%,
+    rgba(95,212,217,0.1) 80%,
+    transparent 100%
+  );
+  box-shadow:0 0 16px 2px rgba(95,212,217,0.7), 0 0 32px 6px rgba(111,127,174,0.4);
+  transform:translateY(-50%) rotate(-3deg);
+  transition:left 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events:none; opacity:0; filter:blur(0.5px);
+}
+.resume-grounding-zone:hover::before{
+  left:140%; opacity:1;
+}
+
+.rg-idle{ display:flex; align-items:center; gap:14px; }
+.rg-icon-box{
+  width:40px; height:40px; border-radius:8px; background:rgba(95,212,217,0.08);
+  border:1px solid rgba(95,212,217,0.25); display:flex; align-items:center;
+  justify-content:center; font-size:18px; color:var(--cyan); flex-shrink:0;
+}
+.rg-content{ flex:1; }
+.rg-title{ font-size:12.5px; font-weight:600; color:var(--silver); }
+.rg-sub{ font-size:11px; color:var(--silver-faint); margin-top:2px; line-height:1.4; }
+.rg-actions{ display:flex; align-items:center; gap:8px; margin-top:6px; }
+.btn-text-action{
+  background:transparent; border:none; color:var(--cyan); font-family:'JetBrains Mono',monospace;
+  font-size:10px; cursor:pointer; padding:0; text-decoration:underline; text-underline-offset:2px;
+}
+.btn-text-action:hover{ color:#fff; }
+
+/* Animated [EXTRACTING_CONTEXT...] readout */
+.rg-extracting{
+  display:none; flex-direction:column; gap:8px; font-family:'JetBrains Mono',monospace;
+}
+.rg-extracting.active{ display:flex; }
+.extract-status-line{
+  display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--cyan);
+}
+.extract-status-text{
+  font-weight:600; letter-spacing:.05em; display:flex; align-items:center; gap:6px;
+}
+.extract-status-text::before{
+  content:''; width:7px; height:7px; border-radius:50%; background:var(--cyan);
+  box-shadow:0 0 8px var(--cyan); animation:pulseGlow 1s infinite alternate;
+}
+@keyframes pulseGlow{
+  0%{ opacity:.4; transform:scale(.8); }
+  100%{ opacity:1; transform:scale(1.2); }
+}
+.extract-pct{ color:var(--silver); font-size:10px; }
+.extract-bar{
+  width:100%; height:3px; background:rgba(255,255,255,0.06); border-radius:2px; overflow:hidden;
+}
+.extract-fill{
+  height:100%; width:0%; background:linear-gradient(90deg, var(--nebula-bright), var(--cyan));
+  transition:width .15s linear; box-shadow:0 0 8px var(--cyan);
+}
+.extract-subtext{ font-size:10px; color:var(--silver-faint); line-height:1.3; }
+
+/* Grounded state */
+.rg-grounded{
+  display:none; align-items:center; justify-content:space-between; font-family:'JetBrains Mono',monospace;
+}
+.rg-grounded.active{ display:flex; }
+.rg-grounded-left{ display:flex; align-items:center; gap:10px; }
+.rg-badge-check{
+  width:22px; height:22px; border-radius:50%; background:rgba(111,174,138,0.18);
+  border:1px solid var(--good); color:var(--good); display:flex; align-items:center;
+  justify-content:center; font-size:11px; font-weight:700;
+}
+.rg-grounded-info .rg-grounded-title{ font-size:11px; font-weight:600; color:var(--good); }
+.rg-grounded-info .rg-grounded-detail{ font-size:10px; color:var(--silver-dim); }
+.btn-remove-resume{
+  background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); color:#fca5a5;
+  font-family:'JetBrains Mono',monospace; font-size:10px; padding:4px 10px; border-radius:4px;
+  cursor:pointer; transition:all .2s;
+}
+.btn-remove-resume:hover{ background:rgba(239,68,68,0.2); color:#fff; }
+
+/* Manual Resume Paste Drawer */
+.manual-resume-box{
+  margin-top:8px; border-top:1px solid var(--line); padding-top:8px; display:none; flex-direction:column; gap:6px;
+}
+.manual-resume-box.open{ display:flex; }
+.manual-resume-textarea{
+  width:100%; height:75px; background:rgba(0,0,0,0.3); border:1px solid var(--line-strong);
+  border-radius:5px; padding:8px 10px; color:var(--silver); font-size:11px;
+  font-family:'JetBrains Mono',monospace; outline:none; resize:none; line-height:1.4;
+}
+.manual-resume-textarea:focus{ border-color:var(--cyan); }
+
+/* Rubric Preview Pane */
+.rubric-preview-pane{
+  background:rgba(7,9,16,0.85); border:1px solid var(--line-strong);
+  border-radius:10px; padding:16px; display:flex; flex-direction:column; gap:12px;
+  font-family:'JetBrains Mono',monospace; box-shadow:inset 0 0 30px rgba(0,0,0,0.6);
+  position:relative;
+}
+.rp-header{
+  display:flex; justify-content:space-between; align-items:flex-start;
+  border-bottom:1px solid var(--line); padding-bottom:10px;
+}
+.rp-title-block .rp-eyebrow{
+  font-size:9.5px; color:var(--cyan); letter-spacing:.12em; text-transform:uppercase; margin-bottom:2px;
+}
+.rp-title-block .rp-heading{
+  font-size:12px; font-weight:600; color:var(--silver);
+}
+.rp-badges{ display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
+.rp-badge{
+  font-size:9px; padding:2px 6px; border-radius:3px; background:rgba(255,255,255,0.04);
+  border:1px solid var(--line); color:var(--silver-dim);
+}
+.rp-badge.cyan{ background:rgba(95,212,217,0.1); border-color:rgba(95,212,217,0.35); color:var(--cyan); }
+
+.rubric-pillars{ display:flex; flex-direction:column; gap:8px; }
+.rubric-pillar-card{
+  background:rgba(255,255,255,0.018); border:1px solid rgba(255,255,255,0.06);
+  border-radius:6px; padding:9px 11px; display:flex; flex-direction:column; gap:4px;
+  transition:border-color .2s;
+}
+.rubric-pillar-card:hover{ border-color:rgba(95,212,217,0.3); }
+.pillar-top{ display:flex; justify-content:space-between; align-items:center; }
+.pillar-name{ font-size:11px; font-weight:600; color:var(--silver); }
+.pillar-weight{
+  font-size:10px; font-weight:700; color:var(--cyan); background:rgba(95,212,217,0.1);
+  padding:1px 6px; border-radius:3px; border:1px solid rgba(95,212,217,0.25);
+}
+.pillar-progress{ width:100%; height:2px; background:rgba(255,255,255,0.06); border-radius:1px; overflow:hidden; }
+.pillar-fill{ height:100%; background:var(--cyan); border-radius:1px; }
+.pillar-desc{ font-size:9.5px; color:var(--silver-faint); line-height:1.35; margin-top:2px; }
+
+/* Dynamic Framework Spotlight in Rubric */
+.framework-spotlight{
+  background:rgba(111,127,174,0.08); border:1px solid rgba(111,127,174,0.25);
+  border-radius:6px; padding:10px 12px; display:flex; flex-direction:column; gap:4px;
+}
+.fs-label{ font-size:9px; color:var(--aurora); letter-spacing:.08em; text-transform:uppercase; }
+.fs-desc{ font-size:10px; color:var(--silver-dim); line-height:1.4; }
+
+/* Grounding status ticker */
+.grounding-ticker{
+  display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:4px;
+  background:rgba(0,0,0,0.3); border:1px solid var(--line); font-size:9.5px;
+}
+.gt-dot{ width:6px; height:6px; border-radius:50%; background:var(--silver-faint); flex-shrink:0; }
+.gt-dot.active{ background:var(--good); box-shadow:0 0 6px var(--good); }
+.gt-text{ color:var(--silver-dim); }
+
+.track-choice-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .track-card{
-  border:1px solid var(--line-strong); border-radius:8px; padding:14px 15px;
+  border:1px solid var(--line-strong); border-radius:8px; padding:12px 14px;
   background:rgba(255,255,255,0.02); cursor:pointer; transition:all .25s var(--ease);
-  display:flex; align-items:flex-start; gap:12px; position:relative;
+  display:flex; align-items:flex-start; gap:10px; position:relative;
 }
 .track-card:hover{ background:rgba(255,255,255,0.05); border-color:var(--silver-dim); }
 .track-card.active{
@@ -313,9 +502,9 @@ button{ font-family:inherit; }
 .track-card.active#trackCardCode{
   background:rgba(167,139,250,0.08); border-color:#a78bfa; box-shadow:0 0 16px rgba(167,139,250,0.2);
 }
-.track-card .tc-icon{ font-size:20px; line-height:1; }
-.track-card .tc-title{ font-size:13px; font-weight:600; color:var(--silver); }
-.track-card .tc-desc{ font-size:11px; color:var(--silver-faint); line-height:1.4; margin-top:4px; }
+.track-card .tc-icon{ font-size:18px; line-height:1; }
+.track-card .tc-title{ font-size:12px; font-weight:600; color:var(--silver); }
+.track-card .tc-desc{ font-size:10.5px; color:var(--silver-faint); line-height:1.35; margin-top:3px; }
 .track-card .tc-check{
   margin-left:auto; font-size:12px; color:var(--cyan); opacity:0;
   transform:scale(0.6); transition:all .2s var(--ease);
@@ -324,17 +513,17 @@ button{ font-family:inherit; }
 
 .config-select{
   width:100%; background:rgba(255,255,255,0.03); border:1px solid var(--line-strong);
-  border-radius:6px; padding:10px 14px; color:var(--silver); font-size:13px; outline:none;
+  border-radius:6px; padding:9px 12px; color:var(--silver); font-size:12.5px; outline:none;
   font-family:'Inter',sans-serif; transition:border-color .25s;
 }
 .config-select:focus{ border-color:var(--cyan); box-shadow:0 0 12px var(--cyan-glow); }
 .config-select option{ background:#0d0f18; color:var(--silver); }
 
-.config-row-2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.config-row-2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 .pill-group{ display:flex; gap:6px; }
 .pill-btn{
-  flex:1; padding:8px 10px; border-radius:6px; background:rgba(255,255,255,0.03);
-  border:1px solid var(--line-strong); color:var(--silver-dim); font-size:12px;
+  flex:1; padding:7px 8px; border-radius:6px; background:rgba(255,255,255,0.03);
+  border:1px solid var(--line-strong); color:var(--silver-dim); font-size:11.5px;
   font-family:'JetBrains Mono',monospace; cursor:pointer; transition:all .25s;
 }
 .pill-btn:hover{ background:rgba(255,255,255,0.06); color:var(--silver); }
@@ -343,20 +532,20 @@ button{ font-family:inherit; }
 }
 
 .pressure-group{
-  padding:14px 16px; border-radius:8px; background:rgba(239,68,68,0.04);
+  padding:12px 14px; border-radius:8px; background:rgba(239,68,68,0.04);
   border:1px solid rgba(239,68,68,0.22); display:flex; flex-direction:row; align-items:center;
-  justify-content:space-between; gap:16px; transition:all .25s var(--ease);
+  justify-content:space-between; gap:14px; transition:all .25s var(--ease);
 }
 .pressure-group.active{
   background:rgba(239,68,68,0.12); border-color:rgba(239,68,68,0.55); box-shadow:0 0 18px rgba(239,68,68,0.15);
 }
 .pressure-group .p-info{ flex:1; }
-.pressure-group .p-title{ display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--silver); }
+.pressure-group .p-title{ display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--silver); }
 .pressure-group .p-bolt{ color:#ef4444; }
-.pressure-group .p-sub{ font-size:11px; color:var(--silver-faint); line-height:1.4; margin-top:3px; }
+.pressure-group .p-sub{ font-size:10.5px; color:var(--silver-faint); line-height:1.35; margin-top:2px; }
 
 .modal-footer{
-  padding:16px 30px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;
+  padding:14px 30px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;
 }
 .btn-cancel-config{
   background:transparent; border:none; color:var(--silver-faint); font-size:12px;
@@ -365,7 +554,7 @@ button{ font-family:inherit; }
 .btn-cancel-config:hover{ color:var(--silver); }
 .btn-launch-session{
   display:inline-flex; align-items:center; gap:10px; background:var(--silver); color:var(--void);
-  font-family:'Inter',sans-serif; font-size:13px; font-weight:600; padding:11px 24px;
+  font-family:'Inter',sans-serif; font-size:13px; font-weight:600; padding:10px 22px;
   border-radius:6px; cursor:pointer; border:none; transition:all .25s var(--ease);
   box-shadow:0 0 20px rgba(255,255,255,0.2);
 }
@@ -442,92 +631,207 @@ button{ font-family:inherit; }
 
 <div class="stars"></div>
 
-<!-- PRE-INTERVIEW SETUP MODAL -->
+<!-- PRE-INTERVIEW SETUP MODAL (PHASE 4 SPECIALIZATION CONFIGURATION) -->
 <div class="setup-modal-overlay" id="setupModalOverlay">
   <div class="glass-panel setup-modal-card">
     <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
     
     <div class="modal-header">
-      <div class="eyebrow">MISSION CALIBRATION // PROTOCOL HR-1</div>
-      <h2>Configure Interview Simulation</h2>
-      <p class="modal-sub">Calibrate session format, track parameters, difficulty curve, and stress environment before initiating transmission.</p>
+      <div class="eyebrow">
+        <span>MISSION CALIBRATION // PROTOCOL HR-1</span>
+        <span class="badge-phase">PHASE 4 ACTIVE</span>
+      </div>
+      <h2>Specialization Configuration Panel</h2>
+      <p class="modal-sub">Ground the AI interviewer in your verified resume tech stack, calibrate company architectural rubrics, and configure stress parameters.</p>
     </div>
 
-    <div class="modal-body">
-      <!-- 01. Track / Format -->
-      <div class="config-group">
-        <label class="config-label">01 // SESSION TYPE</label>
-        <div class="track-choice-grid">
-          <div class="track-card active" id="trackCardInterview" onclick="selectTrack('interview')">
-            <div class="tc-icon">🎙️</div>
-            <div class="tc-info">
-              <div class="tc-title">Verbal &amp; Systems Interview</div>
-              <div class="tc-desc">Architecture, distributed systems, STAR behavioral &amp; real-time audio telemetry.</div>
+    <div class="modal-split-grid">
+      <!-- LEFT COLUMN: CONTROLS & RESUME GROUNDING -->
+      <div class="modal-left-col">
+        <!-- 01. Resume Grounding Zone -->
+        <div class="config-group">
+          <label class="config-label">
+            <span>01 // RESUME GROUNDING ZONE</span>
+            <span class="label-tag">CONTEXT INGESTION</span>
+          </label>
+          <div class="resume-grounding-zone" id="resumeGroundingZone" onclick="triggerResumeUpload(event)">
+            <!-- Idle View -->
+            <div class="rg-idle" id="rgIdleView">
+              <div class="rg-icon-box">📄</div>
+              <div class="rg-content">
+                <div class="rg-title">Drop Resume to Ground Interview</div>
+                <div class="rg-sub">PDF, TXT, or Markdown — AI tailors architectural probes to your actual stack.</div>
+                <div class="rg-actions">
+                  <span class="btn-text-action">Browse Local File</span>
+                  <span style="color:var(--silver-faint); font-size:10px;">•</span>
+                  <button type="button" class="btn-text-action" onclick="toggleManualResume(event)">Paste Text Manually</button>
+                </div>
+              </div>
             </div>
-            <div class="tc-check">✓</div>
-          </div>
-          <div class="track-card" id="trackCardCode" onclick="selectTrack('coding')">
-            <div class="tc-icon">💻</div>
-            <div class="tc-info">
-              <div class="tc-title">Live Coding &amp; DSA Sandbox</div>
-              <div class="tc-desc">Algorithmic complexity (O(N)), data structures, edge cases &amp; code evaluation.</div>
+
+            <!-- Extracting Animation View -->
+            <div class="rg-extracting" id="rgExtractingView">
+              <div class="extract-status-line">
+                <span class="extract-status-text" id="extractStatusText">[EXTRACTING_CONTEXT...]</span>
+                <span class="extract-pct" id="extractPct">0%</span>
+              </div>
+              <div class="extract-bar">
+                <div class="extract-fill" id="extractFill"></div>
+              </div>
+              <div class="extract-subtext" id="extractSubtext">Parsing engineering tech stack, frameworks, and system domain context...</div>
             </div>
-            <div class="tc-check">✓</div>
+
+            <!-- Grounded View -->
+            <div class="rg-grounded" id="rgGroundedView">
+              <div class="rg-grounded-left">
+                <div class="rg-badge-check">✓</div>
+                <div class="rg-grounded-info">
+                  <div class="rg-grounded-title">[CONTEXT_GROUNDED]</div>
+                  <div class="rg-grounded-detail" id="rgGroundedDetail">Resume parsed · Cross-examination ready</div>
+                </div>
+              </div>
+              <button type="button" class="btn-remove-resume" onclick="clearResume(event)">Remove</button>
+            </div>
+
+            <!-- Hidden File Input -->
+            <input type="file" id="resumeFileInput" accept=".pdf,.txt,.md,.json,.doc,.docx" style="display:none;" onchange="handleResumeFileSelected(this.files)" />
+
+            <!-- Manual Text Paste Drawer -->
+            <div class="manual-resume-box" id="manualResumeBox">
+              <textarea class="manual-resume-textarea" id="manualResumeText" placeholder="Paste your resume summary, tech stack, or recent architecture projects..." oninput="handleManualResumeInput(this.value)"></textarea>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- 02. Target Role -->
-      <div class="config-group">
-        <label class="config-label">02 // TARGET ROLE</label>
-        <select class="config-select" id="setupRole">
-          <option value="SDE-2" selected>Software Development Engineer II (SDE-2)</option>
-          <option value="Senior SDE">Senior Software Engineer (SDE-3 / Lead)</option>
-          <option value="Staff Architect">Staff / Principal Distributed Systems Architect</option>
-          <option value="Frontend Engineer">Senior Frontend Engineer (React / TypeScript)</option>
-          <option value="Backend Engineer">Backend &amp; High-Throughput Systems Engineer</option>
-          <option value="Full Stack">Full Stack Generalist Engineer</option>
-          <option value="AI / ML Engineer">AI / Machine Learning Engineer</option>
-          <option value="DevOps / SRE">DevOps &amp; Cloud Reliability (SRE)</option>
-          <option value="Product Manager">Technical Product Manager</option>
-        </select>
-      </div>
+        <!-- 02. Role & Framework Selectors -->
+        <div class="config-row-2">
+          <div class="config-group">
+            <label class="config-label">
+              <span>02 // TARGET ROLE</span>
+            </label>
+            <select class="config-select" id="setupRole" onchange="onRoleOrFrameworkChange()">
+              <option value="SDE" selected>SDE (Software Engineer)</option>
+              <option value="Data Science">Data Science (AI / ML)</option>
+              <option value="DevOps">DevOps (SRE &amp; Cloud)</option>
+              <option value="PM">PM (Product Manager)</option>
+            </select>
+          </div>
 
-      <!-- 03. Difficulty & Round Grid -->
-      <div class="config-row-2">
+          <div class="config-group">
+            <label class="config-label">
+              <span>03 // COMPANY FRAMEWORK</span>
+            </label>
+            <select class="config-select" id="setupFramework" onchange="onRoleOrFrameworkChange()">
+              <option value="Google System Design" selected>Google (System Design)</option>
+              <option value="Amazon Leadership">Amazon (Leadership &amp; STAR)</option>
+              <option value="Meta Fast Execution">Meta (Fast Execution)</option>
+              <option value="Netflix Chaos Architecture">Netflix (Chaos Architecture)</option>
+              <option value="Apple Integrated Systems">Apple (Integrated Systems)</option>
+              <option value="General Industry Standard">Standard Silicon Valley</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 03. Session Track & Round -->
         <div class="config-group">
-          <label class="config-label">03 // DIFFICULTY CURVE</label>
-          <div class="pill-group">
-            <button type="button" class="pill-btn" onclick="selectDifficulty('Easy', this)">Easy</button>
-            <button type="button" class="pill-btn active" onclick="selectDifficulty('Medium', this)">Medium</button>
-            <button type="button" class="pill-btn" onclick="selectDifficulty('Hard', this)">Hard</button>
+          <label class="config-label">04 // SESSION TRACK</label>
+          <div class="track-choice-grid">
+            <div class="track-card active" id="trackCardInterview" onclick="selectTrack('interview')">
+              <div class="tc-icon">🎙️</div>
+              <div class="tc-info">
+                <div class="tc-title">Verbal &amp; Systems</div>
+                <div class="tc-desc">Architecture, scale &amp; active audio telemetry.</div>
+              </div>
+              <div class="tc-check">✓</div>
+            </div>
+            <div class="track-card" id="trackCardCode" onclick="selectTrack('coding')">
+              <div class="tc-icon">💻</div>
+              <div class="tc-info">
+                <div class="tc-title">Live Coding Sandbox</div>
+                <div class="tc-desc">DSA algorithms, complexity &amp; code analysis.</div>
+              </div>
+              <div class="tc-check">✓</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 04. Difficulty & Round Grid -->
+        <div class="config-row-2">
+          <div class="config-group">
+            <label class="config-label">05 // DIFFICULTY</label>
+            <div class="pill-group">
+              <button type="button" class="pill-btn" onclick="selectDifficulty('Easy', this)">Easy</button>
+              <button type="button" class="pill-btn active" onclick="selectDifficulty('Medium', this)">Medium</button>
+              <button type="button" class="pill-btn" onclick="selectDifficulty('Hard', this)">Hard</button>
+            </div>
+          </div>
+
+          <div class="config-group">
+            <label class="config-label">06 // INTERVIEW ROUND</label>
+            <select class="config-select" id="setupRound">
+              <option value="Technical" selected>System Architecture &amp; Scale</option>
+              <option value="Coding">Data Structures &amp; Algorithms</option>
+              <option value="Behavioral">Behavioral (STAR Method &amp; Leadership)</option>
+              <option value="Comprehensive">Full-Loop Comprehensive</option>
+            </select>
           </div>
         </div>
 
         <div class="config-group">
-          <label class="config-label">04 // INTERVIEW ROUND</label>
-          <select class="config-select" id="setupRound">
-            <option value="Technical" selected>System Architecture &amp; Scale</option>
-            <option value="Coding">Data Structures &amp; Algorithms</option>
-            <option value="Behavioral">Behavioral (STAR Method &amp; Leadership)</option>
-            <option value="Comprehensive">Full-Loop Comprehensive</option>
+          <label class="config-label">07 // INTERVIEW EXPERIENCE</label>
+          <select class="config-select" id="setupInterviewMode">
+            <option value="realistic" selected>Realistic — no hints during the interview</option>
+            <option value="practice">Practice — short coaching hints enabled</option>
           </select>
         </div>
+
+        <!-- 05. Pressure Mode Toggle -->
+        <div class="config-group pressure-group" id="setupPressureCard">
+          <div class="p-info">
+            <div class="p-title">
+              <span class="p-bolt">⚡</span> 
+              <span>Pressure Mode (Stress Testing)</span>
+            </div>
+            <div class="p-sub">AI interviewer interrupts verbosity, challenges weak assumptions with skepticism, and demands rigorous trade-offs.</div>
+          </div>
+          <label class="cosmic-toggle">
+            <input type="checkbox" id="setupPressureToggle" onchange="toggleSetupPressure(this.checked)" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
       </div>
 
-      <!-- 04. Pressure Mode Toggle -->
-      <div class="config-group pressure-group" id="setupPressureCard">
-        <div class="p-info">
-          <div class="p-title">
-            <span class="p-bolt">⚡</span> 
-            <span>Pressure Mode (Stress Testing)</span>
+      <!-- RIGHT COLUMN: RUBRIC PREVIEW PANE (JetBrains Mono) -->
+      <div class="modal-right-col">
+        <div class="rubric-preview-pane">
+          <div class="rp-header">
+            <div class="rp-title-block">
+              <div class="rp-eyebrow">// RUBRIC PREVIEW PANE</div>
+              <div class="rp-heading">ACTIVE EVALUATION RUBRIC</div>
+              <div class="rp-badges">
+                <span class="rp-badge" id="rpRoleBadge">ROLE: SDE</span>
+                <span class="rp-badge cyan" id="rpFrameworkBadge">GOOGLE SYSTEM DESIGN</span>
+              </div>
+            </div>
           </div>
-          <div class="p-sub">AI interviewer interrupts verbosity, challenges weak architectural assumptions with skepticism, and demands rigorous tradeoffs.</div>
+
+          <!-- Dynamic Pillars Container -->
+          <div class="rubric-pillars" id="rubricPillarsContainer">
+            <!-- Rendered dynamically by updateRubricPreview() -->
+          </div>
+
+          <!-- Framework Spotlight -->
+          <div class="framework-spotlight" id="rpFrameworkSpotlight">
+            <div class="fs-label" id="rpSpotlightLabel">COMPANY FRAMEWORK DIRECTIVE</div>
+            <div class="fs-desc" id="rpSpotlightDesc">Demand massive scale, explicit back-of-the-envelope calculations (QPS, storage, latency bounds), and distributed consensus trade-offs.</div>
+          </div>
+
+          <!-- Grounding status indicator -->
+          <div class="grounding-ticker" id="rpGroundingTicker">
+            <span class="gt-dot" id="rpGroundingDot"></span>
+            <span class="gt-text" id="rpGroundingText">Candidate Grounding: Default Architecture Profile</span>
+          </div>
         </div>
-        <label class="cosmic-toggle">
-          <input type="checkbox" id="setupPressureToggle" onchange="toggleSetupPressure(this.checked)" />
-          <span class="toggle-slider"></span>
-        </label>
       </div>
     </div>
 
@@ -697,6 +1001,12 @@ button{ font-family:inherit; }
     </div>
 
     <div class="tele-block">
+      <div class="tele-title">Competency Coverage</div>
+      <div class="metric-row"><div class="mh"><span>Up next</span><span class="mv" id="coverageNext">Calibrating</span></div></div>
+      <div class="metric-row"><div class="mh"><span>Covered</span><span class="mv" id="coverageProgress">0 / 4</span></div></div>
+    </div>
+
+    <div class="tele-block">
       <div class="tele-title">Filler Words</div>
       <div class="filler-live"><span class="v" id="fillerCount">0</span><span class="u">DETECTED THIS SESSION</span></div>
     </div>
@@ -717,6 +1027,7 @@ button{ font-family:inherit; }
 <script>
   let seconds = 0;
   let activeSessionId = null;
+  let currentInterviewMode = 'realistic';
   let fillerTotal = 0;
   const topTimer = document.getElementById('topTimer');
   const sideTimer = document.getElementById('sideTimer');
@@ -975,7 +1286,8 @@ button{ font-family:inherit; }
       const data = await api.post('/interview/message', { 
         sessionId: activeSessionId, 
         content: txt,
-        pressureMode: isPressureMode 
+        pressureMode: isPressureMode,
+        interviewMode: currentInterviewMode
       });
       const node = document.getElementById(thinkingId);
       if (node) node.remove();
@@ -984,6 +1296,7 @@ button{ font-family:inherit; }
         appendMessage('AI', data.message);
         speakAiResponse(data.message);
       }
+      if (data?.competencyCoverage) updateCoverage(data.competencyCoverage);
     } catch(e) {
       const node = document.getElementById(thinkingId);
       if (node) node.remove();
@@ -991,6 +1304,15 @@ button{ font-family:inherit; }
       appendMessage('AI', fallback);
       speakAiResponse(fallback);
     }
+  }
+
+  function updateCoverage(coverage = []) {
+    const next = coverage.find(item => item.status === 'up-next');
+    const covered = coverage.filter(item => item.status === 'tested').length;
+    const nextEl = document.getElementById('coverageNext');
+    const progressEl = document.getElementById('coverageProgress');
+    if (nextEl) nextEl.textContent = next ? next.label : 'Plan complete';
+    if (progressEl) progressEl.textContent = `${covered} / ${coverage.length}`;
   }
 
   // Client-side contextual reflection probe (guarantees dynamic responses even if network drops)
@@ -1188,10 +1510,170 @@ func solve(nums []int, target int) []int {
     await transmitAnswer();
   }
 
+  /* ---------- PHASE 4: SPECIALIZATION CONFIGURATION & RUBRIC ENGINE ---------- */
+  let uploadedResumeText = '';
+  let selectedFramework = 'Google System Design';
+
+  const RUBRIC_MATRIX = {
+    SDE: {
+      defaultFramework: 'Google System Design',
+      base: [
+        { name: "01 // SYSTEM SCALE & CAP THEOREM", weight: "35%", pct: 35, desc: "Partitioning, consensus, replication lag, and distributed transaction semantics." },
+        { name: "02 // LATENCY & IO BUDGET", weight: "25%", pct: 25, desc: "P99 SLA budgeting, caching tiers (Redis/Memcached), and network ingress/egress." },
+        { name: "03 // RESILIENCE & FAILURE MODES", weight: "20%", pct: 20, desc: "Bulkhead isolation, circuit breaking, retry backoffs, and dead-letter queues." },
+        { name: "04 // ARCHITECTURAL ARTICULATION", weight: "20%", pct: 20, desc: "Structured problem framing, concise assumptions, and rigorous trade-off defense." }
+      ],
+      frameworks: {
+        'Google System Design': {
+          directive: "Demand massive scale (millions QPS), explicit back-of-envelope calculations (storage, ingress/egress), and distributed consensus trade-offs (Raft/Paxos).",
+          pillars: [
+            { name: "01 // MASSIVE SCALE & CONSENSUS", weight: "40%", pct: 40, desc: "Back-of-envelope estimation, distributed consensus (Raft/Paxos), and sharding strategy." },
+            { name: "02 // P99 LATENCY & IO BUDGETS", weight: "20%", pct: 20, desc: "Network hop budgets, storage engine internals, and hot key mitigation." },
+            { name: "03 // FAULT TOLERANCE & BLAST RADIUS", weight: "20%", pct: 20, desc: "Active-active multi-region failover, split-brain protection, and chaos resilience." },
+            { name: "04 // ENGINEERING RIGOR & MATH", weight: "20%", pct: 20, desc: "Defensible numerical calculations and precise algorithmic justifications." }
+          ]
+        },
+        'Amazon Leadership': {
+          directive: "Interrogate using Amazon Leadership Principles (Customer Obsession, Dive Deep, Bias for Action). Require answers in STAR format with measurable metrics.",
+          pillars: [
+            { name: "01 // DIVE DEEP & ARCHITECTURE", weight: "35%", pct: 35, desc: "Deep architectural mechanics, eliminating black boxes, and root-cause understanding." },
+            { name: "02 // CUSTOMER OBSESSION & SLA", weight: "25%", pct: 25, desc: "Working backwards from customer pain points and strict operational availability." },
+            { name: "03 // BIAS FOR ACTION & FRUGALITY", weight: "20%", pct: 20, desc: "Pragmatic build-vs-buy decisions, operational cost discipline, and MVP velocity." },
+            { name: "04 // STAR METRICS & IMPACT", weight: "20%", pct: 20, desc: "Quantifiable engineering outcomes (latency -40%, reliability 99.99%, throughput 5x)." }
+          ]
+        },
+        'Meta Fast Execution': {
+          directive: "Prioritize high-velocity execution, MVP trade-offs, high-throughput microservices, and real-time telemetry instrumentation.",
+          pillars: [
+            { name: "01 // EXECUTION VELOCITY & PRAGMATISM", weight: "35%", pct: 35, desc: "Rapid prototyping, avoiding premature optimization, and ruthless trade-offs." },
+            { name: "02 // REAL-TIME TELEMETRY & METRICS", weight: "25%", pct: 25, desc: "Observability pipelines, real-time engagement telemetry, and SLI instrumentation." },
+            { name: "03 // HIGH-THROUGHPUT ARCHITECTURE", weight: "20%", pct: 20, desc: "Stateless app clusters, edge caching, and high-volume event ingestion." },
+            { name: "04 // TECHNICAL AGILITY", weight: "20%", pct: 20, desc: "Decisive problem-solving and defending high-velocity delivery roadmaps." }
+          ]
+        },
+        'Netflix Chaos Architecture': {
+          directive: "Probe resilience against arbitrary node failures, chaos engineering, Kafka event streaming, and multi-region active-active deployments.",
+          pillars: [
+            { name: "01 // CHAOS RESILIENCE & SURVIVABILITY", weight: "35%", pct: 35, desc: "Survival against random node termination, network partitions, and zone outages." },
+            { name: "02 // EVENT STREAMING (KAFKA)", weight: "30%", pct: 30, desc: "Partitioning, consumer group lag, idempotent delivery, and event schema evolution." },
+            { name: "03 // CIRCUIT BREAKING & ISOLATION", weight: "20%", pct: 20, desc: "Adaptive concurrency limits, bulkhead thread pools, and fallback cascades." },
+            { name: "04 // DISTRIBUTED DRIFT CONTROL", weight: "15%", pct: 15, desc: "Decoupled domain models and self-healing microservice contracts." }
+          ]
+        },
+        'Apple Integrated Systems': {
+          directive: "Emphasize privacy-first architecture, hardware-software co-design, extreme memory/power efficiency, and deterministic failure recovery.",
+          pillars: [
+            { name: "01 // PRIVACY & DATA MINIMIZATION", weight: "35%", pct: 35, desc: "On-device processing, zero-knowledge architecture, and cryptographic integrity." },
+            { name: "02 // MEMORY & SYSTEM EFFICIENCY", weight: "25%", pct: 25, desc: "Buffer allocation, zero-copy pipelines, CPU cache alignment, and resource conservation." },
+            { name: "03 // DETERMINISTIC RECOVERY", weight: "20%", pct: 20, desc: "Crash-safe state persistence, transactional rollback, and predictable failure states." },
+            { name: "04 // POLISHED ARCHITECTURE", weight: "20%", pct: 20, desc: "Seamless end-to-end integration and rigorous architectural discipline." }
+          ]
+        },
+        'General Industry Standard': {
+          directive: "Holistic evaluation across system scalability, latency budgeting, fault isolation, and clear engineering communication.",
+          pillars: [
+            { name: "01 // SCALABLE SYSTEM ARCHITECTURE", weight: "35%", pct: 35, desc: "Stateless tier, database sharding, caching, and horizontal growth." },
+            { name: "02 // LATENCY & BOTTLENECK ANALYSIS", weight: "25%", pct: 25, desc: "Bottleneck identification, indexing, network hops, and connection pooling." },
+            { name: "03 // FAULT TOLERANCE & FALLBACKS", weight: "20%", pct: 20, desc: "Retry storms mitigation, rate limiting, and graceful degradation." },
+            { name: "04 // COMMUNICATION & STRUCTURE", weight: "20%", pct: 20, desc: "Logical, structured responses with clear assumptions and trade-offs." }
+          ]
+        }
+      }
+    },
+    'Data Science': {
+      defaultFramework: 'Google System Design',
+      base: [
+        { name: "01 // MODELING & OBJECTIVE FORMULATION", weight: "35%", pct: 35, desc: "Loss function selection, embeddings, feature pipelines, and optimization algorithms." },
+        { name: "02 // PRODUCTION INFERENCE & LATENCY", weight: "25%", pct: 25, desc: "Model serving, quantization, vector search (HNSW), and GPU/CPU constraints." },
+        { name: "03 // VALIDATION & DATA DRIFT", weight: "20%", pct: 20, desc: "Offline vs online metrics, distribution shift, shadow models, and guardrails." },
+        { name: "04 // BUSINESS IMPACT & EXPLAINABILITY", weight: "20%", pct: 20, desc: "SHAP/feature importance, uncertainty bounds, and domain alignment." }
+      ],
+      frameworks: {
+        'Google System Design': {
+          directive: "Emphasize large-scale embeddings, distributed training, model distillation, and sub-15ms vector retrieval pipelines.",
+          pillars: [
+            { name: "01 // DISTRIBUTED ML & EMBEDDINGS", weight: "40%", pct: 40, desc: "Distributed model training, parameter servers, and high-throughput vector indices." },
+            { name: "02 // INFERENCE QUANTIZATION & SLAS", weight: "25%", pct: 25, desc: "INT8/FP16 compression, batching dynamics, and strict P99 latency limits." },
+            { name: "03 // FEATURE STORES & DRIFT", weight: "20%", pct: 20, desc: "Real-time streaming features, training-serving skew, and continuous evaluation." },
+            { name: "04 // MATHEMATICAL RIGOR", weight: "15%", pct: 15, desc: "Theoretical understanding of loss convergence, regularization, and model capacity." }
+          ]
+        },
+        'Amazon Leadership': {
+          directive: "Frame ML solutions around quantifiable customer outcomes, A/B test power, and operational resilience under business constraints.",
+          pillars: [
+            { name: "01 // CUSTOMER IMPACT ML FORMULATION", weight: "35%", pct: 35, desc: "Translating ambiguous business metrics into rigorous loss formulations." },
+            { name: "02 // A/B EXPERIMENTATION & POWER", weight: "25%", pct: 25, desc: "Statistical significance, sample sizing, guardrail metrics, and causal inference." },
+            { name: "03 // DIVE DEEP ON MODEL FAILURES", weight: "20%", pct: 20, desc: "Auditing false positive/negative costs, edge cases, and bias checks." },
+            { name: "04 // STAR RESULTS & METRICS", weight: "20%", pct: 20, desc: "Measurable impact: +12% conversion lift, -35% false positive costs." }
+          ]
+        }
+      }
+    },
+    DevOps: {
+      defaultFramework: 'Netflix Chaos Architecture',
+      base: [
+        { name: "01 // INFRASTRUCTURE AS CODE & GITOPS", weight: "30%", pct: 30, desc: "Terraform modules, state locking, declarative pipelines, and immutable deployments." },
+        { name: "02 // CHAOS & FAULT TOLERANCE", weight: "35%", pct: 35, desc: "Multi-region failover, container crash isolation, and auto-healing topologies." },
+        { name: "03 // OBSERVABILITY & SLIS/SLOS", weight: "20%", pct: 20, desc: "Golden signals, distributed tracing (OpenTelemetry), and actionable alerting." },
+        { name: "04 // POST-MORTEM & SECURITY", weight: "15%", pct: 15, desc: "Root cause analysis, RBAC, zero-trust perimeter, and secret rotation." }
+      ],
+      frameworks: {
+        'Netflix Chaos Architecture': {
+          directive: "Demand multi-region evacuation drills, automated canary analysis, chaos monkey fault injection, and zero-downtime resilience.",
+          pillars: [
+            { name: "01 // CHAOS DRILLS & REGION EVACUATION", weight: "40%", pct: 40, desc: "Active-active traffic draining, regional failover, and fault injection validation." },
+            { name: "02 // AUTOMATED CANARY ANALYSIS", weight: "25%", pct: 25, desc: "Statistical canary score evaluation, automated rollbacks, and blue-green parity." },
+            { name: "03 // HIGH-CARDINALITY TELEMETRY", weight: "20%", pct: 20, desc: "Metric aggregation, tracing across service meshes, and noisy neighbor mitigation." },
+            { name: "04 // BLAMELESS RELIABILITY CULTURE", weight: "15%", pct: 15, desc: "Preventative systemic guardrails and blameless post-incident ownership." }
+          ]
+        },
+        'Google System Design': {
+          directive: "Test Site Reliability Engineering (SRE) principles: error budgets, toil reduction, distributed consensus monitoring, and scalable automation.",
+          pillars: [
+            { name: "01 // SRE ERROR BUDGETS & SLOS", weight: "35%", pct: 35, desc: "Defending error budgets, deployment gates, and user-facing SLO fidelity." },
+            { name: "02 // CLUSTER SCHEDULING (K8S/BORG)", weight: "30%", pct: 30, desc: "Pod scheduling primitives, resource quotas, and control plane resilience." },
+            { name: "03 // TOIL REDUCTION AUTOMATION", weight: "20%", pct: 20, desc: "Eliminating manual ops with self-healing automation and declarative controllers." },
+            { name: "04 // INCIDENT COMMAND PROTOCOLS", weight: "15%", pct: 15, desc: "Incident commander roles, status comms, and blameless retrospective rigor." }
+          ]
+        }
+      }
+    },
+    PM: {
+      defaultFramework: 'Amazon Leadership',
+      base: [
+        { name: "01 // USER EMPATHY & PROBLEM SCOPING", weight: "30%", pct: 30, desc: "Identifying genuine user friction, scoping pain points, and user journey synthesis." },
+        { name: "02 // STRATEGIC PRIORITIZATION (RICE)", weight: "30%", pct: 30, desc: "Reach, Impact, Confidence, Effort; balancing technical debt vs product velocity." },
+        { name: "03 // NORTH STAR METRICS & EXPERIMENTS", weight: "25%", pct: 25, desc: "Leading indicators, counter-metrics, statistical significance, and A/B design." },
+        { name: "04 // CROSS-FUNCTIONAL LEADERSHIP", weight: "15%", pct: 15, desc: "Clear stakeholder management, engineering empathy, and decisive alignment." }
+      ],
+      frameworks: {
+        'Amazon Leadership': {
+          directive: "Evaluate PR/FAQ working backwards documents, customer obsession, 2-pizza team execution, and high-conviction decision making.",
+          pillars: [
+            { name: "01 // WORKING BACKWARDS (PR/FAQ)", weight: "35%", pct: 35, desc: "Customer press release, FAQ framing, customer delight, and backward planning." },
+            { name: "02 // METRICS & AUDITING MECHANISMS", weight: "25%", pct: 25, desc: "Data auditing, eliminating proxy metrics, and dive deep on customer signals." },
+            { name: "03 // 2-WAY DOOR DECISION MAKING", weight: "20%", pct: 20, desc: "Calculated risk-taking, bias for action, and reversible hypothesis iteration." },
+            { name: "04 // DELIVER HIGH-IMPACT RESULTS", weight: "20%", pct: 20, desc: "Overcoming delivery roadblocks and executing with relentless operational excellence." }
+          ]
+        },
+        'Meta Fast Execution': {
+          directive: "Emphasize rapid MVP iteration, growth loop metrics, cohort retention, and bold experimentation under ambiguity.",
+          pillars: [
+            { name: "01 // HIGH-VELOCITY HYPOTHESIS TESTING", weight: "35%", pct: 35, desc: "Minimally viable experiments, fast feedback loops, and bold product bets." },
+            { name: "02 // GROWTH LOOPS & RETENTION", weight: "30%", pct: 30, desc: "Cohort curves, engagement flywheels, and viral distribution levers." },
+            { name: "03 // A/B EXPERIMENTATION RIGOR", weight: "20%", pct: 20, desc: "Cannibalization metrics, holdout groups, and statistical significance." },
+            { name: "04 // TECHNICAL EXECUTION ALIGNMENT", weight: "15%", pct: 15, desc: "Direct engineering collaboration to compress roadmap delivery timelines." }
+          ]
+        }
+      }
+    }
+  };
+
   /* Setup Modal Handlers */
   function openSetupModal() {
     const overlay = document.getElementById('setupModalOverlay');
     if (overlay) overlay.classList.remove('hidden');
+    updateRubricPreview();
   }
 
   function dismissSetupModalIfActive() {
@@ -1215,6 +1697,177 @@ func solve(nums []int, target int) []int {
     isPressureMode = checked;
     const card = document.getElementById('setupPressureCard');
     if (card) card.classList.toggle('active', checked);
+  }
+
+  /* Dynamic Rubric Preview Update */
+  function updateRubricPreview() {
+    const role = document.getElementById('setupRole')?.value || 'SDE';
+    const framework = document.getElementById('setupFramework')?.value || 'Google System Design';
+    selectedFramework = framework;
+
+    const roleBadge = document.getElementById('rpRoleBadge');
+    if (roleBadge) roleBadge.textContent = `ROLE: ${role.toUpperCase()}`;
+    const fwBadge = document.getElementById('rpFrameworkBadge');
+    if (fwBadge) fwBadge.textContent = framework.toUpperCase();
+
+    const roleConfig = RUBRIC_MATRIX[role] || RUBRIC_MATRIX['SDE'];
+    const fwConfig = roleConfig.frameworks?.[framework] || roleConfig.frameworks?.['General Industry Standard'] || {
+      directive: "Holistic evaluation across system scalability, latency budgeting, fault isolation, and clear engineering communication.",
+      pillars: roleConfig.base
+    };
+
+    const container = document.getElementById('rubricPillarsContainer');
+    if (container) {
+      container.innerHTML = fwConfig.pillars.map(p => `
+        <div class="rubric-pillar-card">
+          <div class="pillar-top">
+            <span class="pillar-name">${p.name}</span>
+            <span class="pillar-weight">${p.weight}</span>
+          </div>
+          <div class="pillar-progress">
+            <div class="pillar-fill" style="width: ${p.pct}%;"></div>
+          </div>
+          <div class="pillar-desc">${p.desc}</div>
+        </div>
+      `).join('');
+    }
+
+    const spotDesc = document.getElementById('rpSpotlightDesc');
+    if (spotDesc) spotDesc.textContent = fwConfig.directive;
+
+    // Update Grounding Ticker
+    const tickerDot = document.getElementById('rpGroundingDot');
+    const tickerText = document.getElementById('rpGroundingText');
+    if (uploadedResumeText && uploadedResumeText.trim().length > 20) {
+      if (tickerDot) tickerDot.classList.add('active');
+      if (tickerText) {
+        const charCount = uploadedResumeText.trim().length;
+        tickerText.textContent = `Candidate Grounding: ACTIVE (${charCount.toLocaleString()} chars) · Context Loaded`;
+      }
+    } else {
+      if (tickerDot) tickerDot.classList.remove('active');
+      if (tickerText) tickerText.textContent = `Candidate Grounding: Default Profile (Upload resume for personalized probes)`;
+    }
+  }
+
+  function onRoleOrFrameworkChange() {
+    updateRubricPreview();
+  }
+
+  /* Resume Grounding Handlers */
+  function triggerResumeUpload(e) {
+    if (e && e.target && (e.target.tagName === 'BUTTON' || e.target.tagName === 'TEXTAREA' || e.target.id === 'resumeFileInput')) return;
+    const fileInput = document.getElementById('resumeFileInput');
+    if (fileInput) fileInput.click();
+  }
+
+  function toggleManualResume(e) {
+    if (e) e.stopPropagation();
+    const box = document.getElementById('manualResumeBox');
+    if (box) box.classList.toggle('open');
+  }
+
+  function handleManualResumeInput(val) {
+    if (val && val.trim().length > 20) {
+      uploadedResumeText = val.trim();
+      showGroundedState(uploadedResumeText.length, 'Manual text');
+      updateRubricPreview();
+    } else if (!val || !val.trim()) {
+      uploadedResumeText = '';
+      resetResumeState();
+      updateRubricPreview();
+    }
+  }
+
+  function clearResume(e) {
+    if (e) e.stopPropagation();
+    uploadedResumeText = '';
+    const fileInput = document.getElementById('resumeFileInput');
+    if (fileInput) fileInput.value = '';
+    const manualArea = document.getElementById('manualResumeText');
+    if (manualArea) manualArea.value = '';
+    resetResumeState();
+    updateRubricPreview();
+  }
+
+  function resetResumeState() {
+    const idle = document.getElementById('rgIdleView');
+    if (idle) idle.style.display = 'flex';
+    document.getElementById('rgExtractingView')?.classList.remove('active');
+    document.getElementById('rgGroundedView')?.classList.remove('active');
+  }
+
+  function showGroundedState(charCount, sourceName) {
+    const idle = document.getElementById('rgIdleView');
+    if (idle) idle.style.display = 'none';
+    document.getElementById('rgExtractingView')?.classList.remove('active');
+    const groundedView = document.getElementById('rgGroundedView');
+    if (groundedView) groundedView.classList.add('active');
+    const detail = document.getElementById('rgGroundedDetail');
+    if (detail) detail.textContent = `${sourceName || 'Resume'} (${charCount.toLocaleString()} chars) · Context Ready`;
+  }
+
+  function handleResumeFileSelected(files) {
+    if (!files || !files.length) return;
+    const file = files[0];
+    
+    // Switch to animated extraction view
+    const idle = document.getElementById('rgIdleView');
+    if (idle) idle.style.display = 'none';
+    document.getElementById('rgGroundedView')?.classList.remove('active');
+    const extractingView = document.getElementById('rgExtractingView');
+    if (extractingView) extractingView.classList.add('active');
+
+    const statusText = document.getElementById('extractStatusText');
+    const pctText = document.getElementById('extractPct');
+    const fillBar = document.getElementById('extractFill');
+    const subtext = document.getElementById('extractSubtext');
+
+    let currentPct = 0;
+    const interval = setInterval(() => {
+      currentPct += Math.floor(Math.random() * 15) + 12;
+      if (currentPct > 95) currentPct = 95;
+      
+      if (pctText) pctText.textContent = `${currentPct}%`;
+      if (fillBar) fillBar.style.width = `${currentPct}%`;
+      if (statusText) statusText.textContent = `[EXTRACTING_CONTEXT... ${currentPct}%]`;
+
+      if (currentPct > 30 && currentPct < 70 && subtext) {
+        subtext.textContent = `Scanning systems architecture, database models & proficiencies from ${file.name}...`;
+      } else if (currentPct >= 70 && subtext) {
+        subtext.textContent = `Compiling tech graph & grounding interview probes...`;
+      }
+    }, 140);
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      setTimeout(() => {
+        clearInterval(interval);
+        if (pctText) pctText.textContent = '100%';
+        if (fillBar) fillBar.style.width = '100%';
+        if (statusText) statusText.textContent = '[CONTEXT_GROUNDED]';
+
+        setTimeout(() => {
+          let text = e.target.result || '';
+          if (typeof text !== 'string') text = `Candidate resume from ${file.name}. Experience in distributed systems, backend engineering, and system design.`;
+          uploadedResumeText = text.slice(0, 8000);
+          showGroundedState(uploadedResumeText.length, file.name);
+          updateRubricPreview();
+        }, 300);
+      }, 850);
+    };
+
+    reader.onerror = function() {
+      clearInterval(interval);
+      resetResumeState();
+      alert('Could not read resume file. You can paste text manually instead.');
+    };
+
+    if (file.type.includes('text') || file.name.endsWith('.md') || file.name.endsWith('.txt') || file.name.endsWith('.json')) {
+      reader.readAsText(file);
+    } else {
+      reader.readAsText(file.slice(0, 10000));
+    }
   }
 
   function updatePressureUI() {
@@ -1274,20 +1927,25 @@ func solve(nums []int, target int) []int {
   }
 
   async function launchCustomSession() {
-    const role = document.getElementById('setupRole')?.value || 'SDE-2';
+    const urlParams = new URLSearchParams(window.location.search);
+    const role = document.getElementById('setupRole')?.value || 'SDE';
+    const framework = document.getElementById('setupFramework')?.value || 'Google System Design';
     const diff = selectedDifficulty || 'Medium';
     const round = document.getElementById('setupRound')?.value || 'Technical';
     const pressure = document.getElementById('setupPressureToggle')?.checked || false;
+    const interviewMode = document.getElementById('setupInterviewMode')?.value || 'realistic';
 
     currentRole = role;
     currentDifficulty = diff;
     isPressureMode = pressure;
+    currentInterviewMode = interviewMode;
+    selectedFramework = framework;
 
     // Close modal
     dismissSetupModalIfActive();
 
     // Update Topbar and HUD
-    document.getElementById('topRoundRole').textContent = `${currentRole} Round`;
+    document.getElementById('topRoundRole').textContent = `${currentRole} Round (${framework})`;
     document.getElementById('topRoundMeta').textContent = `${currentDifficulty} · ${round}`;
     document.getElementById('teleRole').textContent = currentRole;
     document.getElementById('teleDiff').textContent = currentDifficulty;
@@ -1304,26 +1962,32 @@ func solve(nums []int, target int) []int {
     transcriptScroll.innerHTML = `
       <div class="t-line ai">
         <div class="t-meta"><span class="t-time">00:00</span><span class="t-who">AI INTERVIEWER</span></div>
-        <div class="t-text" id="openingMsg">Calibrating neural connection for ${currentRole} (${currentDifficulty})...</div>
+        <div class="t-text" id="openingMsg">Calibrating neural connection for ${currentRole} [${framework}]...</div>
       </div>
     `;
     seconds = 0;
     fillerTotal = 0;
     document.getElementById('fillerCount').textContent = '0';
 
-    // Request start from API
+    // Request start from API with companyFramework and candidate resumeText
     try {
       const startRes = await api.post('/interview/start', { 
         role: currentRole, 
+        companyFramework: framework,
+        resumeText: uploadedResumeText,
         difficulty: currentDifficulty, 
         pressureMode: isPressureMode, 
-        rounds: [round] 
+        rounds: [round],
+        interviewMode,
+        openingQuestion: urlParams.get('retryQuestion') || undefined,
+        retrySourceSessionId: urlParams.get('retrySourceSessionId') || undefined
       });
       if (startRes?.sessionId) {
         activeSessionId = startRes.sessionId;
+        updateCoverage(startRes.competencyCoverage);
         const msg = startRes.message || (isPressureMode 
-          ? `Welcome to the high-pressure ${currentRole} evaluation. Time is strictly budgeted: walk me through how you optimize your architecture for 100,000 QPS with under 30ms latency.`
-          : `Hello! Welcome to your ${currentRole} technical interview. Can you walk me through a distributed architecture you recently designed?`);
+          ? `Welcome to the high-pressure ${currentRole} evaluation under ${framework}. Time is strictly budgeted: walk me through how you optimize your architecture for 100,000 QPS with under 30ms latency.`
+          : `Hello! Welcome to your ${currentRole} interview under ${framework}. Can you walk me through a distributed architecture you recently designed?`);
         document.getElementById('openingMsg').textContent = msg;
         setTimeout(() => speakAiResponse(msg), 500);
       } else {
@@ -1344,13 +2008,20 @@ func solve(nums []int, target int) []int {
     const hasAutoStart = params.get('start') === 'auto' || params.get('sessionId');
     const tabParam = params.get('tab');
 
-    const initialRole = params.get('role') || 'SDE-2';
+    let initialRole = params.get('role') || 'SDE';
+    if (/sde|software|backend|frontend|architect/i.test(initialRole)) initialRole = 'SDE';
+    else if (/data|ml|machine|ai/i.test(initialRole)) initialRole = 'Data Science';
+    else if (/devops|sre|cloud/i.test(initialRole)) initialRole = 'DevOps';
+    else if (/pm|product/i.test(initialRole)) initialRole = 'PM';
+
     const initialDiff = params.get('difficulty') || 'Medium';
+    const initialFramework = params.get('framework') || 'Google System Design';
     const initialPressure = params.get('pressure') !== null
       ? params.get('pressure') === 'true'
       : (localStorage.getItem('pressureMode') === 'true');
 
     if (document.getElementById('setupRole')) document.getElementById('setupRole').value = initialRole;
+    if (document.getElementById('setupFramework')) document.getElementById('setupFramework').value = initialFramework;
     if (document.getElementById('setupPressureToggle')) {
       document.getElementById('setupPressureToggle').checked = initialPressure;
       toggleSetupPressure(initialPressure);
@@ -1359,10 +2030,37 @@ func solve(nums []int, target int) []int {
       selectTrack('coding');
     }
 
+    // Bind drag & drop listeners on Resume Grounding Zone
+    const zone = document.getElementById('resumeGroundingZone');
+    if (zone) {
+      ['dragenter', 'dragover'].forEach(name => {
+        zone.addEventListener(name, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          zone.classList.add('dragover');
+        });
+      });
+      ['dragleave', 'drop'].forEach(name => {
+        zone.addEventListener(name, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          zone.classList.remove('dragover');
+        });
+      });
+      zone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        if (dt && dt.files && dt.files.length) {
+          handleResumeFileSelected(dt.files);
+        }
+      });
+    }
+
+    updateRubricPreview();
+
     if (!hasAutoStart) {
-      // User clicked Interview tab! Open the Setup Modal so they can configure role, difficulty, rounds, pressure mode!
+      // Open the Setup Modal so candidate can configure role, framework, resume grounding!
       openSetupModal();
-      document.getElementById('openingMsg').textContent = "Session awaiting parameters... Please configure your role, difficulty, and pressure preferences in the calibration window above.";
+      document.getElementById('openingMsg').textContent = "Session awaiting parameters... Calibrate your role, framework, and resume grounding in the panel above.";
     } else {
       // Direct auto start requested
       launchCustomSession();

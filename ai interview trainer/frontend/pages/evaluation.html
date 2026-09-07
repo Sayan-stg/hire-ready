@@ -322,7 +322,7 @@ button{ font-family:inherit; }
     </div>
 
     <div class="glass-panel roadmap-panel">
-      <div class="p-label">Suggested Focus Areas</div>
+      <div class="p-label">Personal Coaching</div>
       <div id="suggestedAreas">
         <div class="road-item">
           <div><div class="rt">System Architecture Edge Cases</div><div class="rt-d">Review distributed cache invalidation</div></div>
@@ -333,6 +333,7 @@ button{ font-family:inherit; }
           <button class="add-btn" onclick="this.classList.toggle('added'); this.textContent = this.classList.contains('added') ? 'Added ✓' : '+ Add';">+ Add</button>
         </div>
       </div>
+      <button class="add-btn" id="retryWeakBtn" style="margin-top:12px;display:none;">Retry weakest question →</button>
     </div>
   </div>
 
@@ -348,6 +349,8 @@ button{ font-family:inherit; }
 
 <script src="../js/api.js"></script>
 <script>
+  let retryDrill = null;
+  let retrySourceSessionId = null;
   // Replay waveform bars
   const replayWave = document.getElementById('replayWave');
   let waveHtml = '';
@@ -416,20 +419,40 @@ button{ font-family:inherit; }
         if (ev.feedback) {
           document.getElementById('overallSummary').textContent = ev.feedback;
         }
+        if (ev.coaching) {
+          retryDrill = ev.coaching.retryDrill;
+          retrySourceSessionId = id || sess.id || null;
+          const coachingEl = document.getElementById('suggestedAreas');
+          if (coachingEl) {
+            const esc = (s) => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+            coachingEl.innerHTML = `
+              <div class="road-item"><div><div class="rt">Keep doing</div><div class="rt-d">${esc(ev.coaching.keepDoing)}</div></div></div>
+              <div class="road-item"><div><div class="rt">Fix next</div><div class="rt-d">${esc(ev.coaching.fixNext)}</div></div></div>
+              <div class="road-item"><div><div class="rt">Retry drill</div><div class="rt-d">${esc(ev.coaching.retryDrill?.instruction)}</div></div></div>
+              ${ev.coaching.retryComparison ? `<div class="road-item"><div><div class="rt">Retry comparison</div><div class="rt-d">Previous weak-answer score: ${ev.coaching.retryComparison.previousScore}%. This retry: ${ev.coaching.retryComparison.newScore}% (${ev.coaching.retryComparison.change >= 0 ? '+' : ''}${ev.coaching.retryComparison.change}).</div></div></div>` : ''}
+            `;
+          }
+          const retryButton = document.getElementById('retryWeakBtn');
+          if (retryButton && retryDrill?.question) retryButton.style.display = 'inline-flex';
+        }
         if (sess.role) {
           document.getElementById('sessionMeta').textContent = `${sess.role} · ${sess.difficulty || 'Technical'} · ${sess.duration ? Math.floor(sess.duration/60)+'m' : '30m'}`;
         }
         if (sess.messages && sess.messages.length) {
           const esc = (s) => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
           const scroll = document.getElementById('annotScroll');
+          let answerIndex = 0;
           scroll.innerHTML = sess.messages.map(m => {
             const isAi = m.role === 'assistant';
             const fillers = m.fillerWords && m.fillerWords.length ? `<span class="tag filler">${m.fillerWords.map(esc).join(', ')}</span>` : '';
+            const answerReview = !isAi ? ev.answerEvaluations?.[answerIndex++] : null;
+            const scoreTag = answerReview ? `<span class="tag strong">ANSWER ${answerReview.score}%</span>` : '';
             return `
               <div class="a-line ${isAi ? 'ai' : 'you'}">
                 <div class="a-meta">
                   <span class="a-who">${isAi ? 'AI INTERVIEWER' : 'YOU'}</span>
                   ${fillers}
+                  ${scoreTag}
                 </div>
                 <div class="a-text">${esc(m.content)}</div>
               </div>
@@ -487,6 +510,13 @@ button{ font-family:inherit; }
   }
 
   loadEvaluation();
+
+  document.getElementById('retryWeakBtn')?.addEventListener('click', () => {
+    if (!retryDrill?.question) return;
+    const params = new URLSearchParams({ start: 'auto', retryQuestion: retryDrill.question });
+    if (retrySourceSessionId) params.set('retrySourceSessionId', retrySourceSessionId);
+    window.location.href = `interview.html?${params.toString()}`;
+  });
 </script>
 
 </body>

@@ -322,36 +322,70 @@ function generateSmartContextualResponse(messages, role = 'SDE', round = 'Techni
   return `Understood—you noted "${keySnippet}". Walk me through the potential failure modes of this approach: how does the system degrade gracefully if that component becomes unavailable in production?`;
 }
 
-function buildInterviewerSystem(role, difficulty, pressureMode, resumeText, round) {
+function buildInterviewerSystem(role, difficulty, pressureMode, resumeText, round, interviewMode = 'realistic', coverage = [], companyFramework = '') {
   const pressureInstructions = pressureMode
     ? `You are conducting a HIGH PRESSURE interview. Interrupt the candidate if they are overly verbose, challenge weak assumptions with skepticism ("Wait, that won't scale past 10k QPS—why not X?"), and demand rigorous justification under strict time pressure.`
     : '';
 
   const resumeContext = resumeText
-    ? `The candidate's resume highlights: ${resumeText.substring(0, 500)}. Ask questions relevant to their actual experience.`
+    ? `CANDIDATE RESUME GROUNDING: The candidate's background highlights: ${resumeText.substring(0, 1200)}. Actively ground your interview questions and scenarios in their listed tech stack, architectural projects, and actual domain experience.`
     : '';
+
+  const frameworkMap = {
+    'Google System Design': 'COMPANY FRAMEWORK (GOOGLE SYSTEM DESIGN): Demand massive scale (millions of concurrent users), explicit back-of-envelope calculations (QPS, storage, network ingress/egress), P99 latency bounds, and distributed consensus (Raft/Paxos). Probe deeply on CAP theorem trade-offs and edge failure modes.',
+    'Amazon Leadership': 'COMPANY FRAMEWORK (AMAZON LEADERSHIP): Interrogate the candidate using Amazon Leadership Principles (Customer Obsession, Ownership, Dive Deep, Bias for Action, Frugality). Require answers to be framed with concrete STAR evidence (Situation, Task, Action, Result) with measurable metrics.',
+    'Meta Fast Execution': 'COMPANY FRAMEWORK (META FAST EXECUTION): Focus on rapid MVP velocity, pragmatic trade-offs, building scalable services quickly, and measuring real-time user engagement and telemetry metrics.',
+    'Netflix Chaos Architecture': 'COMPANY FRAMEWORK (NETFLIX CHAOS ARCHITECTURE): Test resilience against arbitrary node failures, chaos engineering, circuit breakers, asynchronous event streaming (Kafka), and multi-region active-active deployments.',
+    'Apple Integrated Systems': 'COMPANY FRAMEWORK (APPLE INTEGRATED SYSTEMS): Emphasize privacy-first architecture, hardware-software co-design, extreme battery/memory efficiency, and polished, deterministic failure recovery.'
+  };
+  const frameworkInstructions = frameworkMap[companyFramework] || '';
 
   const difficultyMap = {
     Easy: 'beginner-friendly, conceptual questions with guided hints if stuck',
     Medium: 'intermediate questions requiring practical production knowledge and trade-off analysis',
     Hard: 'staff/principal-level questions demanding deep distributed systems, concurrency primitives, and edge-case resilience',
   };
+  const modeInstructions = interviewMode === 'practice'
+    ? 'PRACTICE MODE: You may offer one short, actionable coaching hint before the next question. Never reveal a complete answer.'
+    : 'REALISTIC MODE: Stay in interviewer character. Do not give hints, coaching, or scores during the interview.';
+  const coverageContext = coverage.length
+    ? `COMPETENCY PLAN: ${coverage.map(item => `${item.label} (${item.status})`).join('; ')}. Test the item marked up-next next; do not repeat a tested item unless requested.`
+    : '';
 
   return `You are a Principal Engineering Interviewer at a top tier technology company conducting a ${round} interview for a ${role} position.
   
 Interview Depth: ${difficultyMap[difficulty] || 'intermediate'}
 Round: ${round}
+${frameworkInstructions}
+${modeInstructions}
+${coverageContext}
 ${pressureInstructions}
-${resumeContext}
 
 MANDATORY ACTIVE-LISTENING INSTRUCTIONS:
-1. REFLECTIVE GROUNDING: Never ask disconnected, canned questions. In your very first sentence, explicitly acknowledge what the candidate just stated by referencing specific tools, algorithms, or architectural patterns they mentioned (e.g., "You proposed using Redis with consistent hashing...", "Regarding your point on database sharding...").
+1. REFLECTIVE GROUNDING: Never ask disconnected, canned questions. In your very first sentence, explicitly acknowledge what the candidate just stated by referencing one specific claim, tool, algorithm, or architectural pattern they mentioned. Do not invent details. Then ask a follow-up that tests the consequence, trade-off, or failure mode of that exact claim (e.g., "You proposed Redis with consistent hashing; how would you handle hot keys?").
 2. ADDRESS CLARIFICATIONS: If the candidate asked a clarifying question (e.g. read/write ratio, scale, latency budget), answer it directly with realistic production figures before asking your follow-up.
 3. ADAPTIVE PROBING:
    - If their answer was vague or brief (< 2 sentences), challenge them to provide concrete implementation specifics, data structures, or code.
    - If their answer was strong, probe edge cases: race conditions, failure recovery, memory limits, or distributed network partitions.
 4. CADENCE: Ask ONE focused question at a time. Keep responses concise (2 to 4 sentences maximum).
 5. Do NOT give final scores, pass/fail ratings, or break character during the interview.`;
+}
+
+function buildCompetencyPlan(role, round) {
+  const normalizedRound = (round || 'Technical').toLowerCase();
+  if (normalizedRound.includes('behavioral') || normalizedRound.includes('hr')) return [
+    ['story', 'Story structure & ownership'], ['impact', 'Measurable impact'], ['conflict', 'Stakeholder management'], ['reflection', 'Reflection & learning'],
+  ].map(([id, label]) => ({ id, label }));
+  if (normalizedRound.includes('coding')) return [
+    ['clarify', 'Clarifying questions & constraints'], ['approach', 'Algorithm selection'], ['complexity', 'Time & space complexity'], ['edge-cases', 'Edge cases & testing'],
+  ].map(([id, label]) => ({ id, label }));
+  const roleFocus = /devops|sre/i.test(role) ? ['reliability', 'Reliability & observability'] : /product manager/i.test(role) ? ['product', 'Product trade-offs & metrics'] : /data|ml/i.test(role) ? ['data', 'Data quality & model evaluation'] : ['design', 'System design & assumptions'];
+  return [['clarify', 'Clarifying questions & constraints'], roleFocus, ['trade-offs', 'Trade-offs & scaling'], ['resilience', 'Failure modes & resilience']].map(([id, label]) => ({ id, label }));
+}
+
+function deriveCoverage(plan = [], messages = []) {
+  const answerCount = messages.filter(message => message.role === 'user').length;
+  return plan.map((item, index) => ({ id: item.id, label: item.label, status: index < answerCount ? 'tested' : index === answerCount ? 'up-next' : 'remaining' }));
 }
 
 function buildRubricEvaluation({ userMessages, duration, tabSwitches, pasteEvents }) {
@@ -396,26 +430,96 @@ function buildRubricEvaluation({ userMessages, duration, tabSwitches, pasteEvent
   return { rubric, technicalAccuracy, communication: rubric.communication, confidence, overallScore, fitScore: Number((overallScore / 10).toFixed(1)), answerQuality: clamp((rubric.problemFraming + rubric.technicalDepth) / 2), fillerMap, fillerCount, detectedFillerWords: Object.keys(fillerMap).filter(word => fillerMap[word]), paceWpm, totalWords: tokens.length, evidence, improvements, focusTelemetry: { tabSwitches, pasteEvents } };
 }
 
+function buildAnswerEvaluations(messages) {
+  const stopWords = new Set(['about', 'after', 'also', 'and', 'are', 'based', 'been', 'between', 'could', 'does', 'explain', 'from', 'give', 'have', 'how', 'into', 'just', 'like', 'more', 'most', 'that', 'the', 'their', 'then', 'this', 'through', 'using', 'what', 'when', 'where', 'which', 'with', 'would', 'your']);
+  const terms = text => [...new Set((text.toLowerCase().match(/[a-z][a-z0-9-]{2,}/g) || []).filter(word => !stopWords.has(word)))];
+  const clamp = value => Math.max(0, Math.min(100, Math.round(value)));
+  const evaluations = [];
+
+  messages.forEach((message, index) => {
+    if (message.role !== 'user') return;
+    const previousQuestion = [...messages.slice(0, index)].reverse().find(item => item.role === 'assistant')?.content || 'Interview response';
+    const nextFollowUp = messages.slice(index + 1).find(item => item.role === 'assistant')?.content || '';
+    const answer = message.content || '';
+    const questionTerms = terms(previousQuestion);
+    const answerTerms = terms(answer);
+    const matchedTerms = questionTerms.filter(term => answerTerms.includes(term));
+    const hasReasoning = /\b(because|therefore|trade-?off|however|depends|instead)\b/i.test(answer);
+    const hasRisk = /\b(failure|risk|retry|fallback|edge case|limit|monitor|test|validate)\b/i.test(answer);
+    const hasConcreteDetail = /\b\d+(?:\.\d+)?(?:%|ms|s|x|qps|rps|gb|mb)?\b/i.test(answer) || /\b(redis|kafka|sql|nosql|cache|queue|index|lock|heap|docker|kubernetes)\b/i.test(answer);
+    const relevance = questionTerms.length ? matchedTerms.length / questionTerms.length : 0.5;
+    const score = clamp(30 + relevance * 35 + (hasReasoning ? 15 : 0) + (hasRisk ? 10 : 0) + (hasConcreteDetail ? 10 : 0));
+    const strengths = [];
+    const missedPoints = [];
+    const evidence = [];
+    if (matchedTerms.length) {
+      strengths.push('Addressed the question directly.');
+      evidence.push(`Connected to: ${matchedTerms.slice(0, 3).join(', ')}.`);
+    } else missedPoints.push('Connect the opening of your answer directly to the question being asked.');
+    if (hasReasoning) strengths.push('Explained reasoning or a trade-off.');
+    else missedPoints.push('Explain why this approach is preferable, not only what you would do.');
+    if (hasRisk) strengths.push('Considered a risk, validation, or failure mode.');
+    else missedPoints.push('Add one edge case, risk, or validation step.');
+    if (hasConcreteDetail) strengths.push('Used a concrete implementation detail or metric.');
+    else missedPoints.push('Use a concrete technical detail or measurable outcome.');
+    evaluations.push({ question: previousQuestion, answer, score, strengths, missedPoints, evidence, followUpQuestion: nextFollowUp });
+  });
+  return evaluations;
+}
+
 global.inMemorySessions = global.inMemorySessions || new Map();
+
+function buildPersonalizedCoaching(answerEvaluations = []) {
+  if (!answerEvaluations.length) {
+    return {
+      keepDoing: 'Complete a few more exchanges so the coach can identify reliable strengths.',
+      fixNext: 'Give each answer a clear structure: approach, rationale, trade-off, and validation.',
+      retryDrill: { question: '', instruction: 'Start another short practice session after answering at least one question.', target: 'One complete answer' },
+    };
+  }
+  const ranked = [...answerEvaluations].sort((a, b) => b.score - a.score);
+  const strongest = ranked[0];
+  const weakest = ranked[ranked.length - 1];
+  const strongestWhy = strongest.strengths?.[0] || 'It was the most complete response in this session.';
+  const weakestWhy = weakest.missedPoints?.[0] || 'It left the most room for a more direct and evidence-based answer.';
+  return {
+    keepDoing: `Keep doing this: ${strongestWhy}`,
+    fixNext: `Fix this next: ${weakestWhy}`,
+    strongestAnswer: { question: strongest.question, score: strongest.score, why: strongestWhy },
+    weakestAnswer: { question: weakest.question, score: weakest.score, why: weakestWhy },
+    retryDrill: {
+      question: weakest.question,
+      instruction: `${weakestWhy} Try again using: direct answer → rationale → trade-off or risk → concrete detail.`,
+      target: 'Address the question directly, explain why, and include one risk or validation step.',
+    },
+  };
+}
 
 // POST /api/interview/start
 router.post('/start', protect, async (req, res) => {
   try {
-    const { role, difficulty, pressureMode, rounds } = req.body;
+    const { role, difficulty, pressureMode, rounds, interviewMode, openingQuestion, retrySourceSessionId, companyFramework, resumeText } = req.body;
     const userRole = role || req.user.targetRole || 'SDE';
+    const candidateResume = (typeof resumeText === 'string' && resumeText.trim()) ? resumeText.trim() : (req.user.resumeText || '');
+    const selectedRound = (rounds || ['Technical'])[0];
+    const selectedMode = interviewMode === 'practice' ? 'practice' : 'realistic';
+    const competencyPlan = buildCompetencyPlan(userRole, selectedRound);
+    const competencyCoverage = deriveCoverage(competencyPlan, []);
 
     // Generate opening question
     const systemPrompt = buildInterviewerSystem(
       userRole,
       difficulty || 'Medium',
       pressureMode,
-      req.user.resumeText,
-      (rounds || ['Technical'])[0]
+      candidateResume,
+      selectedRound, selectedMode, competencyCoverage,
+      companyFramework || ''
     );
 
-    const openingMsg = await callClaude([
+    const generatedOpening = await callClaude([
       { role: 'user', content: 'Start the interview with a brief greeting and your first question.' }
     ], systemPrompt, 1000, { role: userRole, round: (rounds || ['Technical'])[0] });
+    const openingMsg = typeof openingQuestion === 'string' && openingQuestion.trim() ? openingQuestion.trim().slice(0, 2000) : generatedOpening;
 
     if (mongoose.connection.readyState === 1) {
       const session = await Session.create({
@@ -423,11 +527,18 @@ router.post('/start', protect, async (req, res) => {
         role: userRole,
         difficulty: difficulty || 'Medium',
         pressureMode: !!pressureMode,
+        interviewMode: selectedMode,
+        companyFramework: companyFramework || '',
+        resumeText: candidateResume,
         rounds: rounds || ['Technical', 'HR'],
+        competencyPlan,
+        competencyCoverage,
+        retrySourceSessionId: mongoose.isValidObjectId(retrySourceSessionId) ? retrySourceSessionId : undefined,
+        retrySourceQuestion: openingQuestion || undefined,
         messages: [{ role: 'assistant', content: openingMsg }],
         status: 'in-progress',
       });
-      return res.json({ success: true, sessionId: session._id, message: openingMsg });
+      return res.json({ success: true, sessionId: session._id, message: openingMsg, competencyCoverage });
     }
 
     // In-memory session fallback
@@ -438,24 +549,34 @@ router.post('/start', protect, async (req, res) => {
       role: userRole,
       difficulty: difficulty || 'Medium',
       pressureMode: !!pressureMode,
+      interviewMode: selectedMode,
+      companyFramework: companyFramework || '',
+      resumeText: candidateResume,
       rounds: rounds || ['Technical', 'HR'],
+      competencyPlan,
+      competencyCoverage,
+      retrySourceSessionId: retrySourceSessionId || undefined,
+      retrySourceQuestion: openingQuestion || undefined,
       messages: [{ role: 'assistant', content: openingMsg }],
       status: 'in-progress',
       createdAt: new Date(),
     };
     global.inMemorySessions.set(sessId, session);
 
-    res.json({ success: true, sessionId: sessId, message: openingMsg });
+    res.json({ success: true, sessionId: sessId, message: openingMsg, competencyCoverage });
   } catch (err) {
     console.error('Start interview error:', err);
     // Even if error, return valid starting question
     const fallbackId = 'sess_' + Date.now();
     const fallbackMsg = "Welcome to the technical evaluation. Could you walk me through your experience designing distributed architectures?";
+    const candidateResume = (typeof req.body?.resumeText === 'string' && req.body.resumeText.trim()) ? req.body.resumeText.trim() : (req.user?.resumeText || '');
     global.inMemorySessions.set(fallbackId, {
       _id: fallbackId,
       user: req.user._id,
-      role: req.body.role || 'SDE',
-      difficulty: req.body.difficulty || 'Medium',
+      role: req.body?.role || 'SDE',
+      difficulty: req.body?.difficulty || 'Medium',
+      companyFramework: req.body?.companyFramework || '',
+      resumeText: candidateResume,
       messages: [{ role: 'assistant', content: fallbackMsg }],
       status: 'in-progress',
       createdAt: new Date(),
@@ -471,7 +592,7 @@ router.post('/message', protect, async (req, res) => {
     const content = req.body.content || req.body.message;
     if (!content?.trim()) return res.status(400).json({ error: 'Message cannot be empty.' });
 
-    // Detect filler words with punctuation stripped
+    // Detect filler words
     const fillerWords = ['um', 'uh', 'like', 'so', 'basically', 'actually', 'literally', 'you know'];
     const cleanTokens = content.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/).filter(Boolean);
     const detected = fillerWords.filter(w => cleanTokens.includes(w));
@@ -485,22 +606,24 @@ router.post('/message', protect, async (req, res) => {
     }
 
     if (!session) {
-      // Auto-create session if missing
       session = {
         _id: sessionId,
         user: req.user._id,
-        role: 'SDE',
+        role: req.body.role || 'SDE',
         difficulty: 'Medium',
         pressureMode: typeof req.body.pressureMode === 'boolean' ? req.body.pressureMode : false,
+        interviewMode: req.body.interviewMode === 'practice' ? 'practice' : 'realistic',
+        companyFramework: req.body.companyFramework || '',
+        resumeText: req.body.resumeText || req.user.resumeText || '',
+        competencyPlan: buildCompetencyPlan(req.body.role || 'SDE', 'Technical'),
         messages: [],
         status: 'in-progress'
       };
       global.inMemorySessions.set(sessionId, session);
-    } else if (typeof req.body.pressureMode === 'boolean') {
-      session.pressureMode = req.body.pressureMode;
     }
 
     session.messages.push({ role: 'user', content, fillerWords: detected, timestamp: new Date() });
+    session.competencyCoverage = deriveCoverage(session.competencyPlan || buildCompetencyPlan(session.role || 'SDE', session.rounds?.[0]), session.messages);
 
     const claudeMsgs = session.messages.map(m => ({
       role: m.role === 'assistant' ? 'assistant' : 'user',
@@ -508,8 +631,14 @@ router.post('/message', protect, async (req, res) => {
     }));
 
     const systemPrompt = buildInterviewerSystem(
-      session.role || 'SDE', session.difficulty || 'Medium', session.pressureMode || false,
-      req.user.resumeText, session.rounds?.[0] || 'Technical'
+      session.role || 'SDE',
+      session.difficulty || 'Medium',
+      session.pressureMode || false,
+      session.resumeText || req.user.resumeText || '',
+      session.rounds?.[0] || 'Technical',
+      session.interviewMode || 'realistic',
+      session.competencyCoverage,
+      session.companyFramework || ''
     );
 
     const aiResponse = await callClaude(claudeMsgs, systemPrompt, 1000, {
@@ -520,8 +649,7 @@ router.post('/message', protect, async (req, res) => {
 
     session.messages.push({ role: 'assistant', content: aiResponse, timestamp: new Date() });
     if (session.save) await session.save();
-
-    res.json({ success: true, message: aiResponse, fillerWords: detected });
+    res.json({ success: true, message: aiResponse, fillerWords: detected, competencyCoverage: session.competencyCoverage, interviewMode: session.interviewMode || 'realistic' });
   } catch (err) {
     console.error('Message error:', err);
     const fallbackResponse = generateSmartContextualResponse(
@@ -540,7 +668,6 @@ router.post('/message', protect, async (req, res) => {
 
 // GET /api/interview/status
 router.get('/status', (req, res) => {
-  const hasKey = !!process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_gemini_api_key_here';
   res.json({
     success: true,
     hasKey,
@@ -580,6 +707,15 @@ router.post('/end', protect, async (req, res) => {
 
     // ─── Performance evaluation ───
     const userMessages = (session.messages || []).filter(m => m.role === 'user');
+    const answerEvaluations = buildAnswerEvaluations(session.messages || []);
+    const coaching = buildPersonalizedCoaching(answerEvaluations);
+    if (session.retrySourceSessionId && mongoose.connection.readyState === 1) {
+      const source = await Session.findOne({ _id: session.retrySourceSessionId, user: req.user._id });
+      const previousScore = source?.evaluation?.coaching?.weakestAnswer?.score;
+      if (Number.isFinite(previousScore)) {
+        coaching.retryComparison = { previousScore, newScore: 0, change: 0 };
+      }
+    }
     const allUserText = userMessages.map(m => m.content).join(' ');
     const rubricEvaluation = buildRubricEvaluation({ userMessages, duration: duration || 120, tabSwitches, pasteEvents });
     const totalWords = rubricEvaluation.totalWords;
@@ -593,6 +729,10 @@ router.post('/end', protect, async (req, res) => {
     const wordsLower = allUserText.toLowerCase().split(/\W+/);
     const matchedKeywords = techKeywords.filter(k => wordsLower.includes(k));
     const { technicalAccuracy, communication, confidence, fitScore, overallScore, paceWpm } = rubricEvaluation;
+    if (coaching.retryComparison) {
+      coaching.retryComparison.newScore = overallScore;
+      coaching.retryComparison.change = overallScore - coaching.retryComparison.previousScore;
+    }
 
     const strengths = [];
     if (matchedKeywords.length > 0) strengths.push(`Explicitly referenced architecture primitives (${matchedKeywords.slice(0, 3).join(', ')})`);
@@ -620,6 +760,8 @@ router.post('/end', protect, async (req, res) => {
       },
       rubric: rubricEvaluation.rubric,
       evidence: rubricEvaluation.evidence,
+      answerEvaluations,
+      coaching,
       answerQuality: rubricEvaluation.answerQuality,
       strengths,
       weaknesses,
