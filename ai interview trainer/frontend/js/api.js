@@ -155,22 +155,20 @@ function buildNavbar(activePage = '') {
   `).join('') : '';
 
   const navActions = isAuth ? `
-    <button class="theme-btn" onclick="Theme.toggle()" title="Toggle theme">🌙</button>
     <div class="user-menu">
       <button class="user-menu-btn" onclick="toggleUserMenu()">
         <div class="user-avatar-sm">${initials}</div>
         <span>${user.name.split(' ')[0]}</span>
-        <span>▾</span>
+        <span style="font-size:0.65rem;color:var(--starlight-silver);">▼</span>
       </button>
       <div class="user-dropdown" id="user-dropdown">
         <a href="/pages/dashboard.html">📊 Dashboard</a>
         <a href="/pages/settings.html">⚙️ Settings</a>
-        <div class="divider"></div>
+        <div class="divider" style="height:1px;background:var(--border-delicate);margin:4px 0;"></div>
         <button onclick="Auth.logout()">🚪 Log Out</button>
       </div>
     </div>
   ` : `
-    <button class="theme-btn" onclick="Theme.toggle()" title="Toggle theme">🌙</button>
     <a href="/pages/login.html" class="btn btn-ghost btn-sm">Log In</a>
     <a href="/pages/register.html" class="btn btn-primary btn-sm">Sign Up</a>
   `;
@@ -179,8 +177,16 @@ function buildNavbar(activePage = '') {
     <nav class="navbar">
       <div class="nav-inner">
         <a href="/index.html" class="nav-logo">
-          <div class="logo-icon">💼</div>
-          <span>Hire<strong>Ready</strong></span>
+          <div class="logo-icon-orbital">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a10 10 0 1 0 10 10H12V2z"></path>
+              <circle cx="12" cy="12" r="4"></circle>
+            </svg>
+          </div>
+          <div class="nav-logo-text">
+            <span class="nav-logo-team">SIXTH BIT</span>
+            <span class="nav-logo-title">Hire<strong>Ready</strong></span>
+          </div>
         </a>
         <div class="nav-links">${navLinks}</div>
         <div class="nav-actions">${navActions}</div>
@@ -234,6 +240,27 @@ function buildSidebar(activePage = '') {
     </aside>
   `;
 }
+
+// ─── Team Credits Footer Builder ──────────────────────────────────
+function buildCreditsFooter() {
+  return `
+    <footer class="credits-footer">
+      <div class="credits-header">
+        <div class="credits-title">SYSTEM ARCHITECTS & DEVELOPERS // SIXTH BIT</div>
+        <div style="font-family:var(--font-mono);font-size:0.68rem;color:var(--starlight-muted);">PREPARED BY TEAM SIXTH BIT</div>
+      </div>
+      <div class="credits-grid">
+        <div class="credit-item"><span class="credit-num">1.</span> <span class="credit-name">Adeet Singh</span> <span class="credit-id">: 25BAI11451</span></div>
+        <div class="credit-item"><span class="credit-num">2.</span> <span class="credit-name">Piya Nimje</span> <span class="credit-id">: 25BAI10213</span></div>
+        <div class="credit-item"><span class="credit-num">3.</span> <span class="credit-name">Navya Vyas</span> <span class="credit-id">: 25BAI10566</span></div>
+        <div class="credit-item"><span class="credit-num">4.</span> <span class="credit-name">Mohit Pratap Singh</span> <span class="credit-id">: 25BAI10639</span></div>
+        <div class="credit-item"><span class="credit-num">5.</span> <span class="credit-name">Sayan Mondal</span> <span class="credit-id">: 25BAI11532</span></div>
+        <div class="credit-item"><span class="credit-num">6.</span> <span class="credit-name">Krishna Paliwal</span> <span class="credit-id">: 25BAI11317</span></div>
+      </div>
+    </footer>
+  `;
+}
+
 
 // ─── Utility ──────────────────────────────────────────────────────
 function fmtDate(d) {

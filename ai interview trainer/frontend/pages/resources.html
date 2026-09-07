@@ -1,131 +1,533 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Resources — HireReady</title>
-  <link rel="stylesheet" href="../css/main.css"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knowledge Archive — HireReady</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --void:#050507;
+  --void-2:#0a0a10;
+  --line: rgba(232,233,237,0.09);
+  --line-strong: rgba(232,233,237,0.18);
+  --silver:#e9eaef;
+  --silver-dim:#9395a3;
+  --silver-faint:#5c5e6c;
+  --nebula:#2b3a67;
+  --nebula-bright:#4a5f9e;
+  --aurora:#6f7fae;
+  --cyan:#5fd4d9;
+  --cyan-glow: rgba(95,212,217,0.35);
+  --good:#6fae8a;
+  --warn:#c9a35f;
+  --rec:#c65b4e;
+  --ease: cubic-bezier(.16,.8,.24,1);
+}
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  background:var(--void); color:var(--silver);
+  font-family:'Inter', sans-serif; -webkit-font-smoothing:antialiased;
+  min-height:100vh; overflow-x:hidden;
+}
+a{ color:inherit; text-decoration:none; }
+::selection{ background:var(--nebula-bright); color:#fff; }
+.mono{ font-family:'JetBrains Mono', monospace; letter-spacing:.04em; }
+
+.stars{
+  position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.4;
+  background-image:
+    radial-gradient(1px 1px at 15% 20%, rgba(255,255,255,.5) 0%, transparent 60%),
+    radial-gradient(1px 1px at 80% 12%, rgba(255,255,255,.35) 0%, transparent 60%),
+    radial-gradient(1.5px 1.5px at 40% 65%, rgba(255,255,255,.4) 0%, transparent 60%),
+    radial-gradient(1px 1px at 92% 50%, rgba(255,255,255,.3) 0%, transparent 60%),
+    radial-gradient(1px 1px at 50% 85%, rgba(255,255,255,.35) 0%, transparent 60%);
+}
+.glow-a{
+  position:fixed; z-index:0; pointer-events:none; top:-15%; right:-8%;
+  width:700px; height:500px;
+  background:radial-gradient(ellipse, rgba(43,58,103,.28), transparent 65%);
+  filter:blur(10px);
+}
+
+/* ---------- shell layout ---------- */
+.shell{ display:flex; min-height:100vh; position:relative; z-index:1; }
+
+.sidebar{
+  width:240px; flex-shrink:0;
+  border-right:1px solid var(--line);
+  background:rgba(255,255,255,0.015);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  display:flex; flex-direction:column;
+  position:sticky; top:0; height:100vh;
+}
+.side-brand{
+  display:flex; align-items:center; gap:12px;
+  padding:26px 22px; border-bottom:1px solid var(--line);
+}
+.side-brand svg{ width:26px; height:26px; flex-shrink:0; }
+.side-brand-text{ display:flex; flex-direction:column; line-height:1.2; }
+.side-brand-text .p{ font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:600; }
+.side-brand-text .s{ font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; color:var(--silver-faint); text-transform:uppercase; }
+
+.side-nav{ flex:1; padding:18px 12px; display:flex; flex-direction:column; gap:2px; }
+.nav-item{
+  display:flex; align-items:center; gap:13px;
+  padding:11px 12px; border-radius:5px; position:relative;
+  font-size:13.5px; color:var(--silver-dim);
+  transition:background .25s var(--ease), color .25s var(--ease);
+}
+.nav-item svg{ width:18px; height:18px; flex-shrink:0; opacity:.85; }
+.nav-item:hover{ background:rgba(255,255,255,0.03); color:var(--silver); }
+.nav-item.active{ color:var(--silver); background:rgba(111,127,174,0.09); }
+.nav-item.active::before{
+  content:''; position:absolute; left:-12px; top:50%; transform:translateY(-50%);
+  width:2px; height:18px; background:var(--aurora);
+  box-shadow:0 0 8px 1px rgba(111,127,174,.7);
+}
+.nav-label-eyebrow{
+  font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.14em;
+  color:var(--silver-faint); text-transform:uppercase; padding:14px 12px 6px;
+}
+
+.side-foot{
+  border-top:1px solid var(--line); padding:16px 20px;
+  display:flex; align-items:center; gap:12px;
+}
+.avatar{
+  width:34px; height:34px; border-radius:50%;
+  background:linear-gradient(150deg, var(--nebula-bright), var(--nebula));
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Space Grotesk',sans-serif; font-size:12.5px; font-weight:600; color:#fff;
+  border:1px solid var(--line-strong); flex-shrink:0;
+}
+.side-foot .who{ line-height:1.3; flex:1; min-width:0; }
+.side-foot .who .n{ font-size:12.5px; color:var(--silver); }
+.side-foot .who .r{ font-size:10.5px; color:var(--silver-faint); font-family:'JetBrains Mono',monospace; }
+.side-foot .logout{ color:var(--silver-faint); transition:color .3s var(--ease); }
+.side-foot .logout:hover{ color:var(--silver-dim); }
+.side-foot .logout svg{ width:17px; height:17px; }
+
+@media(max-width:900px){
+  .sidebar{ width:76px; }
+  .side-brand-text{ display:none; }
+  .side-brand{ justify-content:center; padding:24px 0; }
+  .nav-item span.label{ display:none; }
+  .nav-item{ justify-content:center; padding:12px; }
+  .nav-label-eyebrow{ display:none; }
+  .side-foot{ justify-content:center; padding:16px 0; }
+  .side-foot .who{ display:none; }
+}
+
+.main{ flex:1; min-width:0; padding:36px 44px 80px; position:relative; }
+@media(max-width:700px){ .main{ padding:28px 20px 60px; } }
+
+.topbar{
+  display:flex; justify-content:space-between; align-items:flex-start;
+  flex-wrap:wrap; gap:20px; margin-bottom:28px;
+}
+.topbar .eyebrow{
+  font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.16em;
+  color:var(--aurora); text-transform:uppercase; display:flex; align-items:center; gap:8px; margin-bottom:10px;
+}
+.topbar .eyebrow::before{
+  content:''; width:5px; height:5px; border-radius:50%; background:var(--aurora);
+  box-shadow:0 0 6px 1px rgba(111,127,174,.6);
+}
+.topbar h1{ font-family:'Space Grotesk',sans-serif; font-size:30px; font-weight:500; }
+.topbar .meta{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--silver-faint); margin-top:8px; }
+
+.badge-count{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:.08em;
+  background:rgba(111,127,174,0.1); border:1px solid var(--line-strong);
+  color:var(--silver); padding:8px 14px; border-radius:4px;
+}
+.badge-count .dot{
+  width:6px; height:6px; border-radius:50%; background:var(--good);
+  box-shadow:0 0 8px var(--good);
+}
+
+/* ─── SEARCH & FILTER CONTROLS ─── */
+.controls-matrix{
+  display:flex; flex-direction:column; gap:16px; margin-bottom:32px;
+  padding-bottom:24px; border-bottom:1px solid var(--line);
+}
+
+.search-line{
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;
+}
+.search-input-wrap{ position:relative; width:360px; max-width:100%; }
+.search-input{
+  width:100%; background:transparent; border:none; outline:none;
+  border-bottom:1px solid var(--line-strong);
+  color:var(--silver); font-family:'Inter',sans-serif; font-size:13.5px;
+  padding:10px 4px 10px 30px; transition:border-color .35s var(--ease), box-shadow .35s var(--ease);
+}
+.search-input::placeholder{ color:var(--silver-faint); font-family:'JetBrains Mono',monospace; font-size:11.5px; }
+.search-input:focus{
+  border-bottom-color:var(--cyan);
+  box-shadow:0 1px 0 0 var(--cyan), 0 6px 18px -8px var(--cyan-glow);
+}
+.search-icon{ position:absolute; left:2px; top:12px; width:16px; height:16px; color:var(--silver-faint); }
+
+.filter-row{
+  display:flex; align-items:center; flex-wrap:wrap; gap:10px;
+}
+.filter-row-lbl{
+  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.12em;
+  color:var(--silver-faint); text-transform:uppercase; width:72px; flex-shrink:0;
+}
+.pills-group{ display:flex; flex-wrap:wrap; gap:6px; }
+.filter-btn{
+  background:transparent; border:1px solid var(--line); border-radius:3px;
+  font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.06em;
+  color:var(--silver-dim); padding:6px 12px; cursor:pointer;
+  transition:all .2s var(--ease);
+}
+.filter-btn:hover{ color:var(--silver); border-color:var(--line-strong); background:rgba(255,255,255,0.02); }
+.filter-btn.active{
+  background:rgba(95,212,217,0.1); border-color:var(--cyan); color:var(--cyan);
+  box-shadow:0 0 12px -3px var(--cyan-glow);
+}
+
+/* ─── RESPONSIVE GRID OF GLASS PANEL CARDS ─── */
+.archive-grid{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:20px;
+}
+@media(max-width:1240px){ .archive-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:720px){ .archive-grid{ grid-template-columns:1fr; } }
+
+.glass-panel{
+  background:rgba(255,255,255,0.025);
+  border:1px solid var(--line-strong);
+  border-radius:8px;
+  backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+  padding:26px; position:relative;
+  display:flex; flex-direction:column; justify-content:space-between;
+  transition:border-color .3s var(--ease), transform .3s var(--ease), box-shadow .3s var(--ease);
+  min-height:280px;
+}
+.glass-panel:hover{
+  border-color:var(--aurora); transform:translateY(-2px);
+  box-shadow:0 12px 30px -10px rgba(0,0,0,0.6);
+}
+
+.corner{ position:absolute; width:14px; height:14px; border-color:var(--aurora); opacity:.5; pointer-events:none; }
+.corner.tl{ top:-1px; left:-1px; border-top:1px solid; border-left:1px solid; border-radius:6px 0 0 0; }
+.corner.tr{ top:-1px; right:-1px; border-top:1px solid; border-right:1px solid; border-radius:0 6px 0 0; }
+.corner.bl{ bottom:-1px; left:-1px; border-bottom:1px solid; border-left:1px solid; border-radius:0 0 0 6px; }
+.corner.br{ bottom:-1px; right:-1px; border-bottom:1px solid; border-right:1px solid; border-radius:0 0 6px 0; }
+
+.card-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+.cat-badge{
+  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.1em;
+  color:var(--cyan); text-transform:uppercase; font-weight:500;
+}
+.duration-badge{
+  font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--silver-faint);
+  display:inline-flex; align-items:center; gap:5px;
+}
+
+.archive-title{
+  font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:600;
+  line-height:1.38; color:var(--silver); margin-bottom:10px;
+}
+.archive-desc{
+  font-size:12.5px; color:var(--silver-dim); line-height:1.62; margin-bottom:18px;
+}
+
+.tags-row{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:20px; }
+.tag-pill{
+  font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.04em;
+  background:rgba(255,255,255,0.04); border:1px solid var(--line);
+  color:var(--silver-faint); padding:3px 8px; border-radius:3px;
+}
+
+.card-foot{
+  display:flex; justify-content:space-between; align-items:center;
+  border-top:1px solid var(--line); padding-top:16px; margin-top:auto;
+}
+.difficulty-lbl{
+  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.08em;
+}
+.difficulty-lbl.easy{ color:var(--good); }
+.difficulty-lbl.medium{ color:var(--warn); }
+.difficulty-lbl.hard{ color:#e06060; }
+
+.access-link{
+  font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--silver);
+  display:inline-flex; align-items:center; gap:6px; transition:color .2s var(--ease);
+  letter-spacing:.04em;
+}
+.access-link:hover{ color:var(--cyan); }
+.access-link svg{ width:12px; height:12px; }
+
+.empty-state{
+  grid-column:1/-1; text-align:center; padding:80px 20px;
+  border:1px dashed var(--line-strong); border-radius:8px;
+  background:rgba(255,255,255,0.01);
+}
+.empty-state h3{ font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:500; margin-bottom:8px; color:var(--silver); }
+.empty-state p{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--silver-faint); margin-bottom:20px; }
+</style>
 </head>
 <body>
-  <div id="navbar-root"></div>
-  <div class="app-shell">
-    <div id="sidebar-root"></div>
-    <main class="main-content">
-      <div class="page-header">
-        <div>
-          <div class="page-title">📚 Learning Resources</div>
-          <div class="page-subtitle">Curated resources for your interview preparation journey</div>
+
+<div class="stars"></div>
+<div class="glow-a"></div>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="side-brand">
+      <svg viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="12.5" stroke="#8b8d98" stroke-width="1"/>
+        <ellipse cx="16" cy="16" rx="12.5" ry="5.5" stroke="#4a5f9e" stroke-width="1" transform="rotate(-28 16 16)"/>
+        <path d="M18.5 9.5c-4 0-6.5 3.4-6.5 7.4 0 3 1.8 5.1 4.3 5.1 2.1 0 3.7-1.5 3.7-3.6 0-1.9-1.3-3.3-3.1-3.3-1 0-1.8.5-2.3 1.2.2-2.7 2-4.7 4.3-4.7" stroke="#e9eaef" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+        <circle cx="26.5" cy="10.5" r="1.4" fill="#e9eaef"/>
+      </svg>
+      <div class="side-brand-text">
+        <span class="p">HireReady</span>
+        <span class="s">Sixth Bit</span>
+      </div>
+    </div>
+
+    <nav class="side-nav">
+      <div class="nav-label-eyebrow">Console</div>
+      <a href="dashboard.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="11" width="8" height="10" rx="1.5"/><rect x="3" y="14" width="8" height="7" rx="1.5"/></svg>
+        <span class="label">Dashboard</span>
+      </a>
+      <a href="interview.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/><path d="M9 22h6"/></svg>
+        <span class="label">Interviews</span>
+      </a>
+      <a href="interview.html?tab=code" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 8 4 12l5 4"/><path d="M15 8l5 4-5 4"/></svg>
+        <span class="label">Coding Sandbox</span>
+      </a>
+      <a href="resources.html" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span class="label">Resources</span>
+      </a>
+      <a href="leaderboard.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a2 2 0 0 0 2 4"/><path d="M17 6h3a2 2 0 0 1-2 4"/></svg>
+        <span class="label">Leaderboard</span>
+      </a>
+
+      <div class="nav-label-eyebrow">System</div>
+      <a href="settings.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="16" cy="12" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="11" cy="18" r="2" fill="currentColor" stroke="none"/></svg>
+        <span class="label">Settings</span>
+      </a>
+    </nav>
+
+    <div class="side-foot">
+      <div class="avatar" id="sideAvatar">CM</div>
+      <div class="who">
+        <div class="n" id="sideName">Commander</div>
+        <div class="r" id="sideTrack">TARGET: SDE-2</div>
+      </div>
+      <a href="#" onclick="Auth.logout()" class="logout" aria-label="Log out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="eyebrow">Cosmic Data Archive</div>
+        <h1>Knowledge Archive</h1>
+        <div class="meta">CURATED TECHNICAL TELEMETRY &amp; SYSTEM ARCHITECTURE BLUEPRINTS</div>
+      </div>
+      <div class="badge-count" id="resultCountBadge">
+        <span class="dot"></span>
+        <span id="resultCountText">CALIBRATING BLUEPRINTS...</span>
+      </div>
+    </div>
+
+    <!-- Controls Matrix: Search + Multi-Vector Filters -->
+    <div class="controls-matrix">
+      <!-- Search & Level Line -->
+      <div class="search-line">
+        <div class="search-input-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" class="search-input" id="searchBar" placeholder="Search archive blueprints (e.g. Redis, STAR, CAP, Trees)..." oninput="handleSearch()" />
         </div>
-        <span class="badge badge-green">● 24 Curated Resources</span>
-      </div>
 
-      <!-- Filters -->
-      <div class="flex gap-2 flex-wrap mb-4" style="margin-bottom:20px;">
-        <button class="filter-btn active" data-role="all" onclick="filterResources(this,'role')">All Roles</button>
-        <button class="filter-btn" data-role="SDE" onclick="filterResources(this,'role')">SDE</button>
-        <button class="filter-btn" data-role="Data Scientist" onclick="filterResources(this,'role')">Data Sci</button>
-        <button class="filter-btn" data-role="DevOps" onclick="filterResources(this,'role')">DevOps</button>
-        <button class="filter-btn" data-role="PM" onclick="filterResources(this,'role')">PM</button>
-        <div style="width:1px;background:var(--border);margin:0 4px;"></div>
-        <button class="filter-btn active" data-cat="all" onclick="filterResources(this,'cat')">All Topics</button>
-        <button class="filter-btn" data-cat="DSA" onclick="filterResources(this,'cat')">DSA</button>
-        <button class="filter-btn" data-cat="System Design" onclick="filterResources(this,'cat')">System Design</button>
-        <button class="filter-btn" data-cat="Behavioral" onclick="filterResources(this,'cat')">Behavioral</button>
-        <button class="filter-btn" data-cat="ML/AI" onclick="filterResources(this,'cat')">ML/AI</button>
-        <button class="filter-btn" data-cat="DevOps" onclick="filterResources(this,'cat')">DevOps</button>
-        <button class="filter-btn" data-cat="PM" onclick="filterResources(this,'cat')">PM</button>
-      </div>
-
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <div class="text-sm text-muted" id="result-count">Loading...</div>
-        <div class="flex gap-2">
-          <button class="filter-btn active" data-diff="all" onclick="filterResources(this,'diff')">All Levels</button>
-          <button class="filter-btn" data-diff="Easy" onclick="filterResources(this,'diff')">Easy</button>
-          <button class="filter-btn" data-diff="Medium" onclick="filterResources(this,'diff')">Medium</button>
-          <button class="filter-btn" data-diff="Hard" onclick="filterResources(this,'diff')">Hard</button>
-        </div>
-      </div>
-
-      <div class="resources-grid" id="resources-grid">
-        <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3);">
-          <div class="spinner" style="margin:0 auto 12px;width:30px;height:30px;"></div>
-          Loading resources...
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <script src="../js/api.js"></script>
-  <script>
-    if (!Auth.requireAuth()) throw new Error();
-    document.getElementById('navbar-root').innerHTML = buildNavbar('resources');
-    document.getElementById('sidebar-root').innerHTML = buildSidebar('resources');
-
-    let currentRole = 'all', currentCat = 'all', currentDiff = 'all';
-
-    function filterResources(btn, type) {
-      if (type === 'role') {
-        document.querySelectorAll('[data-role]').forEach(b => b.classList.remove('active'));
-        currentRole = btn.dataset.role;
-      } else if (type === 'cat') {
-        document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
-        currentCat = btn.dataset.cat;
-      } else if (type === 'diff') {
-        document.querySelectorAll('[data-diff]').forEach(b => b.classList.remove('active'));
-        currentDiff = btn.dataset.diff;
-      }
-      btn.classList.add('active');
-      loadResources();
-    }
-
-    const typeIcons = { article: '📄', video: '▶️', guide: '📖', course: '🎓' };
-    const diffColors = { Easy: 'green', Medium: 'yellow', Hard: 'red' };
-
-    async function loadResources() {
-      try {
-        const data = await api.get(`/resources?role=${currentRole}&category=${currentCat}&difficulty=${currentDiff}`);
-        const resources = data.resources || [];
-
-        document.getElementById('result-count').textContent = `${resources.length} resources found`;
-
-        if (!resources.length) {
-          document.getElementById('resources-grid').innerHTML = `
-            <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3);">
-              <div style="font-size:2rem;margin-bottom:8px;">🔍</div>
-              No resources match your filters. Try adjusting them.
-            </div>`;
-          return;
-        }
-
-        document.getElementById('resources-grid').innerHTML = resources.map(r => `
-          <div class="resource-card fade-in">
-            <div class="resource-header">
-              <div>
-                <div class="resource-type">
-                  <span>${typeIcons[r.type] || '📄'}</span>
-                  <span>${r.category}</span>
-                </div>
-                <div class="resource-title">${r.title}</div>
-              </div>
-              <span class="badge badge-${diffColors[r.difficulty] || 'blue'}">${r.difficulty}</span>
-            </div>
-            <div class="tags-row" style="margin:8px 0;">
-              ${r.tags.map(t => `<span class="badge badge-blue" style="font-size:0.68rem;">${t}</span>`).join('')}
-            </div>
-            <div class="resource-footer">
-              <div class="resource-duration">⏱ ${r.duration}</div>
-              <a href="${r.url}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">
-                Open →
-              </a>
-            </div>
+        <div class="filter-row">
+          <span class="filter-row-lbl">Level</span>
+          <div class="pills-group" id="diffFilters">
+            <button class="filter-btn active" data-val="all" onclick="setFilter('diff', 'all', this)">All Levels</button>
+            <button class="filter-btn" data-val="Easy" onclick="setFilter('diff', 'Easy', this)">Easy</button>
+            <button class="filter-btn" data-val="Medium" onclick="setFilter('diff', 'Medium', this)">Medium</button>
+            <button class="filter-btn" data-val="Hard" onclick="setFilter('diff', 'Hard', this)">Hard</button>
           </div>
-        `).join('');
-      } catch (err) {
-        Toast.error(err.message);
-      }
-    }
+        </div>
+      </div>
+
+      <!-- Target Track Filters -->
+      <div class="filter-row">
+        <span class="filter-row-lbl">Role</span>
+        <div class="pills-group" id="roleFilters">
+          <button class="filter-btn active" data-val="all" onclick="setFilter('role', 'all', this)">All Roles</button>
+          <button class="filter-btn" data-val="SDE" onclick="setFilter('role', 'SDE', this)">SDE</button>
+          <button class="filter-btn" data-val="Data Scientist" onclick="setFilter('role', 'Data Scientist', this)">Data Scientist</button>
+          <button class="filter-btn" data-val="DevOps" onclick="setFilter('role', 'DevOps', this)">DevOps</button>
+          <button class="filter-btn" data-val="PM" onclick="setFilter('role', 'PM', this)">Product Manager</button>
+        </div>
+      </div>
+
+      <!-- Category / Topic Filters -->
+      <div class="filter-row">
+        <span class="filter-row-lbl">Topic</span>
+        <div class="pills-group" id="catFilters">
+          <button class="filter-btn active" data-val="all" onclick="setFilter('cat', 'all', this)">All Topics</button>
+          <button class="filter-btn" data-val="DSA" onclick="setFilter('cat', 'DSA', this)">DSA</button>
+          <button class="filter-btn" data-val="System Design" onclick="setFilter('cat', 'System Design', this)">System Design</button>
+          <button class="filter-btn" data-val="Behavioral" onclick="setFilter('cat', 'Behavioral', this)">Behavioral</button>
+          <button class="filter-btn" data-val="ML/AI" onclick="setFilter('cat', 'ML/AI', this)">ML / AI</button>
+          <button class="filter-btn" data-val="DevOps" onclick="setFilter('cat', 'DevOps', this)">DevOps</button>
+          <button class="filter-btn" data-val="PM" onclick="setFilter('cat', 'PM', this)">PM</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Responsive Grid of Glass Panel Cards -->
+    <div class="archive-grid" id="cardGrid">
+      <div class="empty-state">
+        <p>RETRIEVING MISSION DATA ARCHIVES...</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../js/api.js"></script>
+<script>
+  if (!Auth.requireAuth()) throw new Error();
+
+  const user = Auth.getUser();
+  if (user) {
+    const initials = user.name ? user.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2) : 'CM';
+    document.getElementById('sideAvatar').textContent = initials;
+    document.getElementById('sideName').textContent = user.name || 'Commander';
+    document.getElementById('sideTrack').textContent = `TARGET: ${user.targetRole || 'SDE-2'}`;
+  }
+
+  let curRole = 'all';
+  let curCat = 'all';
+  let curDiff = 'all';
+  let curSearch = '';
+  let allResources = [];
+  let searchTimeout = null;
+
+  function setFilter(type, val, btn) {
+    if (type === 'role') curRole = val;
+    if (type === 'cat') curCat = val;
+    if (type === 'diff') curDiff = val;
+
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
 
     loadResources();
-  </script>
+  }
+
+  function handleSearch() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      curSearch = document.getElementById('searchBar').value.trim();
+      loadResources();
+    }, 250);
+  }
+
+  function renderCards(list, totalCount = 0) {
+    const grid = document.getElementById('cardGrid');
+    const badge = document.getElementById('resultCountText');
+
+    badge.textContent = `${list.length} OF ${totalCount || list.length} BLUEPRINTS LOADED`;
+
+    if (!list || list.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <h3>No Blueprints Found</h3>
+          <p>NO KNOWLEDGE ARCHIVES MATCH CURRENT PARAMETERS.</p>
+          <button class="filter-btn active" style="margin-top:12px;padding:8px 18px;" onclick="resetAllFilters()">Reset Filter Parameters</button>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = list.map(r => {
+      const diffClass = (r.difficulty || '').toLowerCase();
+      const tagsHtml = (r.tags || []).map(t => `<span class="tag-pill">${t}</span>`).join('');
+
+      return `
+        <div class="glass-panel">
+          <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+          <div>
+            <div class="card-top">
+              <span class="cat-badge">[${r.category || 'TECHNICAL'}]</span>
+              <span class="duration-badge">⏱ ${r.duration || '20 min'}</span>
+            </div>
+            <div class="archive-title">${r.title}</div>
+            <div class="archive-desc">${r.description || 'Deep architectural breakdown and optimal mental models for top-tier interview benchmarks.'}</div>
+            <div class="tags-row">${tagsHtml}</div>
+          </div>
+          <div class="card-foot">
+            <span class="difficulty-lbl mono ${diffClass}">LEVEL: ${(r.difficulty || 'CORE').toUpperCase()}</span>
+            <a href="${r.url}" target="_blank" rel="noopener noreferrer" class="access-link">
+              Open Blueprint
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+            </a>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function resetAllFilters() {
+    curRole = 'all';
+    curCat = 'all';
+    curDiff = 'all';
+    curSearch = '';
+    document.getElementById('searchBar').value = '';
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-val') === 'all');
+    });
+    loadResources();
+  }
+
+  async function loadResources() {
+    try {
+      const qParams = new URLSearchParams({
+        role: curRole,
+        category: curCat,
+        difficulty: curDiff,
+        search: curSearch
+      });
+
+      const res = await api.get(`/resources?${qParams.toString()}`).catch(() => null);
+
+      if (res && res.resources) {
+        allResources = res.resources;
+        renderCards(allResources, res.grandTotal || res.total);
+      } else {
+        // Local fallback if API is unreachable
+        renderCards([], 0);
+      }
+    } catch(err) {
+      console.log('Knowledge archive running in fallback mode');
+    }
+  }
+
+  loadResources();
+</script>
+
 </body>
 </html>
+

@@ -1,269 +1,1173 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="HireReady — AI-Powered Interview Preparation Platform. Practice with intelligent simulation and get real-time feedback."/>
-  <title>HireReady — AI-Powered Interview Preparation</title>
-  <link rel="stylesheet" href="css/main.css"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HireReady BY SIXTH BIT — Deep Space Interview Intelligence</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --void:#030305;
+  --void-2:#08080d;
+  --line: rgba(232,233,237,0.08);
+  --line-strong: rgba(232,233,237,0.16);
+  --silver:#e9eaef;
+  --silver-dim:#9395a3;
+  --silver-faint:#5c5e6c;
+  --nebula:#2b3a67;
+  --nebula-bright:#4a5f9e;
+  --aurora:#6f7fae;
+  --cyan:#5fd4d9;
+  --cyan-glow: rgba(95,212,217,0.35);
+  --good:#6fae8a;
+  --warn:#c9a35f;
+  --alert:#e05d52;
+  --ease: cubic-bezier(.16,.8,.24,1);
+}
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  background:var(--void); color:var(--silver);
+  font-family:'Inter', sans-serif; -webkit-font-smoothing:antialiased;
+  min-height:100vh; overflow-x:hidden; position:relative;
+}
+a{ color:inherit; text-decoration:none; }
+::selection{ background:var(--nebula-bright); color:#fff; }
+.mono{ font-family:'JetBrains Mono', monospace; letter-spacing:.04em; }
+
+/* ─── AMBIENT DEEP SPACE CANVAS & CURSOR LIGHT ─── */
+.stars{
+  position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.45;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.6) 0%, transparent 60%),
+    radial-gradient(1px 1px at 78% 8%, rgba(255,255,255,.4) 0%, transparent 60%),
+    radial-gradient(1.5px 1.5px at 34% 62%, rgba(255,255,255,.5) 0%, transparent 60%),
+    radial-gradient(1px 1px at 91% 44%, rgba(255,255,255,.35) 0%, transparent 60%),
+    radial-gradient(1px 1px at 55% 82%, rgba(255,255,255,.45) 0%, transparent 60%),
+    radial-gradient(1.5px 1.5px at 6% 88%, rgba(255,255,255,.3) 0%, transparent 60%),
+    radial-gradient(1px 1px at 68% 30%, rgba(255,255,255,.4) 0%, transparent 60%);
+}
+.glow-cursor{
+  position:fixed; width:450px; height:450px; border-radius:50%;
+  background:radial-gradient(circle, rgba(95,212,217,0.06) 0%, rgba(74,95,158,0.03) 40%, transparent 70%);
+  pointer-events:none; z-index:0; transform:translate(-50%, -50%);
+  transition:transform .15s ease-out, opacity .3s var(--ease); opacity:0;
+}
+.glow-a{
+  position:fixed; z-index:0; pointer-events:none; top:-15%; right:-8%;
+  width:750px; height:520px;
+  background:radial-gradient(ellipse, rgba(43,58,103,.28), transparent 65%);
+  filter:blur(12px);
+}
+.glow-b{
+  position:fixed; z-index:0; pointer-events:none; bottom:-20%; left:-10%;
+  width:800px; height:500px;
+  background:radial-gradient(ellipse, rgba(74,95,158,.14), transparent 65%);
+  filter:blur(24px);
+}
+
+/* ─── TOPBAR HEADER ─── */
+.topbar{
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  display:flex; justify-content:space-between; align-items:center;
+  padding:16px 40px; border-bottom:1px solid var(--line);
+  background:rgba(3,3,5,0.85); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.brand svg{ width:28px; height:28px; flex-shrink:0; }
+.brand-text{ font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:600; display:flex; align-items:baseline; gap:6px; }
+.brand-sub{ font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.14em; color:var(--silver-faint); text-transform:uppercase; }
+
+.nav-links{ display:flex; align-items:center; gap:24px; }
+.nav-link{
+  font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.06em;
+  color:var(--silver-dim); transition:color .25s var(--ease);
+}
+.nav-link:hover{ color:var(--cyan); }
+.nav-link span{ color:var(--aurora); margin-right:4px; }
+
+.top-actions{ display:flex; align-items:center; gap:16px; }
+.status-tag{ font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--good); letter-spacing:.08em; display:flex; align-items:center; gap:6px; }
+.status-tag::before{ content:''; width:5px; height:5px; border-radius:50%; background:var(--good); box-shadow:0 0 8px var(--good); }
+
+.btn{
+  font-size:12.5px; padding:10px 18px; border-radius:3px;
+  display:inline-flex; align-items:center; gap:8px; transition:all .25s var(--ease);
+  cursor:pointer; text-decoration:none; border:none;
+}
+.btn-sm{ padding:8px 14px; font-size:11.5px; }
+.btn-solid{ background:var(--silver); color:var(--void); font-weight:600; }
+.btn-solid:hover{ background:#fff; transform:translateY(-1px); }
+.btn-outline{ border:1px solid var(--line-strong); color:var(--silver-dim); background:transparent; }
+.btn-outline:hover{ border-color:var(--silver-dim); color:var(--silver); }
+.btn-primary{
+  background:linear-gradient(135deg, #ffffff 0%, var(--silver) 100%);
+  color:var(--void); font-weight:600; padding:13px 26px; font-size:13.5px; border-radius:3px;
+  box-shadow:0 0 24px rgba(233,234,239,0.15);
+}
+.btn-primary:hover{ transform:translateY(-1px); box-shadow:0 0 28px rgba(95,212,217,0.35); }
+.btn-ghost{
+  border:1px solid var(--line-strong); color:var(--silver); padding:13px 24px; font-size:13.5px;
+  border-radius:3px; background:rgba(255,255,255,0.02);
+}
+.btn-ghost:hover{ border-color:var(--aurora); background:rgba(111,127,174,0.08); }
+
+.mobile-toggle{
+  display:none; background:transparent; border:none; color:var(--silver); cursor:pointer; padding:6px;
+}
+.mobile-toggle svg{ width:22px; height:22px; }
+
+/* Mobile drawer */
+.mobile-drawer{
+  position:fixed; top:65px; left:0; right:0; background:rgba(5,5,7,0.96);
+  backdrop-filter:blur(24px); border-bottom:1px solid var(--line-strong);
+  padding:24px 30px; display:none; flex-direction:column; gap:16px; z-index:99;
+}
+.mobile-drawer.open{ display:flex; }
+.mobile-drawer a{ font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--silver-dim); padding:8px 0; border-bottom:1px solid var(--line); }
+.mobile-drawer a:hover{ color:var(--cyan); }
+
+@media(max-width:960px){
+  .topbar{ padding:16px 20px; }
+  .nav-links{ display:none; }
+  .mobile-toggle{ display:block; }
+  .status-tag{ display:none; }
+}
+
+/* layout container */
+.wrap{ max-width:1240px; margin:0 auto; padding:0 32px; position:relative; z-index:1; }
+
+/* ─── HERO SECTION (ASYMMETRICAL MISSION CONTROL) ─── */
+.hero{
+  padding-top:135px; padding-bottom:70px; min-height:92vh;
+  display:flex; align-items:center;
+}
+.hero-grid{
+  display:grid; grid-template-columns:1.05fr 1fr; gap:48px; align-items:center; width:100%;
+}
+@media(max-width:1050px){ .hero-grid{ grid-template-columns:1fr; } }
+
+.hero-pill{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 14px; background:rgba(111,127,174,0.08);
+  border:1px solid rgba(111,127,174,0.3); border-radius:100px;
+  font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--cyan);
+  letter-spacing:.12em; text-transform:uppercase; margin-bottom:22px;
+}
+.hero-pill .dot{ width:5px; height:5px; border-radius:50%; background:var(--cyan); box-shadow:0 0 8px var(--cyan); }
+
+.hero-h1{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(36px, 4.4vw, 60px);
+  font-weight:700; line-height:1.08; letter-spacing:-0.035em;
+  background:linear-gradient(175deg, #ffffff 10%, var(--silver) 55%, #7a7d90 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  margin-bottom:20px;
+}
+
+.hero-desc{
+  font-size:15px; color:var(--silver-dim); line-height:1.68;
+  max-width:520px; margin-bottom:32px;
+}
+
+.hero-cta-row{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:44px; }
+
+.hero-metrics{
+  display:flex; gap:36px; padding-top:26px;
+  border-top:1px solid var(--line);
+}
+.metric-item .v{ font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:600; color:var(--silver); }
+.metric-item .l{ font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--silver-faint); text-transform:uppercase; letter-spacing:.08em; margin-top:3px; }
+
+/* ─── MISSION CONTROL CONSOLE HUD (RIGHT) ─── */
+.glass-panel{
+  background:rgba(255,255,255,0.025);
+  border:1px solid var(--line-strong);
+  border-radius:8px;
+  backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+  position:relative;
+}
+.hud-console{
+  padding:26px; border-color:rgba(111,127,174,0.32);
+  box-shadow:0 30px 80px -20px rgba(0,0,0,0.85), 0 0 35px rgba(74,95,158,0.15);
+}
+.corner{ position:absolute; width:14px; height:14px; border-color:var(--cyan); opacity:.7; pointer-events:none; }
+.corner.tl{ top:-1px; left:-1px; border-top:1px solid; border-left:1px solid; border-radius:6px 0 0 0; }
+.corner.tr{ top:-1px; right:-1px; border-top:1px solid; border-right:1px solid; border-radius:0 6px 0 0; }
+.corner.bl{ bottom:-1px; left:-1px; border-bottom:1px solid; border-left:1px solid; border-radius:0 0 0 6px; }
+.corner.br{ bottom:-1px; right:-1px; border-bottom:1px solid; border-right:1px solid; border-radius:0 0 6px 0; }
+
+.hud-top{
+  display:flex; justify-content:space-between; align-items:center;
+  padding-bottom:14px; border-bottom:1px solid var(--line); margin-bottom:16px;
+  font-family:'JetBrains Mono',monospace; font-size:10.5px;
+}
+.hud-top .live{ color:var(--cyan); display:flex; align-items:center; gap:6px; }
+.hud-top .live::before{ content:''; width:5px; height:5px; border-radius:50%; background:var(--cyan); box-shadow:0 0 6px var(--cyan); }
+.hud-top .clock{ color:var(--silver-faint); }
+
+.track-tabs{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:16px;
+}
+.track-tab{
+  font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.04em;
+  padding:7px 4px; text-align:center; border:1px solid var(--line); border-radius:3px;
+  color:var(--silver-faint); cursor:pointer; transition:all .2s var(--ease);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.track-tab.active{
+  border-color:var(--cyan); background:rgba(95,212,217,0.08); color:var(--cyan);
+  box-shadow:0 0 10px -2px var(--cyan-glow);
+}
+
+.hud-prompt{
+  background:rgba(0,0,0,0.45); border:1px solid var(--line); border-left:2px solid var(--cyan);
+  border-radius:4px; padding:14px; font-size:12.5px; line-height:1.6; color:var(--silver);
+  margin-bottom:14px; min-height:64px;
+}
+
+/* Voice Visualizer */
+.hud-visualizer{
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(255,255,255,0.015); border:1px solid var(--line);
+  border-radius:4px; padding:10px 14px; margin-bottom:16px;
+}
+.wave-svg{ width:180px; height:24px; }
+.vis-lbl{ font-family:'JetBrains Mono',monospace; font-size:9.5px; color:var(--good); display:flex; align-items:center; gap:6px; }
+.vis-lbl .dot{ width:5px; height:5px; border-radius:50%; background:var(--good); box-shadow:0 0 6px var(--good); }
+
+/* Candidate live simulation response */
+.hud-response-preview{
+  background:rgba(255,255,255,0.015); border:1px solid var(--line);
+  border-radius:4px; padding:12px 14px; margin-bottom:16px; font-size:12px;
+  color:var(--silver-dim); line-height:1.55; min-height:60px;
+}
+.hud-response-preview .label{
+  font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--aurora);
+  text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px; display:block;
+}
+
+/* Telemetry meters */
+.telemetry-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
+.meter-box{ background:rgba(255,255,255,0.015); border:1px solid var(--line); border-radius:4px; padding:9px 12px; }
+.meter-head{ display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:9.5px; color:var(--silver-faint); margin-bottom:6px; }
+.meter-head .val{ color:var(--silver); font-weight:600; }
+.meter-bar{ height:4px; background:var(--line); border-radius:2px; overflow:hidden; }
+.meter-fill{ height:100%; border-radius:2px; background:linear-gradient(90deg, var(--nebula-bright), var(--cyan)); transition:width .6s var(--ease); }
+
+.hud-footer-actions{ display:flex; gap:10px; }
+
+/* ─── SECTION HEADINGS ─── */
+.section-pad{ padding:90px 0; }
+.eyebrow{
+  font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.16em;
+  color:var(--aurora); text-transform:uppercase; display:flex; align-items:center; gap:8px; margin-bottom:12px;
+}
+.eyebrow::before{
+  content:''; width:5px; height:5px; border-radius:50%; background:var(--aurora);
+  box-shadow:0 0 6px 1px rgba(111,127,174,.6);
+}
+.section-title{ font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:600; margin-bottom:12px; }
+.section-sub{ font-size:14.5px; color:var(--silver-dim); max-width:640px; line-height:1.65; margin-bottom:44px; }
+
+/* ─── 01. CAPABILITIES MATRIX ─── */
+.cap-matrix{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; }
+@media(max-width:1050px){ .cap-matrix{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:600px){ .cap-matrix{ grid-template-columns:1fr; } }
+
+.cap-card{
+  background:rgba(255,255,255,0.02);
+  border:1px solid var(--line-strong);
+  border-radius:6px; padding:24px;
+  display:flex; flex-direction:column; justify-content:space-between; min-height:260px;
+  transition:all .3s var(--ease);
+}
+.cap-card:hover{
+  border-color:var(--aurora); transform:translateY(-2px);
+  background:rgba(111,127,174,0.05);
+}
+.cap-card .num{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--silver-faint); margin-bottom:18px; }
+.cap-card .icon{ font-size:22px; margin-bottom:14px; }
+.cap-card h3{ font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:600; margin-bottom:8px; }
+.cap-card p{ font-size:12.5px; color:var(--silver-dim); line-height:1.6; margin-bottom:20px; }
+.cap-card .tag-foot{
+  font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.08em;
+  color:var(--cyan); border-top:1px solid var(--line); padding-top:12px;
+}
+
+/* ─── 02. INTERACTIVE BEFORE VS AFTER DIAGNOSTIC SCRUBBER ─── */
+.diagnostic-container{
+  background:rgba(255,255,255,0.02); border:1px solid var(--line-strong);
+  border-radius:8px; padding:32px; position:relative;
+}
+.diag-controls{
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;
+  margin-bottom:26px; padding-bottom:18px; border-bottom:1px solid var(--line);
+}
+.diag-toggle-group{
+  display:inline-flex; border:1px solid var(--line-strong); border-radius:4px; overflow:hidden;
+}
+.diag-btn{
+  background:transparent; border:none; color:var(--silver-dim); font-family:'JetBrains Mono',monospace;
+  font-size:11px; padding:9px 18px; cursor:pointer; border-right:1px solid var(--line-strong);
+  transition:all .25s var(--ease);
+}
+.diag-btn:last-child{ border-right:none; }
+.diag-btn.active{ background:rgba(95,212,217,0.12); color:var(--cyan); font-weight:600; }
+
+.diag-grid{
+  display:grid; grid-template-columns:1.2fr 1fr; gap:28px; align-items:start;
+}
+@media(max-width:960px){ .diag-grid{ grid-template-columns:1fr; } }
+
+.diag-transcript-box{
+  background:rgba(0,0,0,0.5); border:1px solid var(--line); border-radius:6px;
+  padding:22px; min-height:220px; font-size:13px; line-height:1.75;
+}
+.diag-transcript-box .hdr{
+  display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace;
+  font-size:10px; color:var(--silver-faint); margin-bottom:14px; text-transform:uppercase; letter-spacing:.1em;
+}
+.filler-pill{
+  background:rgba(224,93,82,0.15); border:1px solid rgba(224,93,82,0.4);
+  color:#ff968d; padding:1px 6px; border-radius:3px; font-family:'JetBrains Mono',monospace; font-size:11px;
+}
+.tech-pill{
+  background:rgba(95,212,217,0.12); border:1px solid rgba(95,212,217,0.4);
+  color:var(--cyan); padding:1px 6px; border-radius:3px; font-family:'JetBrains Mono',monospace; font-size:11px;
+}
+
+.diag-stats-col{ display:flex; flex-direction:column; gap:12px; }
+.diag-stat-card{
+  background:rgba(255,255,255,0.015); border:1px solid var(--line);
+  border-radius:6px; padding:14px 18px; display:flex; justify-content:space-between; align-items:center;
+}
+.diag-stat-card .lbl{ font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--silver-dim); }
+.diag-stat-card .val{ font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:600; color:var(--silver); }
+.diag-stat-card .val.bad{ color:var(--alert); }
+.diag-stat-card .val.good{ color:var(--good); }
+
+/* ─── 03. LIVE CODE & ALGORITHM COMPLEXITY WINDOW ─── */
+.code-window{
+  background:rgba(0,0,0,0.7); border:1px solid var(--line-strong);
+  border-radius:8px; overflow:hidden; box-shadow:0 24px 60px -15px rgba(0,0,0,0.8);
+}
+.code-topbar{
+  display:flex; justify-content:space-between; align-items:center;
+  background:rgba(255,255,255,0.03); padding:12px 20px; border-bottom:1px solid var(--line);
+}
+.window-dots{ display:flex; gap:7px; }
+.window-dots span{ width:10px; height:10px; border-radius:50%; background:var(--line-strong); }
+.window-dots span:nth-child(1){ background:rgba(224,93,82,0.6); }
+.window-dots span:nth-child(2){ background:rgba(201,163,95,0.6); }
+.window-dots span:nth-child(3){ background:rgba(111,174,138,0.6); }
+
+.code-layout{ display:grid; grid-template-columns:1.4fr 1fr; }
+@media(max-width:960px){ .code-layout{ grid-template-columns:1fr; } }
+
+.code-editor{
+  padding:24px; font-family:'JetBrains Mono',monospace; font-size:12px;
+  line-height:1.7; color:var(--silver-dim); border-right:1px solid var(--line);
+  overflow-x:auto;
+}
+.code-editor .kw{ color:#a78bfa; font-weight:600; }
+.code-editor .fn{ color:var(--cyan); }
+.code-editor .str{ color:#6ee7b7; }
+.code-editor .com{ color:var(--silver-faint); font-style:italic; }
+
+.code-telemetry{
+  padding:24px; display:flex; flex-direction:column; justify-content:space-between;
+  background:rgba(255,255,255,0.01);
+}
+.telemetry-row{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px; }
+.telemetry-row:last-child{ margin-bottom:0; }
+.telemetry-row .tl{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--silver-faint); }
+.telemetry-row .tv{ font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; color:var(--silver); }
+.telemetry-row .tv.optimal{ color:var(--good); }
+
+/* ─── 04. SEQUENCE PATH ─── */
+.path-wrap{ margin:40px 0; overflow-x:auto; }
+.path-svg{ width:100%; min-width:800px; height:80px; }
+.path-stages{ display:flex; justify-content:space-between; min-width:800px; margin-top:14px; }
+.path-stage{ display:flex; flex-direction:column; align-items:center; text-align:center; }
+.path-stage .num{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--aurora); margin-bottom:4px; }
+.path-stage .name{ font-size:12px; color:var(--silver-dim); }
+
+/* ─── 05. INNOVATION PANEL GRID ─── */
+.panel-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+@media(max-width:900px){ .panel-grid{ grid-template-columns:1fr; } }
+.panel{
+  background:rgba(255,255,255,0.02); border:1px solid var(--line); border-radius:6px; padding:26px;
+  display:flex; flex-direction:column; gap:12px; transition:border-color .25s var(--ease);
+}
+.panel:hover{ border-color:var(--line-strong); }
+.glyph{ font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.12em; color:var(--cyan); }
+.panel h3{ font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:600; }
+.panel p{ font-size:12.5px; color:var(--silver-dim); line-height:1.6; }
+
+.quote-section{
+  margin:60px 0; padding:50px 30px; text-align:center; border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.quote-section blockquote{
+  font-family:'Space Grotesk',sans-serif; font-size:24px; font-weight:500; color:var(--silver); margin-bottom:12px;
+}
+.quote-section cite{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--silver-faint); font-style:normal; }
+
+.cta-band{
+  text-align:center; padding:70px 20px;
+  background:radial-gradient(ellipse at 50% 50%, rgba(43,58,103,0.22), transparent 70%);
+}
+.cta-band h2{ font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:600; margin-bottom:24px; }
+.cta-band .row{ display:flex; justify-content:center; gap:16px; flex-wrap:wrap; }
+
+/* ─── FOOTER & CREW MANIFEST ─── */
+footer{ border-top:1px solid var(--line); padding:60px 0 40px; background:rgba(3,3,5,0.95); }
+.foot-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:36px; }
+.foot-links{ display:flex; gap:24px; }
+.foot-links a{ font-size:12.5px; color:var(--silver-faint); }
+.foot-links a:hover{ color:var(--silver-dim); }
+
+.manifest{
+  background:rgba(255,255,255,0.015); border:1px solid var(--line-strong); border-radius:6px;
+  padding:22px 26px; margin-bottom:36px;
+}
+.manifest-label{
+  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.14em;
+  color:var(--cyan); text-transform:uppercase; margin-bottom:12px;
+}
+.manifest-readout{
+  font-family:'JetBrains Mono',monospace; font-size:11.5px; line-height:1.8;
+  color:var(--silver-dim); white-space:pre-line;
+}
+.manifest-readout .hdr{ color:var(--silver); font-weight:600; display:block; margin-bottom:6px; }
+.manifest-readout .id{ color:var(--silver-faint); }
+
+.foot-bottom{
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:11.5px; color:var(--silver-faint);
+}
+</style>
 </head>
-<body class="landing-body">
+<body>
 
-  <div id="navbar-root"></div>
+<div class="stars"></div>
+<div class="glow-cursor" id="glowCursor"></div>
+<div class="glow-a"></div>
+<div class="glow-b"></div>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-grid"></div>
-    <div class="hero-glow"></div>
-    <div class="hero-content fade-in">
-      <div class="hero-badge"><span class="pulse"></span>AI-Powered Platform</div>
-      <h1 class="hero-title">
-        <span class="gradient-text">AI-Powered</span> Interview<br/>Preparation Platform
-      </h1>
-      <p class="hero-sub">Transform your interview preparation with intelligent simulation and real-time feedback</p>
-      <p class="hero-tagline">" From Practice to Placement "</p>
-
-      <div class="hero-tags">
-        <span class="hero-tag">🤖 AI Simulation</span>
-        <span class="hero-tag">📊 Real-time Analysis</span>
-        <span class="hero-tag">👥 Role-based Practice</span>
-        <span class="hero-tag">🎯 Performance Tracking</span>
-      </div>
-
-      <div class="hero-cta">
-        <a href="/pages/interview.html" class="btn btn-primary btn-lg" id="start-btn">▶ Start Interview</a>
-        <a href="#features" class="btn btn-ghost btn-lg">ℹ Learn More</a>
-      </div>
-
-      <div class="hero-team">
-        <div class="avatar-group">
-          <div class="avatar-circle av-1">KS</div>
-          <div class="avatar-circle av-2">AA</div>
-          <div class="avatar-circle av-3">AS</div>
-        </div>
-        <div class="team-names">
-          Khyati Singh · Aayushi · Aditya Singh · Sayan Modal · Yashraj
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- STATS -->
-  <section class="stats-bar">
-    <div class="stat-item">
-      <span class="stat-num" data-val="1234" data-suffix="">1,234</span>
-      <span class="stat-label">Active Users</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-num" data-val="87" data-suffix="%">87%</span>
-      <span class="stat-label">Success Rate</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-num" data-val="45" data-suffix=" min">45 min</span>
-      <span class="stat-label">Avg. Session</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-num" data-val="4.8" data-suffix="/5">4.8/5</span>
-      <span class="stat-label">Rating</span>
-    </div>
-  </section>
-
-  <!-- FEATURES -->
-  <section class="section" id="features">
-    <div class="section-head">
-      <h2 class="section-title">Everything You Need to <span class="gradient-text">Get Hired</span></h2>
-      <p class="section-sub">A complete end-to-end interview intelligence system</p>
-    </div>
-    <div class="features-grid">
-      <div class="feature-card glow">
-        <div class="feature-icon">🤖</div>
-        <h3>AI Interview Engine</h3>
-        <p>Context-aware follow-ups, adaptive difficulty, and realistic dialog powered by Claude AI.</p>
-        <ul class="feature-list">
-          <li>SDE, Data Scientist, DevOps, PM roles</li>
-          <li>Technical + HR rounds</li>
-          <li>Easy / Medium / Hard difficulty</li>
-        </ul>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📄</div>
-        <h3>Resume-Based Questions</h3>
-        <p>Upload your resume and get questions tailored to your actual experience, projects, and skills.</p>
-        <ul class="feature-list">
-          <li>Experience analysis</li>
-          <li>Education matching</li>
-          <li>Skill extraction</li>
-        </ul>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">💻</div>
-        <h3>Coding Sandbox</h3>
-        <p>Built-in code editor for live coding challenges with AI-powered code review.</p>
-        <ul class="feature-list">
-          <li>Syntax highlighting</li>
-          <li>Multiple languages</li>
-          <li>AI code review</li>
-        </ul>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">⚡</div>
-        <h3>Pressure Mode</h3>
-        <p>Simulates tough interviewers with interruptions, cross-questioning, and strict time limits.</p>
-        <ul class="feature-list">
-          <li>Random interruptions</li>
-          <li>Rapid follow-ups</li>
-          <li>Time constraints</li>
-        </ul>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📊</div>
-        <h3>AI Evaluation Layer</h3>
-        <p>Instant structured feedback on technical accuracy, communication, confidence, and fit score.</p>
-        <ul class="feature-list">
-          <li>Role readiness score</li>
-          <li>Filler word detection</li>
-          <li>Weakness identification</li>
-        </ul>
-      </div>
-      <div class="feature-card glow">
-        <div class="feature-icon">🏆</div>
-        <h3>Growth & Retention</h3>
-        <p>Gamified leaderboards, daily streaks, and personalized improvement roadmaps.</p>
-        <ul class="feature-list">
-          <li>Peer leaderboard</li>
-          <li>Daily streak system</li>
-          <li>Anti-cheat detection</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- HOW IT WORKS -->
-  <div class="pipeline-section">
-    <div class="section-head" style="margin-bottom:40px">
-      <h2 class="section-title">How It <span class="gradient-text">Works</span></h2>
-    </div>
-    <div class="pipeline">
-      <div class="pipeline-step"><div class="step-icon">🔐</div><div class="step-label">Sign In</div></div>
-      <div class="pipeline-arrow">→</div>
-      <div class="pipeline-step"><div class="step-icon">🎯</div><div class="step-label">Select Role</div></div>
-      <div class="pipeline-arrow">→</div>
-      <div class="pipeline-step"><div class="step-icon">📄</div><div class="step-label">Upload Resume</div></div>
-      <div class="pipeline-arrow">→</div>
-      <div class="pipeline-step"><div class="step-icon">🤖</div><div class="step-label">AI Interview</div></div>
-      <div class="pipeline-arrow">→</div>
-      <div class="pipeline-step"><div class="step-icon">💻</div><div class="step-label">Coding Round</div></div>
-      <div class="pipeline-arrow">→</div>
-      <div class="pipeline-step"><div class="step-icon">📊</div><div class="step-label">Feedback</div></div>
-      <div class="pipeline-arrow">→</div>
-      <div class="pipeline-step"><div class="step-icon">🗺️</div><div class="step-label">Roadmap</div></div>
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" fill="none">
+      <circle cx="16" cy="16" r="12.5" stroke="#8b8d98" stroke-width="1"/>
+      <ellipse cx="16" cy="16" rx="12.5" ry="5.5" stroke="#4a5f9e" stroke-width="1" transform="rotate(-28 16 16)"/>
+      <path d="M18.5 9.5c-4 0-6.5 3.4-6.5 7.4 0 3 1.8 5.1 4.3 5.1 2.1 0 3.7-1.5 3.7-3.6 0-1.9-1.3-3.3-3.1-3.3-1 0-1.8.5-2.3 1.2.2-2.7 2-4.7 4.3-4.7" stroke="#e9eaef" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+      <circle cx="26.5" cy="10.5" r="1.4" fill="#e9eaef"/>
+    </svg>
+    <div class="brand-text">
+      HireReady <span class="brand-sub">BY SIXTH BIT</span>
     </div>
   </div>
 
-  <!-- INNOVATIONS -->
-  <section class="section">
-    <div class="section-head">
-      <h2 class="section-title">Innovation & <span class="gradient-text">Unique Features</span></h2>
-      <p class="section-sub">What makes HireReady different from the rest</p>
+  <nav class="nav-links">
+    <a href="#capabilities" class="nav-link"><span>01.</span>Capabilities</a>
+    <a href="#diagnostics" class="nav-link"><span>02.</span>Diagnostics</a>
+    <a href="#sandbox" class="nav-link"><span>03.</span>Sandbox</a>
+    <a href="/pages/resources.html" class="nav-link"><span>04.</span>Resources</a>
+    <a href="/pages/leaderboard.html" class="nav-link"><span>05.</span>Leaderboard</a>
+    <a href="#manifest" class="nav-link"><span>06.</span>Mission Team</a>
+  </nav>
+
+  <div class="top-actions">
+    <span class="status-tag mono">SYS: NOMINAL // v4.2</span>
+    <a href="/pages/login.html" class="btn btn-outline btn-sm" id="navAuthBtn">Sign In &gt;</a>
+    <button class="mobile-toggle" onclick="toggleMobileMenu()" aria-label="Toggle navigation">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- Mobile Navigation Drawer -->
+<div class="mobile-drawer" id="mobileDrawer">
+  <a href="#capabilities" onclick="toggleMobileMenu()">01. Capabilities</a>
+  <a href="#diagnostics" onclick="toggleMobileMenu()">02. Diagnostics</a>
+  <a href="#sandbox" onclick="toggleMobileMenu()">03. Sandbox Preview</a>
+  <a href="/pages/resources.html">04. Knowledge Archive</a>
+  <a href="/pages/leaderboard.html">05. Planetary Leaderboard</a>
+  <a href="/pages/settings.html">06. System Parameters</a>
+  <a href="#manifest" onclick="toggleMobileMenu()">07. Crew Manifest</a>
+</div>
+
+<!-- HERO SECTION -->
+<section class="hero wrap">
+  <div class="hero-grid">
+    
+    <!-- Left Column: Typography & Metrics -->
+    <div>
+      <div class="hero-pill">
+        <span class="dot"></span> SYS_ID: 6BIT-HR-2026 // VOICE-FIRST INTELLIGENCE
+      </div>
+
+      <h1 class="hero-h1">
+        Master the<br/>
+        Interview.<br/>
+        Before It<br/>
+        Happens.
+      </h1>
+
+      <p class="hero-desc">
+        HireReady leverages high-frequency acoustic vector analysis, adaptive behavioral telemetry, and deep domain evaluation to simulate hyper-realistic interview scenarios. Developed by <strong>Sixth Bit</strong>.
+      </p>
+
+      <div class="hero-cta-row">
+        <a href="/pages/register.html" class="btn btn-primary">Launch Telemetry Trial →</a>
+        <a href="#diagnostics" class="btn btn-ghost">Explore Diagnostics</a>
+      </div>
+
+      <div class="hero-metrics">
+        <div class="metric-item">
+          <div class="v mono count-up" data-target="104820">104,820+</div>
+          <div class="l">Telemetry Logs</div>
+        </div>
+        <div class="metric-item">
+          <div class="v mono count-up" data-target="99.4" data-suffix="%">99.4%</div>
+          <div class="l">Accuracy Index</div>
+        </div>
+        <div class="metric-item">
+          <div class="v mono">&lt; 12ms</div>
+          <div class="l">Acoustic Latency</div>
+        </div>
+      </div>
     </div>
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">🧠</div>
-        <h3>Adaptive Questioning</h3>
-        <p>AI adjusts question difficulty dynamically based on your performance. Harder when you excel, supportive when you struggle.</p>
+
+    <!-- Right Column: Interactive Mission Control Console HUD -->
+    <div class="glass-panel hud-console">
+      <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="hud-top">
+        <span class="live">MISSION CONTROL // LIVE TELEMETRY</span>
+        <span class="clock" id="simClock">20:46:25 UTC</span>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔒</div>
-        <h3>Anti-Cheat Detection</h3>
-        <p>Tab switch monitoring, paste detection, and integrity scoring for authentic practice results.</p>
+
+      <!-- Track Tabs -->
+      <div class="track-tabs">
+        <div class="track-tab active" onclick="switchTrack('sde', this)">SDE III</div>
+        <div class="track-tab" onclick="switchTrack('ai', this)">AI/ML</div>
+        <div class="track-tab" onclick="switchTrack('quant', this)">Quant</div>
+        <div class="track-tab" onclick="switchTrack('pm', this)">Product Lead</div>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">🗣️</div>
-        <h3>Filler Word Analysis</h3>
-        <p>Detects 'um', 'uh', 'like', 'so' patterns in real-time. Helps improve communication clarity.</p>
+
+      <div style="display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:9.5px; color:var(--cyan); margin-bottom:8px;" id="trackMeta">
+        <span>TRACK: DISTRIBUTED ARCHITECTURE</span>
+        <span>DIFFICULTY: HARD</span>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">🎯</div>
-        <h3>Role Readiness Score</h3>
-        <p>Comprehensive rating based on multiple dimensions before you walk into actual interviews.</p>
+
+      <div class="hud-prompt" id="promptBox">
+        "Walk me through how you handle memory contention and cache invalidation when designing a distributed vector index serving millions of concurrent queries."
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">📈</div>
-        <h3>Improvement Roadmap</h3>
-        <p>Personalized learning path generated from your weaknesses, with curated resources to fill gaps.</p>
+
+      <!-- Voice Visualizer -->
+      <div class="hud-visualizer">
+        <svg class="wave-svg" viewBox="0 0 180 24" id="audioWaveSvg">
+          <path id="wavePath" d="M0,12 Q15,2 30,12 T60,12 T90,3 T120,21 T150,12 T180,12" stroke="var(--cyan)" stroke-width="1.8" fill="none"/>
+        </svg>
+        <div class="vis-lbl" id="visStatus"><span class="dot"></span> AI INTERVIEWER STANDBY</div>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">🏅</div>
-        <h3>Leaderboard & Streaks</h3>
-        <p>Gamified system with peer rankings and daily streaks to drive consistent practice habits.</p>
+
+      <!-- Candidate Real-Time Answer Simulation -->
+      <div class="hud-response-preview">
+        <span class="label" id="previewLabel">&gt; CANDIDATE RESPONSE STREAM</span>
+        <span id="candidateLiveText">Click "Simulate Candidate Answer" below to test live acoustic telemetry and dynamic metric calibration.</span>
+      </div>
+
+      <!-- Telemetry Gauges -->
+      <div class="telemetry-grid">
+        <div class="meter-box">
+          <div class="meter-head"><span>TECHNICAL RIGOR</span><span class="val" id="mRigor">94.8%</span></div>
+          <div class="meter-bar"><div class="meter-fill" id="bRigor" style="width:94.8%;"></div></div>
+        </div>
+        <div class="meter-box">
+          <div class="meter-head"><span>VOCAL CADENCE</span><span class="val" id="mCadence">88.2%</span></div>
+          <div class="meter-bar"><div class="meter-fill" id="bCadence" style="width:88.2%;"></div></div>
+        </div>
+        <div class="meter-box">
+          <div class="meter-head"><span>STAR FRAMEWORK</span><span class="val" id="mStar">96.0%</span></div>
+          <div class="meter-bar"><div class="meter-fill" id="bStar" style="width:96.0%;"></div></div>
+        </div>
+        <div class="meter-box">
+          <div class="meter-head"><span>CONFIDENCE INDEX</span><span class="val" id="mConf">91.4%</span></div>
+          <div class="meter-bar"><div class="meter-fill" id="bConf" style="width:91.4%;"></div></div>
+        </div>
+      </div>
+
+      <div class="hud-footer-actions">
+        <button class="btn btn-solid" id="simBtn" onclick="runCandidateSimulation()" style="flex:1; justify-content:center; font-size:11.5px;">
+          ⚡ Simulate Candidate Answer
+        </button>
+        <button class="btn btn-outline" onclick="nextScenario()" style="font-size:11.5px;">Next Track &gt;</button>
       </div>
     </div>
-  </section>
 
-  <!-- CTA -->
-  <section class="cta-section">
-    <div class="cta-box">
-      <h2>"Hire Ready transforms preparation into performance."</h2>
-      <p>From practice to placement — your AI-powered interview preparation platform</p>
-      <a href="/pages/register.html" class="btn btn-lg" style="background:#fff;color:#5a3fd4;font-weight:700;" id="cta-btn">
-        Get Started Free →
-      </a>
+  </div>
+</section>
+
+<!-- 01. CAPABILITIES MATRIX -->
+<section id="capabilities" class="section-pad wrap">
+  <div class="eyebrow">01 // ORBITAL ARCHITECTURE</div>
+  <h2 class="section-title">Engineered for Technical Mastery</h2>
+  <p class="section-sub">
+    Standard interview bots evaluate shallow keywords. HireReady maps high-dimensional response vectors to calibrate your technical depth, communication clarity, and problem solving under stress.
+  </p>
+
+  <div class="cap-matrix">
+    <div class="cap-card">
+      <div>
+        <div class="num">HR — 01</div>
+        <div class="icon">⏱️</div>
+        <h3>Acoustic Signal Processing</h3>
+        <p>Real-time analysis of vocal inflection, hesitation patterns, filler frequency, and micro-pauses to calculate real-time confidence scores.</p>
+      </div>
+      <div class="tag-foot">TELEMETRY: LATENCY &lt; 8MS</div>
     </div>
-  </section>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-logo">💼 Hire<strong>Ready</strong></div>
-      <p class="footer-copy">© 2025 HireReady · The Fifth Bit · All rights reserved.</p>
-      <div class="footer-links">
-        <a href="/pages/settings.html">Privacy</a>
-        <a href="#">Terms</a>
-        <a href="#">Contact</a>
+    <div class="cap-card">
+      <div>
+        <div class="num">HR — 02</div>
+        <div class="icon">🥞</div>
+        <h3>Adaptive Difficulty Scaling</h3>
+        <p>The AI interviewer dynamically adapts follow-up probing questions based on your technical depth, testing edge cases and trade-offs in real time.</p>
+      </div>
+      <div class="tag-foot">ALGORITHM: ADAPTIVE-TREE-v3</div>
+    </div>
+
+    <div class="cap-card">
+      <div>
+        <div class="num">HR — 03</div>
+        <div class="icon">☑️</div>
+        <h3>STAR Method Telemetry</h3>
+        <p>Automated structural parse of behavioral responses into Situation, Task, Action, and Result vectors, pinpointing fluff and missing metrics.</p>
+      </div>
+      <div class="tag-foot">FRAMEWORK: BEHAVIORAL-PARSE</div>
+    </div>
+
+    <div class="cap-card">
+      <div>
+        <div class="num">HR — 04</div>
+        <div class="icon">💻</div>
+        <h3>Live Code &amp; Architecture</h3>
+        <p>Simulate live coding, whiteboarding discussions, and distributed system design with immediate static analysis and trade-off scoring.</p>
+      </div>
+      <div class="tag-foot">EVALUATOR: SYNTAX-AST-v4</div>
+    </div>
+  </div>
+</section>
+
+<!-- 02. INTERACTIVE BEFORE VS AFTER DIAGNOSTIC SCRUBBER -->
+<section id="diagnostics" class="section-pad wrap">
+  <div class="eyebrow">02 // TELEMETRY DIAGNOSTICS</div>
+  <h2 class="section-title">Raw Speech vs. Calibrated Delivery</h2>
+  <p class="section-sub">
+    Inspect how HireReady converts hesitant, filler-dense responses into disciplined, executive articulation using the STAR framework.
+  </p>
+
+  <div class="diagnostic-container">
+    <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+
+    <div class="diag-controls">
+      <div class="diag-toggle-group">
+        <button class="diag-btn active" id="btnBefore" onclick="switchDiagnostic('before')">[01. UNCALIBRATED SPEECH]</button>
+        <button class="diag-btn" id="btnAfter" onclick="switchDiagnostic('after')">[02. HIREREADY MASTERED]</button>
+      </div>
+      <div class="mono" style="font-size:11px; color:var(--cyan);" id="diagRoleTag">SCENARIO: SYSTEM INCIDENT POST-MORTEM</div>
+    </div>
+
+    <div class="diag-grid">
+      <!-- Transcript readout -->
+      <div class="diag-transcript-box">
+        <div class="hdr">
+          <span id="diagStatusLbl">RAW CANDIDATE TRANSCRIPT // DETECTED FLUFF</span>
+          <span class="mono" id="diagWpmLbl">82 WPM · HESITANT</span>
+        </div>
+        <div id="diagContent">
+          "So, <span class="filler-pill">um</span>, basically there was this time where our Redis cluster kind of crashed because of <span class="filler-pill">like</span> memory pressure. And, <span class="filler-pill">you know</span>, we had to restart the pods manually, which took <span class="filler-pill">actually</span> a long time."
+        </div>
+      </div>
+
+      <!-- Live diagnostic score delta -->
+      <div class="diag-stats-col">
+        <div class="diag-stat-card">
+          <span class="lbl">ROLE READINESS SCORE</span>
+          <span class="val bad" id="diagScoreVal">52%</span>
+        </div>
+        <div class="diag-stat-card">
+          <span class="lbl">FILLER WORD COUNT</span>
+          <span class="val bad" id="diagFillerVal">4 DETECTED</span>
+        </div>
+        <div class="diag-stat-card">
+          <span class="lbl">TECHNICAL RIGOR DENSITY</span>
+          <span class="val" id="diagRigorVal">34%</span>
+        </div>
+        <div class="diag-stat-card">
+          <span class="lbl">STAR FRAMEWORK ALIGNMENT</span>
+          <span class="val bad" id="diagStarVal">UNSTRUCTURED</span>
+        </div>
       </div>
     </div>
-  </footer>
+  </div>
+</section>
 
-  <script src="js/api.js"></script>
-  <script>
-    // Inject navbar
-    document.getElementById('navbar-root').innerHTML = buildNavbar('home');
+<!-- 03. LIVE CODE & ALGORITHM COMPLEXITY WINDOW -->
+<section id="sandbox" class="section-pad wrap">
+  <div class="eyebrow">03 // REAL-TIME SANDBOX EVALUATION</div>
+  <h2 class="section-title">Algorithmic Concurrency &amp; AST Analysis</h2>
+  <p class="section-sub">
+    Evaluate code complexity, memory barriers, and cache-line false sharing mitigation in real time.
+  </p>
 
-    // Redirect start button if logged in
-    const startBtn = document.getElementById('start-btn');
-    const ctaBtn = document.getElementById('cta-btn');
-    if (Auth.isLoggedIn()) {
-      if (ctaBtn) { ctaBtn.textContent = 'Go to Dashboard →'; ctaBtn.href = '/pages/dashboard.html'; }
-    } else {
-      if (startBtn) startBtn.href = '/pages/login.html';
-    }
+  <div class="code-window">
+    <div class="code-topbar">
+      <div class="window-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="mono" style="font-size:10.5px; color:var(--silver-faint);">
+        ring_buffer.rs // LOCK-FREE CONCURRENCY BENCHMARK
+      </div>
+      <div class="mono" style="font-size:10px; color:var(--good);">AST: OPTIMAL</div>
+    </div>
 
-    // Animate stats
-    function animateVal(el, end, suffix = '', duration = 1400) {
-      const start = 0;
-      const isFloat = String(end).includes('.');
-      let s = null;
-      const step = (ts) => {
-        if (!s) s = ts;
-        const p = Math.min((ts - s) / duration, 1);
-        const eased = 1 - Math.pow(1 - p, 3);
-        const val = start + eased * (end - start);
-        el.textContent = (isFloat ? val.toFixed(1) : Math.floor(val).toLocaleString()) + suffix;
-        if (p < 1) requestAnimationFrame(step);
-      };
-      requestAnimationFrame(step);
-    }
+    <div class="code-layout">
+      <!-- Code preview -->
+      <div class="code-editor">
+<span class="com">// Single-Producer Single-Consumer Lock-Free Ring Buffer</span>
+<span class="kw">pub struct</span> <span class="fn">AtomicRingBuffer</span>&lt;T, <span class="kw">const</span> CAP: usize&gt; {
+    buffer: [*<span class="kw">mut</span> T; CAP],
+    head: <span class="fn">AtomicUsize</span>,  <span class="com">// Cache-line aligned (64 bytes)</span>
+    tail: <span class="fn">AtomicUsize</span>,  <span class="com">// Prevent false sharing anomalies</span>
+}
 
-    const statsObs = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          const el = e.target;
-          animateVal(el, parseFloat(el.dataset.val), el.dataset.suffix || '');
-          statsObs.unobserve(el);
+<span class="kw">impl</span>&lt;T, <span class="kw">const</span> CAP: usize&gt; <span class="fn">AtomicRingBuffer</span>&lt;T, CAP&gt; {
+    <span class="kw">pub fn</span> <span class="fn">push</span>(&amp;<span class="kw">self</span>, val: T) -&gt; <span class="fn">Result</span>&lt;(), T&gt; {
+        <span class="kw">let</span> head = <span class="kw">self</span>.head.load(<span class="fn">Ordering</span>::Acquire);
+        <span class="kw">let</span> tail = <span class="kw">self</span>.tail.load(<span class="fn">Ordering</span>::Relaxed);
+        <span class="kw">if</span> (tail + 1) % CAP == head {
+            <span class="kw">return</span> <span class="fn">Err</span>(val); <span class="com">// Buffer saturated</span>
         }
-      });
-    }, { threshold: 0.5 });
-    document.querySelectorAll('[data-val]').forEach(el => statsObs.observe(el));
-  </script>
+        <span class="kw">self</span>.tail.store((tail + 1) % CAP, <span class="fn">Ordering</span>::Release);
+        <span class="fn">Ok</span>(())
+    }
+}
+      </div>
+
+      <!-- Code telemetry stats -->
+      <div class="code-telemetry">
+        <div>
+          <div class="mono" style="font-size:10px; letter-spacing:.12em; color:var(--cyan); margin-bottom:18px;">
+            AST ENGINE TELEMETRY
+          </div>
+
+          <div class="telemetry-row">
+            <span class="tl">TIME COMPLEXITY</span>
+            <span class="tv optimal mono">O(1) CONSTANT</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="tl">SPACE OVERHEAD</span>
+            <span class="tv optimal mono">O(CAP) ZERO-ALLOC</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="tl">FALSE SHARING MITIGATION</span>
+            <span class="tv optimal mono">VERIFIED (CACHE-LINE)</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="tl">MEMORY ORDERING PRAGMAS</span>
+            <span class="tv mono">ACQUIRE / RELEASE</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="tl">COMPILER DEADLOCK CHECK</span>
+            <span class="tv optimal mono">PASSED (LOCK-FREE)</span>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--line); padding-top:16px; margin-top:24px;">
+          <a href="/pages/interview.html?tab=code" class="btn btn-outline btn-sm" style="width:100%; justify-content:center;">
+            Launch Code Sandbox →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04. SEQUENCE PATH -->
+<section id="sequence" class="section-pad wrap">
+  <div class="eyebrow">04 // ORBITAL TRAJECTORY</div>
+  <h2 class="section-title">Seven stages, one trajectory.</h2>
+  <p class="section-sub">From telemetry trial to an authentic offer-ready candidate portfolio &mdash; a single continuous flight path.</p>
+
+  <div class="path-wrap">
+    <svg class="path-svg" viewBox="0 0 1200 90" preserveAspectRatio="none">
+      <path d="M20,45 C200,5 300,85 440,45 C580,5 680,85 820,45 C940,10 1040,80 1180,45" stroke="rgba(232,233,237,0.18)" stroke-width="1.2" fill="none"/>
+      <circle cx="20" cy="45" r="4" fill="#e9eaef"/>
+      <circle cx="205" cy="26" r="3.5" fill="#8b8d98"/>
+      <circle cx="440" cy="45" r="3.5" fill="#4a5f9e"/>
+      <circle cx="630" cy="26" r="3.5" fill="#8b8d98"/>
+      <circle cx="820" cy="45" r="3.5" fill="#4a5f9e"/>
+      <circle cx="1010" cy="24" r="3.5" fill="#8b8d98"/>
+      <circle cx="1180" cy="45" r="4" fill="#e9eaef"/>
+    </svg>
+    <div class="path-stages">
+      <div class="path-stage"><div class="num mono">01</div><div class="name">Sign In</div></div>
+      <div class="path-stage"><div class="num mono">02</div><div class="name">Select Role</div></div>
+      <div class="path-stage"><div class="num mono">03</div><div class="name">Upload Resume</div></div>
+      <div class="path-stage"><div class="num mono">04</div><div class="name">AI Interview</div></div>
+      <div class="path-stage"><div class="num mono">05</div><div class="name">Coding Sandbox</div></div>
+      <div class="path-stage"><div class="num mono">06</div><div class="name">Debrief Audit</div></div>
+      <div class="path-stage"><div class="num mono">07</div><div class="name">Knowledge Roadmap</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 05. INNOVATION -->
+<section id="innovation" class="section-pad wrap">
+  <div class="eyebrow">05 // ARCHITECTURAL INNOVATION</div>
+  <h2 class="section-title">Built past the demo.</h2>
+  <p class="section-sub">Six systems most interview tools skip entirely.</p>
+
+  <div class="panel-grid">
+    <div class="panel">
+      <span class="glyph">◆ ADAPTIVE</span>
+      <div>
+        <h3>Adaptive Questioning</h3>
+        <p>Difficulty adjusts in real time &mdash; harder when you're excelling, supportive when you're not.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <span class="glyph">◆ INTEGRITY</span>
+      <div>
+        <h3>Anti-Cheat Detection</h3>
+        <p>Tab-switch monitoring, paste detection, and an integrity score for results you can trust.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <span class="glyph">◆ SPEECH</span>
+      <div>
+        <h3>Filler Word Analysis</h3>
+        <p>Detects "um," "uh," "like," and "so" patterns in real time to sharpen clarity.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <span class="glyph">◆ SCORING</span>
+      <div>
+        <h3>Role Readiness Score</h3>
+        <p>A composite rating across every dimension that matters, before you walk into the real thing.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <span class="glyph">◆ ROADMAP</span>
+      <div>
+        <h3>Improvement Roadmap</h3>
+        <p>A personalized learning path generated from your weak points, with curated resources.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <span class="glyph">◆ RETENTION</span>
+      <div>
+        <h3>Leaderboard &amp; Streaks</h3>
+        <p>Peer rankings and daily streaks that turn one-off practice into a real habit.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE -->
+<section class="quote-section wrap">
+  <blockquote>"HireReady transforms preparation into disciplined engineering performance."</blockquote>
+  <cite>— Team Sixth Bit · Built for High-Stakes Technical Placement</cite>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-band wrap">
+  <h2>Ready when the room is.</h2>
+  <div class="row">
+    <a href="/pages/register.html" class="btn btn-primary">Get Started Free →</a>
+    <a href="/pages/resources.html" class="btn btn-ghost">Explore Knowledge Archive</a>
+  </div>
+</section>
+
+<!-- FOOTER & CREW MANIFEST -->
+<footer id="manifest">
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="brand">
+        <svg viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="12.5" stroke="#8b8d98" stroke-width="1"/>
+          <ellipse cx="16" cy="16" rx="12.5" ry="5.5" stroke="#4a5f9e" stroke-width="1" transform="rotate(-28 16 16)"/>
+          <path d="M18.5 9.5c-4 0-6.5 3.4-6.5 7.4 0 3 1.8 5.1 4.3 5.1 2.1 0 3.7-1.5 3.7-3.6 0-1.9-1.3-3.3-3.1-3.3-1 0-1.8.5-2.3 1.2.2-2.7 2-4.7 4.3-4.7" stroke="#e9eaef" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+          <circle cx="26.5" cy="10.5" r="1.4" fill="#e9eaef"/>
+        </svg>
+        <span class="brand-text">HireReady <span class="brand-sub">Sixth Bit</span></span>
+      </div>
+      <div class="foot-links">
+        <a href="/pages/resources.html">Resources</a>
+        <a href="/pages/leaderboard.html">Leaderboard</a>
+        <a href="/pages/settings.html">Privacy</a>
+        <a href="/pages/login.html">Sign In</a>
+      </div>
+    </div>
+
+    <div class="manifest">
+      <div class="manifest-label">Mission Control Readout // Crew Manifest</div>
+      <div class="manifest-readout"><span class="hdr">PREPARED BY TEAM SIXTH BIT:</span>1. Adeet Singh: <span class="id">25BAI11451</span>
+2. Piya Nimje: <span class="id">25BAI10213</span>
+3. Navya Vyas: <span class="id">25BAI10566</span>
+4. Mohit Pratap Singh: <span class="id">25BAI10639</span>
+5. Sayan Mondal: <span class="id">25BAI11532</span>
+6. Krishna Paliwal: <span class="id">25BAI11317</span></div>
+    </div>
+
+    <div class="foot-bottom">
+      <span>© 2026 HireReady · Sixth Bit · All rights reserved.</span>
+      <span class="mono">STATUS: OPERATIONAL // TELEMETRY VERIFIED</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script>
+  // Mobile drawer toggle
+  function toggleMobileMenu() {
+    const d = document.getElementById('mobileDrawer');
+    d.classList.toggle('open');
+  }
+
+  // Cursor following glow
+  const glow = document.getElementById('glowCursor');
+  window.addEventListener('mousemove', (e) => {
+    glow.style.opacity = '1';
+    glow.style.left = `${e.clientX}px`;
+    glow.style.top = `${e.clientY}px`;
+  });
+  window.addEventListener('mouseleave', () => {
+    glow.style.opacity = '0';
+  });
+
+  // UTC Clock
+  function updateClock(){
+    const d = new Date();
+    const h = String(d.getUTCHours()).padStart(2,'0');
+    const m = String(d.getUTCMinutes()).padStart(2,'0');
+    const s = String(d.getUTCSeconds()).padStart(2,'0');
+    document.getElementById('simClock').textContent = `${h}:${m}:${s} UTC`;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  if (Auth.isLoggedIn()) {
+    const b = document.getElementById('navAuthBtn');
+    if (b) { b.textContent = 'Dashboard >'; b.href = '/pages/dashboard.html'; }
+  }
+
+  // Animated Numeric Roll-up
+  const countEls = document.querySelectorAll('.count-up');
+  const countObserver = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseFloat(el.getAttribute('data-target'));
+        const suffix = el.getAttribute('data-suffix') || '';
+        let start = 0;
+        const duration = 1200;
+        const startTime = performance.now();
+
+        function updateCount(currentTime) {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const currentVal = (start + (target - start) * (1 - Math.pow(1 - progress, 3)));
+
+          if (target % 1 === 0) {
+            el.textContent = Math.floor(currentVal).toLocaleString() + (suffix || '+');
+          } else {
+            el.textContent = currentVal.toFixed(1) + suffix;
+          }
+
+          if (progress < 1) {
+            requestAnimationFrame(updateCount);
+          }
+        }
+        requestAnimationFrame(updateCount);
+        obs.unobserve(el);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  countEls.forEach(el => countObserver.observe(el));
+
+  // Interactive Track Simulation Data
+  const tracks = {
+    sde: {
+      meta: "TRACK: DISTRIBUTED ARCHITECTURE | DIFFICULTY: HARD",
+      q: `"Walk me through how you handle memory contention and cache invalidation when designing a distributed vector index serving millions of concurrent queries."`,
+      sample: "To resolve cache contention, we partition vector shards using consistent hashing with virtual nodes. Invalidation events propagate via lock-free ring buffers and Redis Sentinel queues, keeping p99 latency under 14ms.",
+      rigor: "94.8%", cadence: "88.2%", star: "96.0%", conf: "91.4%"
+    },
+    ai: {
+      meta: "TRACK: AI/ML INFRASTRUCTURE | DIFFICULTY: HARD",
+      q: `"How do you optimize FlashAttention-2 GPU kernel memory access patterns when fine-tuning a 70B parameter Mixture-of-Experts model under constrained VRAM?"`,
+      sample: "We optimize SRAM tiling by fusing QK^T matrix multiplies and softmax reduction, eliminating redundant HBM reads. For MoE routing, we apply expert parallelism with top-2 gating and token-capacity clipping.",
+      rigor: "97.2%", cadence: "91.5%", star: "94.0%", conf: "95.8%"
+    },
+    quant: {
+      meta: "TRACK: QUANTITATIVE EXECUTION | DIFFICULTY: HARD",
+      q: `"Explain your approach to order-book matching engine lock-free ring buffer design for sub-microsecond tick-to-trade execution."`,
+      sample: "We implement a single-producer single-consumer circular buffer with cache-line padded atomics, eliminating mutex lock contention and CPU cache-line bouncing on x86 architectures.",
+      rigor: "96.0%", cadence: "89.4%", star: "95.2%", conf: "93.1%"
+    },
+    pm: {
+      meta: "TRACK: PRODUCT LEADERSHIP | DIFFICULTY: MEDIUM",
+      q: `"How do you resolve strategic misalignment between platform security mandates and developer velocity goals when launching a high-throughput API gateway?"`,
+      sample: "I establish an SLA framework where security checks are shifted left into automated CI canary gates, ensuring compliance while maintaining sub-10-minute deployment velocity for product teams.",
+      rigor: "91.5%", cadence: "95.0%", star: "98.2%", conf: "96.4%"
+    }
+  };
+
+  const keys = ['sde', 'ai', 'quant', 'pm'];
+  let currentKey = 'sde';
+  let isSimulating = false;
+
+  function switchTrack(key, tabEl) {
+    currentKey = key;
+    document.querySelectorAll('.track-tab').forEach(t => t.classList.remove('active'));
+    if (tabEl) tabEl.classList.add('active');
+    const data = tracks[key];
+    if (data) {
+      document.getElementById('trackMeta').innerHTML = `<span>${data.meta.split(' | ')[0]}</span><span>${data.meta.split(' | ')[1]}</span>`;
+      document.getElementById('promptBox').textContent = data.q;
+      document.getElementById('mRigor').textContent = data.rigor;
+      document.getElementById('bRigor').style.width = data.rigor;
+      document.getElementById('mCadence').textContent = data.cadence;
+      document.getElementById('bCadence').style.width = data.cadence;
+      document.getElementById('mStar').textContent = data.star;
+      document.getElementById('bStar').style.width = data.star;
+      document.getElementById('mConf').textContent = data.conf;
+      document.getElementById('bConf').style.width = data.conf;
+
+      document.getElementById('candidateLiveText').textContent = 'Click "Simulate Candidate Answer" below to test live acoustic telemetry.';
+      document.getElementById('visStatus').innerHTML = '<span class="dot"></span> AI INTERVIEWER STANDBY';
+    }
+  }
+
+  function nextScenario() {
+    const nextIdx = (keys.indexOf(currentKey) + 1) % keys.length;
+    const nextKey = keys[nextIdx];
+    const tabEl = document.querySelectorAll('.track-tab')[nextIdx];
+    switchTrack(nextKey, tabEl);
+  }
+
+  // Real-time Candidate Answer Simulation
+  function runCandidateSimulation() {
+    if (isSimulating) return;
+    isSimulating = true;
+
+    const data = tracks[currentKey];
+    const textTarget = data.sample;
+    const liveEl = document.getElementById('candidateLiveText');
+    const visEl = document.getElementById('visStatus');
+    const simBtn = document.getElementById('simBtn');
+
+    liveEl.textContent = '';
+    simBtn.disabled = true;
+    simBtn.style.opacity = '0.6';
+    visEl.innerHTML = '<span class="dot" style="background:var(--cyan);box-shadow:0 0 8px var(--cyan);"></span> CANDIDATE SPEAKING (142 WPM)...';
+
+    // Animate wave SVG
+    const wavePath = document.getElementById('wavePath');
+    let phase = 0;
+    const waveInterval = setInterval(() => {
+      phase += 0.3;
+      const y1 = Math.sin(phase) * 8 + 12;
+      const y2 = Math.cos(phase * 1.5) * 9 + 12;
+      const y3 = Math.sin(phase * 0.8) * 8 + 12;
+      wavePath.setAttribute('d', `M0,12 Q15,${y1} 30,12 T60,${y2} T90,${y3} T120,${y1} T150,${y2} T180,12`);
+    }, 40);
+
+    let charIdx = 0;
+    const typeInterval = setInterval(() => {
+      liveEl.textContent += textTarget[charIdx];
+      charIdx++;
+
+      if (charIdx >= textTarget.length) {
+        clearInterval(typeInterval);
+        clearInterval(waveInterval);
+        wavePath.setAttribute('d', 'M0,12 Q15,2 30,12 T60,12 T90,3 T120,21 T150,12 T180,12');
+        visEl.innerHTML = '<span class="dot" style="background:var(--good);box-shadow:0 0 8px var(--good);"></span> EVALUATION COMPLETE (AUTHENTIC)';
+        simBtn.disabled = false;
+        simBtn.style.opacity = '1';
+        isSimulating = false;
+
+        // Flash meters with glow
+        document.querySelectorAll('.meter-box').forEach(m => {
+          m.style.borderColor = 'var(--cyan)';
+          setTimeout(() => m.style.borderColor = 'var(--line)', 800);
+        });
+      }
+    }, 18);
+  }
+
+  // Before vs After Diagnostic Scrubber
+  const diagData = {
+    before: {
+      btnActive: 'before',
+      status: 'RAW CANDIDATE TRANSCRIPT // DETECTED FLUFF',
+      wpm: '82 WPM · HESITANT',
+      content: `"So, <span class="filler-pill">um</span>, basically there was this time where our Redis cluster kind of crashed because of <span class="filler-pill">like</span> memory pressure. And, <span class="filler-pill">you know</span>, we had to restart the pods manually, which took <span class="filler-pill">actually</span> a long time."`,
+      score: '52%',
+      scoreBad: true,
+      filler: '4 DETECTED',
+      fillerBad: true,
+      rigor: '34%',
+      star: 'UNSTRUCTURED',
+      starBad: true
+    },
+    after: {
+      btnActive: 'after',
+      status: 'HIREREADY CALIBRATED // STAR FRAMEWORK VERIFIED',
+      wpm: '138 WPM · CRISP DELIVERY',
+      content: `"During a 400% traffic surge, our <span class="tech-pill">Redis cluster</span> saturated memory due to unbounded TTL keys. I led the incident by executing <span class="tech-pill">consistent hashing redistribution</span> and implementing <span class="tech-pill">LRU eviction policies</span>, restoring 99.99% availability within 4 minutes."`,
+      score: '96%',
+      scoreBad: false,
+      filler: '0 DETECTED',
+      fillerBad: false,
+      rigor: '95%',
+      star: 'EXECUTIVE STAR',
+      starBad: false
+    }
+  };
+
+  function switchDiagnostic(type) {
+    const d = diagData[type];
+    document.getElementById('btnBefore').classList.toggle('active', type === 'before');
+    document.getElementById('btnAfter').classList.toggle('active', type === 'after');
+
+    document.getElementById('diagStatusLbl').textContent = d.status;
+    document.getElementById('diagWpmLbl').textContent = d.wpm;
+    document.getElementById('diagContent').innerHTML = d.content;
+
+    const scoreEl = document.getElementById('diagScoreVal');
+    scoreEl.textContent = d.score;
+    scoreEl.className = `val ${d.scoreBad ? 'bad' : 'good'}`;
+
+    const fillerEl = document.getElementById('diagFillerVal');
+    fillerEl.textContent = d.filler;
+    fillerEl.className = `val ${d.fillerBad ? 'bad' : 'good'}`;
+
+    document.getElementById('diagRigorVal').textContent = d.rigor;
+
+    const starEl = document.getElementById('diagStarVal');
+    starEl.textContent = d.star;
+    starEl.className = `val ${d.starBad ? 'bad' : 'good'}`;
+  }
+</script>
+
 </body>
 </html>

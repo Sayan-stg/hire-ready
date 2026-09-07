@@ -4,6 +4,7 @@ const multer = require('multer');
 const { protect } = require('../middleware/auth');
 const User = require('../models/User');
 const Session = require('../models/Session');
+const mongoose = require('mongoose');
 
 // Memory storage for resume (parse text in-memory)
 const upload = multer({
@@ -21,14 +22,33 @@ const upload = multer({
 // GET /api/users/profile
 router.get('/profile', protect, async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
-    const sessions = await Session.find({ user: req.user._id, status: 'completed' })
-      .sort({ completedAt: -1 }).limit(5).select('role difficulty evaluation.overallScore duration completedAt');
+    if (mongoose.connection.readyState === 1) {
+      const user = await User.findById(req.user._id);
+      const sessions = await Session.find({ user: req.user._id, status: 'completed' })
+        .sort({ completedAt: -1 }).limit(5).select('role difficulty evaluation.overallScore duration completedAt');
+
+      return res.json({
+        success: true,
+        user: user ? user.toSafeObject() : req.user,
+        recentSessions: sessions,
+      });
+    }
+
+    // In-memory fallback
+    const user = (global.inMemoryUsers && global.inMemoryUsers.get(req.user._id?.toString())) || req.user;
+    let sessions = [];
+    if (global.inMemorySessions) {
+      for (const s of global.inMemorySessions.values()) {
+        if (s.user?.toString() === req.user._id?.toString() && s.status === 'completed') {
+          sessions.push(s);
+        }
+      }
+    }
 
     res.json({
       success: true,
-      user: user.toSafeObject(),
-      recentSessions: sessions,
+      user: user.toSafeObject ? user.toSafeObject() : user,
+      recentSessions: sessions.slice(0, 5),
     });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch profile.' });
@@ -43,8 +63,18 @@ router.put('/profile', protect, async (req, res) => {
     if (name) updates.name = name.trim().substring(0, 100);
     if (targetRole) updates.targetRole = targetRole;
 
-    const user = await User.findByIdAndUpdate(req.user._id, updates, { new: true, runValidators: true });
-    res.json({ success: true, user: user.toSafeObject() });
+    if (mongoose.connection.readyState === 1) {
+      const user = await User.findByIdAndUpdate(req.user._id, updates, { new: true, runValidators: true });
+      return res.json({ success: true, user: user.toSafeObject() });
+    }
+
+    // In-memory fallback
+    const user = (global.inMemoryUsers && global.inMemoryUsers.get(req.user._id?.toString())) || req.user;
+    if (updates.name) user.name = updates.name;
+    if (updates.targetRole) user.targetRole = updates.targetRole;
+    if (global.inMemoryUsers) global.inMemoryUsers.set(req.user._id?.toString(), user);
+
+    res.json({ success: true, user: user.toSafeObject ? user.toSafeObject() : user });
   } catch (err) {
     res.status(500).json({ error: 'Failed to update profile.' });
   }
@@ -60,7 +90,19 @@ router.put('/settings', protect, async (req, res) => {
     if (difficulty) settings['settings.difficulty'] = difficulty;
     if (typeof notifications === 'boolean') settings['settings.notifications'] = notifications;
 
-    const user = await User.findByIdAndUpdate(req.user._id, { $set: settings }, { new: true });
+    if (mongoose.connection.readyState === 1) {
+      const user = await User.findByIdAndUpdate(req.user._id, { $set: settings }, { new: true });
+      return res.json({ success: true, settings: user.settings });
+    }
+
+    // In-memory fallback
+    const user = (global.inMemoryUsers && global.inMemoryUsers.get(req.user._id?.toString())) || req.user;
+    user.settings = user.settings || {};
+    if (theme) user.settings.theme = theme;
+    if (typeof pressureMode === 'boolean') user.settings.pressureMode = pressureMode;
+    if (difficulty) user.settings.difficulty = difficulty;
+    if (typeof notifications === 'boolean') user.settings.notifications = notifications;
+
     res.json({ success: true, settings: user.settings });
   } catch (err) {
     res.status(500).json({ error: 'Failed to update settings.' });
@@ -111,8 +153,19 @@ router.post('/resume', protect, upload.single('resume'), async (req, res) => {
 // GET /api/users/stats
 router.get('/stats', protect, async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
-    const sessions = await Session.find({ user: req.user._id, status: 'completed' });
+    let sessions = [];
+    let user = req.user;
+
+    if (mongoose.connection.readyState === 1) {
+      user = await User.findById(req.user._id) || req.user;
+      sessions = await Session.find({ user: req.user._id, status: 'completed' });
+    } else if (global.inMemorySessions) {
+      for (const s of global.inMemorySessions.values()) {
+        if (s.user?.toString() === req.user._id?.toString() && s.status === 'completed') {
+          sessions.push(s);
+        }
+      }
+    }
 
     const avgScore = sessions.length
       ? Math.round(sessions.reduce((a, s) => a + (s.evaluation?.overallScore || 0), 0) / sessions.length)
@@ -129,15 +182,26 @@ router.get('/stats', protect, async (req, res) => {
       role: s.role,
     }));
 
+    // Aggregate real filler words across all completed sessions
+    const fillerTotals = { um: 0, like: 0, so: 0, uh: 0, basically: 0, actually: 0, literally: 0 };
+    sessions.forEach(s => {
+      if (s.evaluation?.fillerMap) {
+        Object.entries(s.evaluation.fillerMap).forEach(([k, v]) => {
+          fillerTotals[k] = (fillerTotals[k] || 0) + v;
+        });
+      }
+    });
+
     res.json({
       success: true,
       stats: {
-        totalSessions: user.totalSessions,
-        totalPoints: user.totalPoints,
-        streak: user.streak,
+        totalSessions: sessions.length,
+        totalPoints: user.totalPoints || (sessions.length * 750),
+        streak: user.streak || (sessions.length > 0 ? 1 : 0),
         avgScore,
         roleBreakdown,
         recentScores,
+        fillerTotals,
       },
     });
   } catch (err) {

@@ -44,17 +44,18 @@ app.use(cors({
       'http://localhost:5000',
       'http://127.0.0.1:5500',
       'http://localhost:5500',
-      // Allow file:// for local dev
+      // Allow local file/test tooling
       undefined
     ];
     if (!origin || allowed.includes(origin)) return callback(null, true);
-    callback(null, true); // Allow all in dev; restrict in prod
+    if (process.env.NODE_ENV !== 'production') return callback(null, true);
+    callback(new Error('CORS blocked: origin not allowed by policy.'));
   },
   credentials: true,
 }));
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
@@ -92,7 +93,9 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/hireready';
 
-mongoose.connect(MONGO_URI)
+mongoose.set('bufferCommands', false);
+
+mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 2000 })
   .then(() => {
     console.log('✅ MongoDB connected');
     app.listen(PORT, () => console.log(`🚀 HireReady server running on http://localhost:${PORT}`));
