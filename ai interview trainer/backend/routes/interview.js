@@ -5,7 +5,7 @@ const Session = require('../models/Session');
 const User = require('../models/User');
 const mongoose = require('mongoose');
 
-// ─── AI API Helper (Direct Google Gemini 3.5 Flash-Lite Engine) ───────────────
+// ─── AI API Helper (Direct Google Gemini 1.5 Flash Engine) ───────────────
 async function callClaude(messages, systemPrompt, maxTokens = 1000) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === 'your_gemini_api_key_here') {
@@ -37,7 +37,7 @@ async function callClaude(messages, systemPrompt, maxTokens = 1000) {
   };
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -385,8 +385,8 @@ router.get('/status', (req, res) => {
   res.json({
     success: true,
     hasKey,
-    engine: hasKey ? 'Google Gemini 3.5 Flash-Lite' : 'Unconfigured',
-    model: hasKey ? 'gemini-3.5-flash-lite' : 'none',
+    engine: hasKey ? 'Google Gemini 1.5 Flash' : 'Unconfigured',
+    model: hasKey ? 'gemini-1.5-flash' : 'none',
     description: hasKey ? 'Real-time multi-turn generative AI evaluation via Google Gemini' : 'Set GEMINI_API_KEY to activate AI engine'
   });
 });
