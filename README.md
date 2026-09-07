@@ -1,4 +1,4 @@
-# HireReady — AI-Powered Technical & Behavioral Interview Trainer
+# HireReady â€” AI-Powered Technical & Behavioral Interview Trainer
 
 <div align="center">
 
@@ -13,7 +13,7 @@ An intelligent, voice-first simulation platform engineered to replicate authenti
 [![Security](https://img.shields.io/badge/Security-Audited%20%26%20Isolated-success?style=flat-square)](#-security--api-isolation)
 [![Team](https://img.shields.io/badge/Developed%20By-Sixth%20Bit-6f7fae?style=flat-square)](#)
 
-[**Explore Live Demo ?**](https://thefifthbit.onrender.com) · [**Report Issue**](https://github.com/Sayan-stg/hire-ready/issues) · [**Setup Guide**](#-quickstart-guide)
+[**Explore Live Demo ?**](https://thefifthbit.onrender.com) Â· [**Report Issue**](https://github.com/Sayan-stg/hire-ready/issues) Â· [**Setup Guide**](#-quickstart-guide)
 
 </div>
 
@@ -31,7 +31,7 @@ Never jump into an uncalibrated session. HireReady launches an interactive confi
 ### 2. ? Pressure Mode (Stress-Testing Protocol)
 Transform the interviewer persona from supportive to skeptical and demanding:
 - **Real-Time Interruptions:** Flags over-verbosity and answers that lack depth.
-- **Skeptical Probing:** Actively challenges assumptions (*"Wait, that won't scale past 20k QPS under sustained write pressure—why not X?"*).
+- **Skeptical Probing:** Actively challenges assumptions (*"Wait, that won't scale past 20k QPS under sustained write pressureâ€”why not X?"*).
 - **Dynamic Switching:** Can be toggled on-the-fly mid-session via the topbar or set as a default preference.
 
 ### 3. ?? Live Code Sandbox & Algorithmic Evaluator
@@ -61,17 +61,17 @@ Transform the interviewer persona from supportive to skeptical and demanding:
 
 ```
 [ Candidate Browser ]
-       ¦  (Web Speech API for audio synthesis/STT; zero third-party client leaks)
-       ¦  (Session tokens via HttpOnly headers)
+       Â¦  (Web Speech API for audio synthesis/STT; zero third-party client leaks)
+       Â¦  (Session tokens via HttpOnly headers)
        ?
 [ Node.js / Express Gateway (Port 5000) ]
-       ¦  +-- Security: Helmet HTTP Headers & CORS restrictions
-       ¦  +-- Protection: IP Rate-Limiting (express-rate-limit)
-       ¦  +-- Middleware: JWT Authentication & User Verification
-       ¦  +-- Fallback: In-memory session store (operates even if DB is offline)
+       Â¦  +-- Security: Helmet HTTP Headers & CORS restrictions
+       Â¦  +-- Protection: IP Rate-Limiting (express-rate-limit)
+       Â¦  +-- Middleware: JWT Authentication & User Verification
+       Â¦  +-- Fallback: In-memory session store (operates even if DB is offline)
        ?
 [ Google Gemini Generative AI API (models/gemini-3.5-flash-lite) ]
-       ¦  (Server-to-Server encrypted proxy; credentials never exposed)
+       Â¦  (Server-to-Server encrypted proxy; credentials never exposed)
        ?
 [ MongoDB Database ]
        (User accounts, encrypted credentials via bcrypt, past session telemetry)
@@ -98,26 +98,26 @@ hire-ready/
 +-- ai interview trainer/
     +-- .gitignore
     +-- backend/
-    ¦   +-- middleware/
-    ¦   ¦   +-- auth.js                # JWT session verification & role isolation
-    ¦   +-- models/
-    ¦   ¦   +-- User.js                # User identity & preference schema
-    ¦   ¦   +-- Session.js             # Interview transcript & telemetry schema
-    ¦   +-- routes/
-    ¦   ¦   +-- auth.js                # Registration, authentication, token refresh
-    ¦   ¦   +-- interview.js           # Gemini prompt builder, start, message, pressure mode
-    ¦   ¦   +-- evaluation.js          # Multi-dimensional score calculation
-    ¦   ¦   +-- leaderboard.js         # Peer matrix ranking algorithms
-    ¦   ¦   +-- resources.js           # Curated technical interview curriculum
-    ¦   ¦   +-- users.js               # Profile and telemetry preference management
-    ¦   +-- server.js                  # Express backend entry point
-    ¦   +-- package.json
+    Â¦   +-- middleware/
+    Â¦   Â¦   +-- auth.js                # JWT session verification & role isolation
+    Â¦   +-- models/
+    Â¦   Â¦   +-- User.js                # User identity & preference schema
+    Â¦   Â¦   +-- Session.js             # Interview transcript & telemetry schema
+    Â¦   +-- routes/
+    Â¦   Â¦   +-- auth.js                # Registration, authentication, token refresh
+    Â¦   Â¦   +-- interview.js           # Gemini prompt builder, start, message, pressure mode
+    Â¦   Â¦   +-- evaluation.js          # Multi-dimensional score calculation
+    Â¦   Â¦   +-- leaderboard.js         # Peer matrix ranking algorithms
+    Â¦   Â¦   +-- resources.js           # Curated technical interview curriculum
+    Â¦   Â¦   +-- users.js               # Profile and telemetry preference management
+    Â¦   +-- server.js                  # Express backend entry point
+    Â¦   +-- package.json
     +-- frontend/
         +-- index.html                 # High-tech cosmic landing page
         +-- css/
-        ¦   +-- main.css               # Obsidian & starlight design system
+        Â¦   +-- main.css               # Obsidian & starlight design system
         +-- js/
-        ¦   +-- api.js                 # API abstraction client, token manager, theme engine
+        Â¦   +-- api.js                 # API abstraction client, token manager, theme engine
         +-- pages/
             +-- dashboard.html         # Readiness gauge, streak, recent telemetry
             +-- interview.html         # Live simulation room (Voice feed, Sandbox, HUD)
@@ -136,7 +136,7 @@ hire-ready/
 ### Prerequisites
 - [Node.js](https://nodejs.org) (v18 or higher)
 - [Google Gemini API Key](https://aistudio.google.com/app/apikey)
-- MongoDB (Optional — the server includes an automatic in-memory fallback for instant local evaluation)
+- MongoDB (Optional â€” the server includes an automatic in-memory fallback for instant local evaluation)
 
 ### 1. Clone the Repository
 ```bash
