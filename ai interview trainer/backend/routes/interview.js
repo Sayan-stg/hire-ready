@@ -354,6 +354,48 @@ MANDATORY ACTIVE-LISTENING INSTRUCTIONS:
 5. Do NOT give final scores, pass/fail ratings, or break character during the interview.`;
 }
 
+function buildRubricEvaluation({ userMessages, duration, tabSwitches, pasteEvents }) {
+  const answers = userMessages.map(message => message.content || '');
+  const allText = answers.join(' ');
+  const tokens = allText.toLowerCase().match(/[\w-]+/g) || [];
+  const answerCount = answers.length;
+  const averageWords = answerCount ? Math.round(tokens.length / answerCount) : 0;
+  const fillerWords = ['um', 'uh', 'like', 'so', 'basically', 'actually', 'literally', 'you know'];
+  const fillerMap = Object.fromEntries(fillerWords.map(word => [word, 0]));
+  userMessages.forEach(message => (message.fillerWords || []).forEach(word => {
+    fillerMap[word] = (fillerMap[word] || 0) + 1;
+  }));
+  const fillerCount = Object.values(fillerMap).reduce((sum, count) => sum + count, 0);
+  const hasNumbers = /\b\d+(?:\.\d+)?(?:%|ms|s|x|qps|rps|gb|mb)?\b/i.test(allText);
+  const hasTradeoff = /\b(trade-?off|because|however|whereas|versus|instead|depends)\b/i.test(allText);
+  const hasEdgeCase = /\b(edge case|failure|retry|race condition|fallback|limit|risk|error|partition)\b/i.test(allText);
+  const hasStructure = /\b(first|second|then|finally|star|situation|task|action|result)\b/i.test(allText);
+  const technicalTerms = ['cache', 'database', 'sql', 'nosql', 'index', 'latency', 'throughput', 'scale', 'distributed', 'queue', 'kafka', 'redis', 'async', 'thread', 'complexity', 'partition', 'api', 'microservices', 'concurrency', 'memory', 'heap', 'stack', 'model', 'cluster', 'kubernetes', 'docker'];
+  const distinctTechnicalTerms = technicalTerms.filter(term => tokens.includes(term)).length;
+  const paceWpm = Math.round(tokens.length / Math.max(0.5, duration / 60));
+  const clamp = value => Math.max(0, Math.min(100, Math.round(value)));
+  const rubric = {
+    problemFraming: clamp(35 + (answerCount ? 20 : 0) + (hasStructure ? 20 : 0) + (averageWords >= 25 ? 15 : 0)),
+    technicalDepth: clamp(30 + distinctTechnicalTerms * 7 + (hasTradeoff ? 15 : 0) + (hasEdgeCase ? 15 : 0)),
+    evidenceAndImpact: clamp(25 + (hasNumbers ? 30 : 0) + (hasStructure ? 20 : 0) + (averageWords >= 20 ? 15 : 0)),
+    communication: clamp(72 + (hasStructure ? 12 : 0) + (averageWords >= 15 && averageWords <= 120 ? 8 : -8) - fillerCount * 3),
+  };
+  const technicalAccuracy = clamp(rubric.technicalDepth * .7 + rubric.problemFraming * .3);
+  const confidence = clamp(65 + (paceWpm >= 100 && paceWpm <= 170 ? 15 : 0) + (hasStructure ? 8 : 0) - fillerCount * 2);
+  const overallScore = clamp(rubric.problemFraming * .20 + rubric.technicalDepth * .40 + rubric.evidenceAndImpact * .20 + rubric.communication * .20);
+  const evidence = [];
+  if (hasStructure) evidence.push('Used a recognizable answer structure.');
+  if (hasTradeoff) evidence.push('Explained a decision or trade-off.');
+  if (hasEdgeCase) evidence.push('Addressed a risk, limit, or failure case.');
+  if (hasNumbers) evidence.push('Included measurable evidence or scale.');
+  const improvements = [];
+  if (!hasStructure) improvements.push('Start with a clear structure: assumptions, approach, trade-offs, and conclusion.');
+  if (!hasTradeoff) improvements.push('Name at least one trade-off and why your chosen approach fits.');
+  if (!hasEdgeCase) improvements.push('Close technical answers with an edge case, failure mode, or validation step.');
+  if (!hasNumbers) improvements.push('Add a concrete metric, result, or scale estimate where it is truthful and useful.');
+  return { rubric, technicalAccuracy, communication: rubric.communication, confidence, overallScore, fitScore: Number((overallScore / 10).toFixed(1)), answerQuality: clamp((rubric.problemFraming + rubric.technicalDepth) / 2), fillerMap, fillerCount, detectedFillerWords: Object.keys(fillerMap).filter(word => fillerMap[word]), paceWpm, totalWords: tokens.length, evidence, improvements, focusTelemetry: { tabSwitches, pasteEvents } };
+}
+
 global.inMemorySessions = global.inMemorySessions || new Map();
 
 // POST /api/interview/start
@@ -508,34 +550,6 @@ router.get('/status', (req, res) => {
   });
 });
 
-// POST /api/interview/test-key
-router.post('/test-key', protect, async (req, res) => {
-  const { apiKey } = req.body;
-  if (!apiKey || !apiKey.trim()) return res.status(400).json({ error: 'API key is required.' });
-  try {
-    const testRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey.trim()}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: 'Ping. Respond with "Neural link verified".' }] }]
-        })
-      }
-    );
-
-    if (!testRes.ok) {
-      const errText = await testRes.text();
-      return res.status(400).json({ error: 'Gemini verification failed (' + testRes.status + '): ' + errText });
-    }
-
-    process.env.GEMINI_API_KEY = apiKey.trim();
-    res.json({ success: true, message: 'Neural link verified successfully! Gemini 3.5 Flash is now active for all interview rounds.' });
-  } catch (err) {
-    res.status(500).json({ error: 'Connection to Gemini failed: ' + err.message });
-  }
-});
-
 // POST /api/interview/end
 router.post('/end', protect, async (req, res) => {
   try {
@@ -564,37 +578,21 @@ router.post('/end', protect, async (req, res) => {
     session.duration = duration || 120;
     session.completedAt = new Date();
 
-    // ─── Real-Time Performance Analytics ───
+    // ─── Performance evaluation ───
     const userMessages = (session.messages || []).filter(m => m.role === 'user');
     const allUserText = userMessages.map(m => m.content).join(' ');
-    const totalWords = allUserText.split(/\s+/).filter(Boolean).length;
+    const rubricEvaluation = buildRubricEvaluation({ userMessages, duration: duration || 120, tabSwitches, pasteEvents });
+    const totalWords = rubricEvaluation.totalWords;
     const wordCountPerAnswer = userMessages.length ? Math.round(totalWords / userMessages.length) : 0;
 
     // Real filler words tally
-    const fillerMap = { um: 0, uh: 0, like: 0, so: 0, basically: 0, actually: 0, literally: 0 };
-    let fillerCount = 0;
-    const detectedFillerWords = [];
-    userMessages.forEach(m => {
-      (m.fillerWords || []).forEach(w => {
-        fillerCount++;
-        fillerMap[w] = (fillerMap[w] || 0) + 1;
-        if (!detectedFillerWords.includes(w)) detectedFillerWords.push(w);
-      });
-    });
+    const { fillerMap, fillerCount, detectedFillerWords } = rubricEvaluation;
 
     // Technical domain keyword parsing
     const techKeywords = ['cache', 'database', 'sql', 'nosql', 'index', 'latency', 'throughput', 'scale', 'distributed', 'queue', 'kafka', 'redis', 'async', 'thread', 'complexity', 'o(n)', 'partition', 'api', 'http', 'microservices', 'container', 'concurrency', 'deadlock', 'lock', 'memory', 'heap', 'stack', 'model', 'gradient', 'cluster', 'kubernetes', 'docker'];
     const wordsLower = allUserText.toLowerCase().split(/\W+/);
     const matchedKeywords = techKeywords.filter(k => wordsLower.includes(k));
-    const techDensity = Math.min(100, Math.round((matchedKeywords.length / 8) * 100));
-
-    // Dynamic Real Scores Calculation
-    const technicalAccuracy = Math.min(98, Math.max(45, 55 + Math.round(techDensity * 0.35) + (wordCountPerAnswer > 30 ? 8 : -8)));
-    const communication = Math.min(98, Math.max(40, 86 - (fillerCount * 4) + (wordCountPerAnswer >= 20 ? 8 : -12)));
-    const paceWpm = Math.round(totalWords / Math.max(0.5, (duration || 60) / 60));
-    const confidence = Math.min(98, Math.max(45, 78 + (paceWpm >= 100 && paceWpm <= 170 ? 10 : -8) - (fillerCount * 2)));
-    const fitScore = Math.min(9.9, Math.max(4.0, Number(((technicalAccuracy * 0.45 + communication * 0.35 + confidence * 0.2) / 10).toFixed(1))));
-    const overallScore = Math.round(technicalAccuracy * 0.45 + communication * 0.35 + confidence * 0.2);
+    const { technicalAccuracy, communication, confidence, fitScore, overallScore, paceWpm } = rubricEvaluation;
 
     const strengths = [];
     if (matchedKeywords.length > 0) strengths.push(`Explicitly referenced architecture primitives (${matchedKeywords.slice(0, 3).join(', ')})`);
@@ -604,11 +602,9 @@ router.post('/end', protect, async (req, res) => {
 
     const weaknesses = [];
     if (fillerCount > 2) weaknesses.push(`Filler word density (${fillerCount} occurrences detected: ${detectedFillerWords.join(', ')})`);
-    if (techDensity < 30) weaknesses.push('Answers could incorporate more specific system trade-offs');
+    if (!rubricEvaluation.evidence.some(item => item.includes('trade-off'))) weaknesses.push('Answers could incorporate more specific system trade-offs');
     if (wordCountPerAnswer < 20) weaknesses.push('Answers were brief; elaborate further on edge cases and failure modes');
     if (weaknesses.length === 0) weaknesses.push('Deepen quantitative metric articulation (e.g. latency deltas)');
-
-    const integrityScore = Math.max(60, 100 - (tabSwitches * 10) - (pasteEvents * 5));
 
     const evaluation = {
       technicalAccuracy,
@@ -622,7 +618,9 @@ router.post('/end', protect, async (req, res) => {
         confidence,
         cultureFit: Math.min(100, Math.round(confidence * 0.95))
       },
-      answerQuality: Math.round((technicalAccuracy + communication) / 2),
+      rubric: rubricEvaluation.rubric,
+      evidence: rubricEvaluation.evidence,
+      answerQuality: rubricEvaluation.answerQuality,
       strengths,
       weaknesses,
       fillerWordCount: fillerCount,
@@ -632,11 +630,10 @@ router.post('/end', protect, async (req, res) => {
       totalWords,
       tabSwitches,
       pasteEvents,
-      integrityScore,
+      focusTelemetry: rubricEvaluation.focusTelemetry,
       improvementRoadmap: [
-        weaknesses[0] ? `Focus: ${weaknesses[0]}` : 'Distributed cache invalidation patterns',
-        'STAR Framing: Quantify throughput improvements and percentiles',
-        'System Architecture: Lock-free concurrency benchmarks'
+        ...rubricEvaluation.improvements.slice(0, 3),
+        ...(weaknesses[0] ? [`Focus: ${weaknesses[0]}`] : [])
       ],
       feedback: `Session completed with ${userMessages.length} candidate exchanges over ${Math.floor((duration || 0)/60)}m ${Math.floor((duration || 0)%60)}s. Technical Rigor calibrated at ${technicalAccuracy}%, Communication at ${communication}%.`,
       trend: overallScore >= 75 ? 'positive' : 'stable'
@@ -711,40 +708,22 @@ router.get('/sessions/:id', protect, async (req, res) => {
   }
 });
 
-// GET /api/interview/sessions/:id
-router.get('/sessions/:id', protect, async (req, res) => {
-  try {
-    const session = await Session.findOne({ _id: req.params.id, user: req.user._id });
-    if (!session) return res.status(404).json({ error: 'Session not found.' });
-    res.json({ success: true, session });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch session.' });
-  }
-});
-
-// POST /api/interview/anti-cheat
-router.post('/anti-cheat', protect, async (req, res) => {
+// POST /api/interview/focus-events
+router.post('/focus-events', protect, async (req, res) => {
   try {
     const { sessionId, event } = req.body; // event: 'tab-switch' | 'paste'
     const update = {};
-    if (event === 'tab-switch') update['antiCheat.tabSwitches'] = 1;
-    if (event === 'paste') update['antiCheat.pasteAttempts'] = 1;
+    if (event === 'tab-switch') update['focusTelemetry.tabSwitches'] = 1;
+    if (event === 'paste') update['focusTelemetry.pasteEvents'] = 1;
 
     await Session.findOneAndUpdate(
       { _id: sessionId, user: req.user._id },
       { $inc: update }
     );
 
-    // Flag if too many violations
-    const session = await Session.findById(sessionId);
-    if (session && (session.antiCheat.tabSwitches >= 3 || session.antiCheat.pasteAttempts >= 3)) {
-      session.antiCheat.flagged = true;
-      await session.save();
-    }
-
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: 'Anti-cheat logging failed.' });
+    res.status(500).json({ error: 'Focus telemetry logging failed.' });
   }
 });
 

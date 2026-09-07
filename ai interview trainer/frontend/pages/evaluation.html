@@ -311,13 +311,13 @@ button{ font-family:inherit; }
     </div>
 
     <div class="glass-panel integrity-panel">
-      <div class="p-label">Integrity Report</div>
-      <div class="integrity-score"><span class="v" id="integrityScore">96</span><span class="u mono">/ 100</span></div>
-      <p id="integrityDesc">No violations detected. Voice signature matched throughout the session.</p>
+      <div class="p-label">Practice Context</div>
+      <div class="integrity-score"><span class="v" id="integrityScore">0</span><span class="u mono"> EVENTS</span></div>
+      <p id="integrityDesc">Focus events are optional context, not an integrity or performance score.</p>
       <div class="integrity-log">
-        <div>&gt; TAB_FOCUS ...... <span class="ok">STABLE</span></div>
-        <div>&gt; PASTE_EVENTS ... <span class="ok">NONE</span></div>
-        <div>&gt; VOICE_MATCH .... <span class="ok">VERIFIED</span></div>
+        <div>&gt; FOCUS_EXITS .... <span class="ok">0</span></div>
+        <div>&gt; PASTE_EVENTS ... <span class="ok">0</span></div>
+        <div>&gt; NOTE ........... Context only</div>
       </div>
     </div>
 
@@ -457,21 +457,21 @@ button{ font-family:inherit; }
           fwList.innerHTML = `<div style="color:var(--good);font-size:12px;text-align:center;padding:16px 0;">✓ 0 filler words detected · Optimal Cadence</div>`;
         }
 
-        // Real Integrity Report
-        const tabs = ev.tabSwitches || 0;
-        const pastes = ev.pasteEvents || 0;
-        const integScore = ev.integrityScore || Math.max(70, 100 - (tabs * 10) - (pastes * 5));
-        document.getElementById('integrityScore').textContent = integScore;
+        // Practice context: neither event is a violation or a score.
+        const focus = ev.focusTelemetry || {};
+        const tabs = focus.tabSwitches ?? ev.tabSwitches ?? 0;
+        const pastes = focus.pasteEvents ?? ev.pasteEvents ?? 0;
+        document.getElementById('integrityScore').textContent = tabs + pastes;
         document.getElementById('integrityDesc').textContent = tabs === 0 && pastes === 0
-          ? "No violations detected. Flawless tab focus and voice verified throughout."
-          : `Session logged ${tabs} tab-focus switches and ${pastes} paste operations.`;
+          ? "No focus or paste events were recorded. These signals are informational only."
+          : `Recorded ${tabs} focus exits and ${pastes} paste events. They do not affect your result.`;
         
         const integLog = document.querySelector('.integrity-log');
         if (integLog) {
           integLog.innerHTML = `
-            <div>&gt; TAB_FOCUS ...... <span class="${tabs > 0 ? 'warn' : 'ok'}">${tabs > 0 ? tabs + ' SWITCHES' : 'STABLE'}</span></div>
-            <div>&gt; PASTE_EVENTS ... <span class="${pastes > 0 ? 'warn' : 'ok'}">${pastes > 0 ? pastes + ' DETECTED' : 'NONE'}</span></div>
-            <div>&gt; VOICE_MATCH .... <span class="ok">VERIFIED</span></div>
+            <div>&gt; FOCUS_EXITS .... <span>${tabs}</span></div>
+            <div>&gt; PASTE_EVENTS ... <span>${pastes}</span></div>
+            <div>&gt; NOTE ........... <span>CONTEXT ONLY</span></div>
           `;
         }
 

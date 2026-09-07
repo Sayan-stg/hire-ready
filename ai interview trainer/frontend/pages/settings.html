@@ -473,19 +473,10 @@ a{ color:inherit; text-decoration:none; }
           <span class="chip" id="engineChip" style="background:rgba(95,212,217,0.12);color:var(--cyan);border:1px solid rgba(95,212,217,0.3);padding:5px 12px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:10.5px;">CHECKING</span>
         </div>
 
-        <form id="neuralForm" onsubmit="saveNeuralKey(event)">
-          <div class="form-group">
-            <label class="form-label">Google Gemini API Key</label>
-            <input type="password" class="form-input" id="geminiKeyInput" placeholder="Enter AIzaSy... key" autocomplete="off" />
-            <div style="font-size:11.5px;color:var(--silver-faint);margin-top:8px;line-height:1.5;">
-              Obtain your free API key at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--cyan);text-decoration:underline;">Google AI Studio</a>. If left blank, HireReady will automatically use the <strong>Autonomous Contextual Adaptive Engine</strong>, parsing your technical answers and probing edge cases locally without any cloud delay or API costs.
-            </div>
-          </div>
-          <div style="display:flex;gap:12px;margin-top:20px;">
-            <button type="submit" class="btn-solid" id="pingBtn">Ping &amp; Connect Neural Link</button>
-            <button type="button" class="btn-ghost" onclick="resetNeuralKey()" style="background:transparent;border:1px solid var(--line-strong);color:var(--silver-dim);padding:0 18px;border-radius:5px;cursor:pointer;font-size:12.5px;">Use Autonomous Engine</button>
-          </div>
-        </form>
+        <div class="form-group">
+          <label class="form-label">Secure provider configuration</label>
+          <div style="font-size:11.5px;color:var(--silver-faint);margin-top:8px;line-height:1.5;">AI provider credentials are configured only by the deployment administrator through server environment variables. This keeps shared credentials out of browsers and prevents one account from changing the engine for everyone.</div>
+        </div>
       </div>
 
     </div>
@@ -541,38 +532,6 @@ a{ color:inherit; text-decoration:none; }
     }
   }
 
-  async function saveNeuralKey(e) {
-    e.preventDefault();
-    const key = document.getElementById('geminiKeyInput').value.trim();
-    if (!key) {
-      Toast.warn('Please enter a Gemini API key or click "Use Autonomous Engine".');
-      return;
-    }
-    const btn = document.getElementById('pingBtn');
-    btn.textContent = 'Verifying Handshake...';
-    btn.disabled = true;
-
-    try {
-      const res = await api.post('/interview/test-key', { apiKey: key });
-      if (res?.success) {
-        Toast.success(res.message || 'Neural Link established successfully!');
-        loadNeuralStatus();
-        document.getElementById('geminiKeyInput').value = '';
-      } else {
-        Toast.error(res?.error || 'Neural link verification failed.');
-      }
-    } catch(err) {
-      Toast.error(err.message || 'Failed to verify neural link with Gemini.');
-    } finally {
-      btn.textContent = 'Ping & Connect Neural Link';
-      btn.disabled = false;
-    }
-  }
-
-  function resetNeuralKey() {
-    Toast.info('Switched to Autonomous Contextual Heuristic Engine (Local Mode).');
-    loadNeuralStatus();
-  }
 
   document.getElementById('profileForm').addEventListener('submit', (e) => {
     e.preventDefault();

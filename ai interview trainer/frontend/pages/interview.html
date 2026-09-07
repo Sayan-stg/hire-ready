@@ -702,11 +702,11 @@ button{ font-family:inherit; }
     </div>
 
     <div class="tele-block">
-      <div class="tele-title">Integrity</div>
+      <div class="tele-title">Practice Context</div>
       <div class="integrity-log">
-        <div>&gt; TAB_FOCUS ...... <span class="ok">STABLE</span></div>
-        <div>&gt; PASTE_EVENTS ... <span class="ok">NONE</span></div>
-        <div>&gt; VOICE_MATCH .... <span class="ok">VERIFIED</span></div>
+        <div>&gt; FOCUS_EXITS .... <span class="ok">0</span></div>
+        <div>&gt; PASTE_EVENTS ... <span class="ok">0</span></div>
+        <div>&gt; NOTE ........... CONTEXT ONLY</div>
       </div>
     </div>
   </div>
@@ -739,16 +739,16 @@ button{ font-family:inherit; }
   let tabSwitchesCount = 0;
   let pasteEventsCount = 0;
 
-  // Real-time Integrity Detection
+  // Optional practice context. These events never affect a score.
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
       tabSwitchesCount++;
       const integrityEl = document.querySelector('.integrity-log');
       if (integrityEl) {
         integrityEl.innerHTML = `
-          <div>&gt; TAB_FOCUS ...... <span style="color:var(--warn);">${tabSwitchesCount} SWITCHES</span></div>
-          <div>&gt; PASTE_EVENTS ... <span class="${pasteEventsCount > 0 ? 'warn' : 'ok'}">${pasteEventsCount > 0 ? pasteEventsCount : 'NONE'}</span></div>
-          <div>&gt; VOICE_MATCH .... <span class="ok">ACTIVE</span></div>
+          <div>&gt; FOCUS_EXITS .... <span>${tabSwitchesCount}</span></div>
+          <div>&gt; PASTE_EVENTS ... <span>${pasteEventsCount}</span></div>
+          <div>&gt; NOTE ........... <span>CONTEXT ONLY</span></div>
         `;
       }
     }
@@ -759,9 +759,9 @@ button{ font-family:inherit; }
     const integrityEl = document.querySelector('.integrity-log');
     if (integrityEl) {
       integrityEl.innerHTML = `
-        <div>&gt; TAB_FOCUS ...... <span class="${tabSwitchesCount > 0 ? 'warn' : 'ok'}">${tabSwitchesCount > 0 ? tabSwitchesCount + ' SWITCHES' : 'STABLE'}</span></div>
-        <div>&gt; PASTE_EVENTS ... <span style="color:var(--warn);">${pasteEventsCount} DETECTED</span></div>
-        <div>&gt; VOICE_MATCH .... <span class="ok">ACTIVE</span></div>
+        <div>&gt; FOCUS_EXITS .... <span>${tabSwitchesCount}</span></div>
+        <div>&gt; PASTE_EVENTS ... <span>${pasteEventsCount}</span></div>
+        <div>&gt; NOTE ........... <span>CONTEXT ONLY</span></div>
       `;
     }
   });

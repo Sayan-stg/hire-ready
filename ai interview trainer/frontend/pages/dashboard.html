@@ -450,15 +450,15 @@ td.score{ font-family:'JetBrains Mono',monospace; }
         </div>
       </div>
 
-      <!-- integrity -->
+      <!-- practice context -->
       <div class="glass-panel integrity-panel">
-        <div class="p-label">Session Integrity</div>
-        <div class="integrity-score"><span class="v" id="dashIntegVal">100</span><span class="u mono">/ 100</span></div>
+        <div class="p-label">Practice Context</div>
+        <div class="integrity-score"><span class="v" id="dashIntegVal">0</span><span class="u mono"> EVENTS</span></div>
         <p id="dashIntegText">Live tab focus and input telemetry verified across sessions.</p>
         <div class="integrity-log" id="dashIntegLog">
           <div>&gt; TAB_FOCUS ............ <span class="ok">STABLE</span></div>
           <div>&gt; PASTE_EVENTS ......... <span class="ok">NONE</span></div>
-          <div>&gt; VOICE_MATCH .......... <span class="ok">VERIFIED</span></div>
+          <div>&gt; NOTE ................. CONTEXT ONLY</div>
         </div>
       </div>
 
@@ -566,21 +566,20 @@ td.score{ font-family:'JetBrains Mono',monospace; }
           if (document.getElementById('rPct3')) document.getElementById('rPct3').textContent = `${fitAvg}%`;
           if (document.getElementById('rBar3')) document.getElementById('rBar3').style.width = `${fitAvg}%`;
 
-          // Session Integrity
-          const totalTabs = completedSessions.reduce((acc, sess) => acc + (sess.tabSwitches || 0), 0);
-          const totalPastes = completedSessions.reduce((acc, sess) => acc + (sess.pasteEvents || 0), 0);
-          const integScore = Math.max(50, 100 - (totalTabs * 5) - (totalPastes * 10));
+          // Practice context, never an integrity score.
+          const totalTabs = completedSessions.reduce((acc, sess) => acc + (sess.evaluation?.focusTelemetry?.tabSwitches ?? sess.tabSwitches ?? 0), 0);
+          const totalPastes = completedSessions.reduce((acc, sess) => acc + (sess.evaluation?.focusTelemetry?.pasteEvents ?? sess.pasteEvents ?? 0), 0);
           const valEl = document.getElementById('dashIntegVal');
           if (valEl) {
-            valEl.textContent = integScore;
-            valEl.style.color = integScore >= 80 ? 'var(--good)' : integScore >= 60 ? 'var(--warning, #e0a94e)' : '#e06060';
+            valEl.textContent = totalTabs + totalPastes;
+            valEl.style.color = 'var(--silver)';
           }
           const logEl = document.getElementById('dashIntegLog');
           if (logEl) {
             logEl.innerHTML = `
-              <div>&gt; TAB_FOCUS ............ <span class="${totalTabs === 0 ? 'ok' : ''}">${totalTabs === 0 ? 'STABLE (0 exits)' : `${totalTabs} SWITCHES`}</span></div>
-              <div>&gt; PASTE_EVENTS ......... <span class="${totalPastes === 0 ? 'ok' : ''}">${totalPastes === 0 ? 'CLEAN (0 pastes)' : `${totalPastes} DETECTED`}</span></div>
-              <div>&gt; TELEMETRY_STREAM ..... <span class="ok">AUTHENTIC</span></div>
+              <div>&gt; FOCUS_EXITS .......... <span>${totalTabs}</span></div>
+              <div>&gt; PASTE_EVENTS ......... <span>${totalPastes}</span></div>
+              <div>&gt; TELEMETRY_STREAM ..... <span>CONTEXT ONLY</span></div>
             `;
           }
         }
