@@ -1,332 +1,184 @@
-# HireReady — AI-Powered Interview Preparation Platform
+# HireReady � AI-Powered Technical & Behavioral Interview Trainer
 
-> "From Practice to Placement" — The Fifth Bit Hackathon 2026
+<div align="center">
+
+![HireReady Banner](https://raw.githubusercontent.com/Sayan-stg/hire-ready/main/ai%20interview%20trainer/frontend/favicon.svg)
+
+### *Master the Interview. Before It Happens.*
+An intelligent, voice-first simulation platform engineered to replicate authentic FAANG and high-growth startup technical interview loops.
+
+[![Live Deployment](https://img.shields.io/badge/Live%20Demo-Render-5fd4d9?style=flat-square)](https://thefifthbit.onrender.com)
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat-square&logo=node.js)](https://nodejs.org)
+[![AI Engine](https://img.shields.io/badge/AI%20Engine-Google%20Gemini-4285F4?style=flat-square&logo=google)](https://ai.google.dev/)
+[![Security](https://img.shields.io/badge/Security-Audited%20%26%20Isolated-success?style=flat-square)](#-security--api-isolation)
+[![Team](https://img.shields.io/badge/Developed%20By-Sixth%20Bit-6f7fae?style=flat-square)](#)
+
+[**Explore Live Demo ?**](https://thefifthbit.onrender.com) � [**Report Issue**](https://github.com/Sayan-stg/hire-ready/issues) � [**Setup Guide**](#-quickstart-guide)
+
+</div>
 
 ---
 
-## 🚀 Tech Stack
+## ?? Key Highlights & Capabilities
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | HTML5, CSS3 (CSS Variables), Vanilla JS |
-| Backend | Node.js + Express.js |
-| Database | MongoDB + Mongoose |
-| AI Engine | Claude API (Anthropic) — claude-sonnet-4-20250514 |
-| Auth | JWT + bcryptjs + HttpOnly Cookies |
-| Security | Helmet, Rate Limiting, Input Validation, Account Lockout |
+### 1. ?? Pre-Interview Mission Calibration (Setup Modal)
+Never jump into an uncalibrated session. HireReady launches an interactive configuration dashboard before every interview:
+- **Track Selection:** Choose between **??? Verbal Architecture & Systems** or **?? Live Coding Sandbox**.
+- **Role Alignment:** SDE-2, Senior Software Engineer (Lead), Staff Distributed Architect, Frontend, Backend, Full Stack, AI/ML Engineer, DevOps/SRE, or Product Manager.
+- **Difficulty Curves:** Foundational (Easy / Junior), Production (Medium / Mid-Level), or Staff / Extreme (Hard).
+- **Interview Rounds:** System Architecture & Scale, Data Structures & Algorithms, Behavioral (STAR Method), or Full-Loop Comprehensive.
+
+### 2. ? Pressure Mode (Stress-Testing Protocol)
+Transform the interviewer persona from supportive to skeptical and demanding:
+- **Real-Time Interruptions:** Flags over-verbosity and answers that lack depth.
+- **Skeptical Probing:** Actively challenges assumptions (*"Wait, that won't scale past 20k QPS under sustained write pressure�why not X?"*).
+- **Dynamic Switching:** Can be toggled on-the-fly mid-session via the topbar or set as a default preference.
+
+### 3. ?? Live Code Sandbox & Algorithmic Evaluator
+- Integrated multi-language code sandbox supporting **Python 3**, **JavaScript (ES6)**, **C++ (20)**, **Java 17**, and **Go 1.22**.
+- **`? Submit Code for AI Critique`**: Sends source code directly to Google Gemini for:
+  - Theoretical & Practical Time Complexity ($O(N)$, $O(N \log N)$)
+  - Space Overhead & Memory Allocation
+  - Edge-case vulnerability analysis (concurrency races, overflow, empty buffers)
+  - Algorithmic counter-probes
+
+### 4. ??? Voice-First Telemetry Engine
+- Native browser **Web Speech API** integration for bidirectional, zero-latency speech-to-text transcription and natural voice readout.
+- Animated multi-harmonic orbital waveform visualizer responding dynamically to speech cadence.
+
+### 5. ?? Real-Time Speech & Integrity Diagnostics
+- **Pace Analysis:** Instantaneous Words Per Minute (WPM) tracking.
+- **Filler Word Detection:** Real-time highlighting of verbal micro-hesitations (`um`, `uh`, `like`, `basically`, `actually`, `you know`).
+- **Integrity Telemetry:** Monitored tab-switch detection, clipboard paste tracking, and active session duration logging.
+
+### 6. ?? Multi-Dimensional Scorecards & Leaderboards
+- Post-session evaluation breaking down **Technical Accuracy**, **Communication & Articulation**, **System Trade-offs**, and **STAR Behavioral Adherence**.
+- Global matrix leaderboard ranking candidates by percentile.
 
 ---
 
-## 📁 Project Structure
+## ??? Technical Architecture
 
 ```
-hireready-full/
-├── backend/
-│   ├── models/
-│   │   ├── User.js          # User model with security features
-│   │   └── Session.js       # Interview session model
-│   ├── routes/
-│   │   ├── auth.js          # Register, login, logout, /me
-│   │   ├── users.js         # Profile, settings, resume, stats
-│   │   ├── interview.js     # Start, message, end, code review, anti-cheat
-│   │   ├── evaluation.js    # Fetch evaluations
-│   │   ├── leaderboard.js   # Rankings with filters
-│   │   └── resources.js     # Curated learning resources
-│   ├── middleware/
-│   │   └── auth.js          # JWT protect middleware
-│   ├── .env.example         # Environment variables template
-│   ├── package.json
-│   └── server.js            # Main Express server
-└── frontend/
-    ├── css/
-    │   └── main.css         # Full design system, dark + light mode
-    ├── js/
-    │   └── api.js           # API client, auth manager, theme, toasts
-    ├── pages/
-    │   ├── login.html
-    │   ├── register.html
-    │   ├── dashboard.html
-    │   ├── interview.html
-    │   ├── evaluation.html
-    │   ├── leaderboard.html
-    │   ├── resources.html
-    │   └── settings.html
-    └── index.html           # Landing page
+[ Candidate Browser ]
+       �  (Web Speech API for audio synthesis/STT; zero third-party client leaks)
+       �  (Session tokens via HttpOnly headers)
+       ?
+[ Node.js / Express Gateway (Port 5000) ]
+       �  +-- Security: Helmet HTTP Headers & CORS restrictions
+       �  +-- Protection: IP Rate-Limiting (express-rate-limit)
+       �  +-- Middleware: JWT Authentication & User Verification
+       �  +-- Fallback: In-memory session store (operates even if DB is offline)
+       ?
+[ Google Gemini Generative AI API (models/gemini-3.5-flash-lite) ]
+       �  (Server-to-Server encrypted proxy; credentials never exposed)
+       ?
+[ MongoDB Database ]
+       (User accounts, encrypted credentials via bcrypt, past session telemetry)
 ```
 
 ---
 
-## ⚙️ Setup Instructions
+## ?? Security & API Isolation
+
+A comprehensive white-box security audit was completed on this codebase:
+- **Client-Side Isolation:** Zero upstream keys (Gemini, OpenAI, Anthropic) exist in client-side HTML, CSS, or JS.
+- **Backend Proxying:** All LLM communications are strictly mediated through server-side Express routes (`/api/interview/*`).
+- **Secret Protection:** Strict `.gitignore` configurations protect `.env`, `config.json`, and deployment secrets from being staged.
+- **Input Sanitization:** Stored and reflected DOM transcript elements undergo HTML entity escaping to prevent cross-site scripting (XSS).
+
+---
+
+## ?? Repository Structure
+
+```
+hire-ready/
++-- .gitignore                         # Root secret and environment exclusion rules
++-- README.md                          # Project documentation and guide
++-- ai interview trainer/
+    +-- .gitignore
+    +-- backend/
+    �   +-- middleware/
+    �   �   +-- auth.js                # JWT session verification & role isolation
+    �   +-- models/
+    �   �   +-- User.js                # User identity & preference schema
+    �   �   +-- Session.js             # Interview transcript & telemetry schema
+    �   +-- routes/
+    �   �   +-- auth.js                # Registration, authentication, token refresh
+    �   �   +-- interview.js           # Gemini prompt builder, start, message, pressure mode
+    �   �   +-- evaluation.js          # Multi-dimensional score calculation
+    �   �   +-- leaderboard.js         # Peer matrix ranking algorithms
+    �   �   +-- resources.js           # Curated technical interview curriculum
+    �   �   +-- users.js               # Profile and telemetry preference management
+    �   +-- server.js                  # Express backend entry point
+    �   +-- package.json
+    +-- frontend/
+        +-- index.html                 # High-tech cosmic landing page
+        +-- css/
+        �   +-- main.css               # Obsidian & starlight design system
+        +-- js/
+        �   +-- api.js                 # API abstraction client, token manager, theme engine
+        +-- pages/
+            +-- dashboard.html         # Readiness gauge, streak, recent telemetry
+            +-- interview.html         # Live simulation room (Voice feed, Sandbox, HUD)
+            +-- evaluation.html        # Detailed evaluation breakdown
+            +-- leaderboard.html       # Peer rankings
+            +-- resources.html         # Technical guides & interview strategies
+            +-- settings.html          # Mission parameters & preference toggles
+            +-- login.html             # Access portal
+            +-- register.html          # Candidate enrollment
+```
+
+---
+
+## ? Quickstart Guide
 
 ### Prerequisites
-- Node.js 18+
-- MongoDB (local or MongoDB Atlas)
-- Anthropic API Key (for AI features)
+- [Node.js](https://nodejs.org) (v18 or higher)
+- [Google Gemini API Key](https://aistudio.google.com/app/apikey)
+- MongoDB (Optional � the server includes an automatic in-memory fallback for instant local evaluation)
 
-### 1. Install backend dependencies
-
+### 1. Clone the Repository
 ```bash
-cd backend
+git clone https://github.com/Sayan-stg/hire-ready.git
+cd hire-ready/"ai interview trainer"/backend
+```
+
+### 2. Install Dependencies
+```bash
 npm install
 ```
 
-### 2. Configure environment variables
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` and fill in:
-```
+### 3. Configure Environment Variables
+Create a `.env` file in `ai interview trainer/backend/`:
+```env
+PORT=5000
+NODE_ENV=development
+JWT_SECRET=your_super_secret_session_key_replace_this
+GEMINI_API_KEY=your_google_gemini_api_key_here
 MONGODB_URI=mongodb://localhost:27017/hireready
-JWT_SECRET=your_very_long_random_secret_here
-ANTHROPIC_API_KEY=sk-ant-xxxx...
 ```
 
-### 3. Start the server
+> **Note:** If MongoDB is not running locally, the server will automatically launch in **Autonomous Demo Mode** using high-speed in-memory session tracking.
 
+### 4. Start the Application
 ```bash
-# Development
-npm run dev
-
-# Production
-npm start
+node server.js
 ```
 
-The server runs on **http://localhost:5000** and serves the frontend automatically.
-
-### 4. Open in browser
-
-Visit: **http://localhost:5000**
-
----
-
-## 🔑 Features Implemented
-
-### From PPT Slides
-- ✅ AI-Based Mock Interview Sessions (Claude API)
-- ✅ Role-Based Interview Simulation (SDE, Data Scientist, DevOps, PM)
-- ✅ Technical + HR Rounds
-- ✅ Adaptive Follow-up Questions (context-aware AI)
-- ✅ Real-time AI Feedback & Scoring
-- ✅ Resume Upload & Resume-Based Questions
-- ✅ Difficulty Modes (Easy / Medium / Hard)
-- ✅ Pressure Mode (AI interruptions, time pressure)
-- ✅ Coding Editor (Monaco-style) with AI Code Review
-- ✅ Anti-Cheat Detection (tab switching, paste monitoring)
-- ✅ AI Evaluation System (technical, communication, confidence)
-- ✅ Filler Word Detection (um, uh, like, so, etc.)
-- ✅ Confidence Analysis + Sentiment Analysis
-- ✅ Weakness Identification + Role Readiness Score
-- ✅ Improvement Roadmap (personalized learning path)
-- ✅ Leaderboard with Role-based Rankings
-- ✅ Daily Streak System
-- ✅ Curated Resources (categorized by role, topic, difficulty)
-- ✅ Performance Tracking over sessions
-
-### UI/UX
-- ✅ Dark Mode (default, matching the slides)
-- ✅ Light Mode (same color palette as attached screenshots)
-- ✅ Smooth theme switching
-- ✅ Responsive design (mobile-friendly)
-- ✅ Animated stats, toasts, modals
-
-### Security
-- ✅ Password hashing (bcrypt, 12 rounds)
-- ✅ JWT authentication (7-day expiry)
-- ✅ HTTP-only cookies
-- ✅ Account lockout (5 failed attempts → 15 min lock)
-- ✅ Rate limiting (general: 200/15min, auth: 20/15min, AI: 60/min)
-- ✅ Input validation (express-validator)
-- ✅ Helmet security headers
-- ✅ CORS protection
-- ✅ SQL/NoSQL injection protection (Mongoose sanitization)
-- ✅ Passwords never returned in API responses (select: false)
-
----
-
-## 🧑‍💻 Team — The Fifth Bit
-
-- Khyati Singh (25BCE11336)
-- Aayushi (25BCE10206)
-- Aditya Singh (25BCE1133)
-- Sayan Modal (25BAI11532)
-- Yashraj (25BAI11556)
-
----
-
-## 🔮 Future Scope (from slides)
-
-- Company-specific interview modes
-- Voice & emotion detection AI
-- Recruiter dashboard & analytics
-- Referral system for top performers
-- Mobile app (React Native)
-# HireReady — AI-Powered Interview Preparation Platform
-
-> "From Practice to Placement" — The Fifth Bit Hackathon 2026
-
----
-
-## 🚀 Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | HTML5, CSS3 (CSS Variables), Vanilla JS |
-| Backend | Node.js + Express.js |
-| Database | MongoDB + Mongoose |
-| AI Engine | Claude API (Anthropic) — claude-sonnet-4-20250514 |
-| Auth | JWT + bcryptjs + HttpOnly Cookies |
-| Security | Helmet, Rate Limiting, Input Validation, Account Lockout |
-
----
-
-## 📁 Project Structure
-
+Open your browser and navigate to:
 ```
-hireready-full/
-├── backend/
-│   ├── models/
-│   │   ├── User.js          # User model with security features
-│   │   └── Session.js       # Interview session model
-│   ├── routes/
-│   │   ├── auth.js          # Register, login, logout, /me
-│   │   ├── users.js         # Profile, settings, resume, stats
-│   │   ├── interview.js     # Start, message, end, code review, anti-cheat
-│   │   ├── evaluation.js    # Fetch evaluations
-│   │   ├── leaderboard.js   # Rankings with filters
-│   │   └── resources.js     # Curated learning resources
-│   ├── middleware/
-│   │   └── auth.js          # JWT protect middleware
-│   ├── .env.example         # Environment variables template
-│   ├── package.json
-│   └── server.js            # Main Express server
-└── frontend/
-    ├── css/
-    │   └── main.css         # Full design system, dark + light mode
-    ├── js/
-    │   └── api.js           # API client, auth manager, theme, toasts
-    ├── pages/
-    │   ├── login.html
-    │   ├── register.html
-    │   ├── dashboard.html
-    │   ├── interview.html
-    │   ├── evaluation.html
-    │   ├── leaderboard.html
-    │   ├── resources.html
-    │   └── settings.html
-    └── index.html           # Landing page
+http://localhost:5000
 ```
 
 ---
 
-## ⚙️ Setup Instructions
+## ?? Engineering Team
 
-### Prerequisites
-- Node.js 18+
-- MongoDB (local or MongoDB Atlas)
-- Anthropic API Key (for AI features)
-
-### 1. Install backend dependencies
-
-```bash
-cd backend
-npm install
-```
-
-### 2. Configure environment variables
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` and fill in:
-```
-MONGODB_URI=mongodb://localhost:27017/hireready
-JWT_SECRET=your_very_long_random_secret_here
-ANTHROPIC_API_KEY=sk-ant-xxxx...
-```
-
-### 3. Start the server
-
-```bash
-# Development
-npm run dev
-
-# Production
-npm start
-```
-
-The server runs on **http://localhost:5000** and serves the frontend automatically.
-
-### 4. Open in browser
-
-Visit: **http://localhost:5000**
+Developed with ?? by **Sixth Bit** for modern software engineering candidates:
+- **Sayan** ([@Sayan-stg](https://github.com/Sayan-stg))
 
 ---
 
-## 🔑 Features Implemented
-
-### From PPT Slides
-- ✅ AI-Based Mock Interview Sessions (Claude API)
-- ✅ Role-Based Interview Simulation (SDE, Data Scientist, DevOps, PM)
-- ✅ Technical + HR Rounds
-- ✅ Adaptive Follow-up Questions (context-aware AI)
-- ✅ Real-time AI Feedback & Scoring
-- ✅ Resume Upload & Resume-Based Questions
-- ✅ Difficulty Modes (Easy / Medium / Hard)
-- ✅ Pressure Mode (AI interruptions, time pressure)
-- ✅ Coding Editor (Monaco-style) with AI Code Review
-- ✅ Anti-Cheat Detection (tab switching, paste monitoring)
-- ✅ AI Evaluation System (technical, communication, confidence)
-- ✅ Filler Word Detection (um, uh, like, so, etc.)
-- ✅ Confidence Analysis + Sentiment Analysis
-- ✅ Weakness Identification + Role Readiness Score
-- ✅ Improvement Roadmap (personalized learning path)
-- ✅ Leaderboard with Role-based Rankings
-- ✅ Daily Streak System
-- ✅ Curated Resources (categorized by role, topic, difficulty)
-- ✅ Performance Tracking over sessions
-
-### UI/UX
-- ✅ Dark Mode (default, matching the slides)
-- ✅ Light Mode (same color palette as attached screenshots)
-- ✅ Smooth theme switching
-- ✅ Responsive design (mobile-friendly)
-- ✅ Animated stats, toasts, modals
-
-### Security
-- ✅ Password hashing (bcrypt, 12 rounds)
-- ✅ JWT authentication (7-day expiry)
-- ✅ HTTP-only cookies
-- ✅ Account lockout (5 failed attempts → 15 min lock)
-- ✅ Rate limiting (general: 200/15min, auth: 20/15min, AI: 60/min)
-- ✅ Input validation (express-validator)
-- ✅ Helmet security headers
-- ✅ CORS protection
-- ✅ SQL/NoSQL injection protection (Mongoose sanitization)
-- ✅ Passwords never returned in API responses (select: false)
-
----
-
-## 🧑‍💻 Team — The Fifth Bit
-
-- Khyati Singh (25BCE11336)
-- Aayushi (25BCE10206)
-- Aditya Singh (25BCE1133)
-- Sayan Modal (25BAI11532)
-- Yashraj (25BAI11556)
-
----
-
-## 🔮 Future Scope (from slides)
-
-- Company-specific interview modes
-- Voice & emotion detection AI
-- Recruiter dashboard & analytics
-- Referral system for top performers
-- Mobile app (React Native)
-
-
-website link- https://thefifthbit.onrender.com
-
+## ?? License
+This project is open-source and available under the [MIT License](LICENSE).
