@@ -1,4 +1,8 @@
-﻿<div align="center">
+<div align="center">
+
+<p align="center">
+  <code>⚡ SIXTH BIT PRESENTS</code>
+</p>
 
 # ⚡ HireReady
 ### **Voice-First AI Technical & Behavioral Interview Simulation Platform**
@@ -11,6 +15,7 @@
 [![Google Gemini](https://img.shields.io/badge/AI%20MODEL-GEMINI%203.5%20FLASH-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
 [![Node.js](https://img.shields.io/badge/BACKEND-NODE%20%2F%20EXPRESS-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Security Status](https://img.shields.io/badge/SECURITY-AUDITED%20%26%20ISOLATED-10b981?style=for-the-badge&logo=shield&logoColor=white)](#-security--white-box-audit)
+[![Team](https://img.shields.io/badge/DEVELOPED%20BY-SIXTH%20BIT-6f7fae?style=for-the-badge)](https://github.com/Sayan-stg)
 [![License](https://img.shields.io/badge/LICENSE-MIT-a78bfa?style=for-the-badge)](LICENSE)
 
 <br/>
@@ -20,16 +25,6 @@
 [🎯 **Mission Calibration**](#1--mission-calibration-pre-interview-setup-modal) &nbsp;•&nbsp;
 [💻 **Code Sandbox**](#3--live-coding-sandbox--algorithmic-auditor) &nbsp;•&nbsp;
 [🔒 **Security Architecture**](#-security--white-box-audit)
-
-<br/>
-
-```
-  ____ ___  _  ___ _____ _   _   ____ ___ _____ 
- / ___/ _ \| |/ / |_   _| | | | | __ )_ _|_   _|
- \___| | | | ' /| | | | | |_| | |  _ \| |  | |  
-  ___) | |_| . \| | | | |  _  | | |_) | |  | |  
- |____/\___/|_|\_\_| |_| |_| |_| |____/___| |_|  PRESENTS: HIREREADY
-```
 
 </div>
 
