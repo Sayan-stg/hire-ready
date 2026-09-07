@@ -612,10 +612,12 @@ a{ color:inherit; text-decoration:none; }
         renderCalibrationTable();
       }
     } catch(err) {
-      console.warn('Using local fallback admin dataset:', err);
-      // Fallback local render if server offline
-      renderFlaggedDeck();
-      renderCalibrationTable();
+      console.error('Failed to load live admin data:', err);
+      document.getElementById('kpiMae').textContent = '—';
+      document.getElementById('kpiConsistency').textContent = '—';
+      document.getElementById('kpiFlagged').textContent = '—';
+      document.getElementById('calibrationTbody').innerHTML = `<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--silver-faint);font-family:'JetBrains Mono',monospace;">Unable to connect to live telemetry API.</td></tr>`;
+      document.getElementById('flaggedDeckContainer').innerHTML = `<div style="grid-column:span 2;text-align:center;padding:30px;color:var(--silver-faint);font-family:'JetBrains Mono',monospace;">Unable to connect to live telemetry API.</div>`;
     }
   }
 
@@ -713,7 +715,10 @@ a{ color:inherit; text-decoration:none; }
     });
 
     if (!filtered.length) {
-      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--silver-faint);font-family:'JetBrains Mono',monospace;">No matching calibration benchmarks found for current filters.</td></tr>`;
+      const msg = calibrationData.length === 0
+        ? "No completed interview sessions recorded yet. Candidate sessions will calibrate here dynamically in real time."
+        : "No matching calibration benchmarks found for current filters.";
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:36px;color:var(--silver-faint);font-family:'JetBrains Mono',monospace;">${msg}</td></tr>`;
       return;
     }
 
