@@ -69,6 +69,7 @@ app.use('/api/interview',  require('./routes/interview'));
 app.use('/api/evaluation', require('./routes/evaluation'));
 app.use('/api/leaderboard',require('./routes/leaderboard'));
 app.use('/api/resources',  require('./routes/resources'));
+app.use('/api/admin',      require('./routes/admin'));
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

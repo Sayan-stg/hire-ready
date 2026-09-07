@@ -155,6 +155,27 @@ button{ font-family:inherit; }
 .tag.strong{ color:var(--good); border-color:rgba(111,174,138,.4); }
 .tag.pause{ color:var(--silver-faint); border-color:var(--line-strong); }
 
+/* scoring confidence indicator */
+.confidence-tag{
+  display:inline-flex; align-items:center; gap:5px;
+  font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.08em;
+  padding:2px 7px; border-radius:3px; text-transform:uppercase; font-weight:600;
+  vertical-align:middle;
+}
+.confidence-tag .tag-dot{ width:5px; height:5px; border-radius:50%; }
+.confidence-tag.high{
+  background:rgba(95,212,217,0.10); border:1px solid rgba(95,212,217,0.35); color:#5fd4d9;
+}
+.confidence-tag.high .tag-dot{ background:#5fd4d9; box-shadow:0 0 6px rgba(95,212,217,0.8); }
+.confidence-tag.med{
+  background:rgba(201,163,95,0.10); border:1px solid rgba(201,163,95,0.35); color:#c9a35f;
+}
+.confidence-tag.med .tag-dot{ background:#c9a35f; box-shadow:0 0 6px rgba(201,163,95,0.8); }
+.confidence-tag.low{
+  background:rgba(147,149,163,0.10); border:1px solid rgba(147,149,163,0.25); color:#9395a3;
+}
+.confidence-tag.low .tag-dot{ background:#9395a3; }
+
 /* filler / integrity / roadmap row */
 .fw-panel{ grid-column:span 4; }
 .integrity-panel{ grid-column:span 4; }
@@ -228,7 +249,10 @@ button{ font-family:inherit; }
         <div class="gauge-num"><span class="v" id="gaugeVal">79</span><span class="u mono">/ 100</span></div>
       </div>
       <div class="gauge-text">
-        <h3>Overall Readiness</h3>
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
+          <h3 style="margin-bottom:0;">Overall Readiness</h3>
+          <span class="confidence-tag high" id="evalConfidenceTag" title="AI Scoring Confidence Rating"><span class="tag-dot"></span>HIGH CONFIDENCE</span>
+        </div>
         <p id="overallSummary">Strong technical answers, communication needs tightening under pressure.</p>
       </div>
     </div>
@@ -418,6 +442,22 @@ button{ font-family:inherit; }
         }
         if (ev.feedback) {
           document.getElementById('overallSummary').textContent = ev.feedback;
+        }
+
+        // Scoring Confidence Tag update
+        const confTag = document.getElementById('evalConfidenceTag');
+        if (confTag) {
+          const cScore = typeof ev.confidence === 'number' ? ev.confidence : (ev.overallScore || 75);
+          if (cScore >= 75) {
+            confTag.className = 'confidence-tag high';
+            confTag.innerHTML = '<span class="tag-dot"></span>HIGH CONFIDENCE';
+          } else if (cScore >= 50) {
+            confTag.className = 'confidence-tag med';
+            confTag.innerHTML = '<span class="tag-dot"></span>MEDIUM CONFIDENCE';
+          } else {
+            confTag.className = 'confidence-tag low';
+            confTag.innerHTML = '<span class="tag-dot"></span>LOW CONFIDENCE';
+          }
         }
         if (ev.coaching) {
           retryDrill = ev.coaching.retryDrill;

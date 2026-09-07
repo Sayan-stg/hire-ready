@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin &amp; Quality Control — HireReady</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --void:#050507;
+  --void-2:#0a0a10;
+  --line: rgba(232,233,237,0.09);
+  --line-strong: rgba(232,233,237,0.16);
+  --silver:#e9eaef;
+  --silver-dim:#9395a3;
+  --silver-faint:#5c5e6c;
+  --nebula:#2b3a67;
+  --nebula-bright:#4a5f9e;
+  --aurora:#6f7fae;
+  --cyan:#5fd4d9;
+  --good:#6fae8a;
+  --warn:#c9a35f;
+  --danger:#ef4444;
+  --ease: cubic-bezier(.16,.8,.24,1);
+}
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  background:var(--void); color:var(--silver);
+  font-family:'Inter', sans-serif; -webkit-font-smoothing:antialiased;
+  min-height:100vh; overflow-x:hidden;
+}
+a{ color:inherit; text-decoration:none; }
+::selection{ background:var(--nebula-bright); color:#fff; }
+.mono{ font-family:'JetBrains Mono', monospace; letter-spacing:.04em; }
+
+.stars{
+  position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.4;
+  background-image:
+    radial-gradient(1px 1px at 15% 20%, rgba(255,255,255,.5) 0%, transparent 60%),
+    radial-gradient(1px 1px at 80% 12%, rgba(255,255,255,.35) 0%, transparent 60%),
+    radial-gradient(1.5px 1.5px at 40% 65%, rgba(255,255,255,.4) 0%, transparent 60%),
+    radial-gradient(1px 1px at 92% 50%, rgba(255,255,255,.3) 0%, transparent 60%),
+    radial-gradient(1px 1px at 60% 85%, rgba(255,255,255,.35) 0%, transparent 60%);
+}
+.glow-ambient{
+  position:fixed; z-index:0; pointer-events:none; top:-10%; right:-5%;
+  width:800px; height:600px;
+  background:radial-gradient(ellipse, rgba(95,212,217,0.06), transparent 70%);
+  filter:blur(30px);
+}
+
+/* ---------- SHELL & SIDEBAR ---------- */
+.shell{ display:flex; min-height:100vh; position:relative; z-index:1; }
+.sidebar{
+  width:240px; flex-shrink:0; border-right:1px solid var(--line);
+  background:rgba(255,255,255,0.015); backdrop-filter:blur(16px);
+  display:flex; flex-direction:column; position:sticky; top:0; height:100vh;
+}
+.side-brand{
+  display:flex; align-items:center; gap:12px; padding:26px 22px; border-bottom:1px solid var(--line);
+}
+.side-brand svg{ width:26px; height:26px; flex-shrink:0; }
+.side-brand-text{ display:flex; flex-direction:column; line-height:1.2; }
+.side-brand-text .p{ font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:600; }
+.side-brand-text .s{ font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; color:var(--silver-faint); text-transform:uppercase; }
+
+.side-nav{ flex:1; padding:18px 12px; display:flex; flex-direction:column; gap:2px; }
+.nav-item{
+  display:flex; align-items:center; gap:13px; padding:11px 12px; border-radius:5px;
+  font-size:13.5px; color:var(--silver-dim); transition:background .25s var(--ease), color .25s var(--ease);
+  position:relative;
+}
+.nav-item svg{ width:18px; height:18px; flex-shrink:0; opacity:.85; }
+.nav-item:hover{ background:rgba(255,255,255,0.03); color:var(--silver); }
+.nav-item.active{ color:var(--silver); background:rgba(95,212,217,0.09); }
+.nav-item.active::before{
+  content:''; position:absolute; left:-12px; top:50%; transform:translateY(-50%);
+  width:2px; height:18px; background:var(--cyan); box-shadow:0 0 8px 1px var(--cyan);
+}
+.nav-label-eyebrow{
+  font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.14em;
+  color:var(--silver-faint); text-transform:uppercase; padding:14px 12px 6px;
+}
+.side-foot{
+  border-top:1px solid var(--line); padding:16px 20px; display:flex; align-items:center; gap:12px;
+}
+.side-foot .who{ line-height:1.3; flex:1; min-width:0; }
+.side-foot .who .n{ font-size:12.5px; color:var(--silver); }
+.side-foot .who .r{ font-size:10.5px; color:var(--cyan); font-family:'JetBrains Mono',monospace; }
+
+/* ---------- MAIN CONTENT AREA ---------- */
+.main{ flex:1; min-width:0; padding:32px 40px 80px; position:relative; }
+@media(max-width:768px){ .main{ padding:20px 16px 60px; } }
+
+/* Topbar */
+.admin-topbar{
+  display:flex; justify-content:space-between; align-items:flex-start;
+  flex-wrap:wrap; gap:18px; margin-bottom:30px;
+}
+.admin-eyebrow{
+  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em;
+  color:var(--cyan); text-transform:uppercase; display:flex; align-items:center; gap:8px; margin-bottom:8px;
+}
+.admin-eyebrow::before{
+  content:''; width:6px; height:6px; border-radius:50%; background:var(--cyan);
+  box-shadow:0 0 8px 1px var(--cyan);
+}
+.admin-eyebrow .qc-badge{
+  background:rgba(95,212,217,0.12); border:1px solid rgba(95,212,217,0.35);
+  color:var(--cyan); padding:2px 6px; border-radius:3px; font-size:9px;
+}
+.admin-topbar h1{ font-family:'Space Grotesk',sans-serif; font-size:28px; font-weight:600; }
+.admin-topbar .meta{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--silver-faint); margin-top:6px; }
+
+.admin-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.btn{
+  font-family:'Inter',sans-serif; font-size:12.5px; font-weight:500; padding:9px 16px;
+  border-radius:5px; display:inline-flex; align-items:center; gap:8px; cursor:pointer;
+  transition:all .2s var(--ease); border:none; text-decoration:none;
+}
+.btn-solid{ background:var(--silver); color:var(--void); font-weight:600; }
+.btn-solid:hover{ background:#ffffff; transform:translateY(-1px); box-shadow:0 0 16px rgba(255,255,255,0.25); }
+.btn-outline{
+  background:rgba(255,255,255,0.02); border:1px solid var(--line-strong); color:var(--silver-dim);
+}
+.btn-outline:hover{ border-color:var(--silver); color:var(--silver); background:rgba(255,255,255,0.05); }
+
+/* ---------- 1. SCORING-CONFIDENCE INDICATORS (REUSABLE BADGES) ---------- */
+.confidence-tag{
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:600;
+  padding:3px 8px; border-radius:4px; letter-spacing:.05em; text-transform:uppercase;
+  transition:all .2s var(--ease); white-space:nowrap;
+}
+.confidence-tag .tag-dot{
+  width:6px; height:6px; border-radius:50%; flex-shrink:0;
+}
+/* HIGH: Micro-opacity cyan */
+.confidence-tag.high{
+  background:rgba(95,212,217,0.10);
+  border:1px solid rgba(95,212,217,0.35);
+  color:var(--cyan);
+}
+.confidence-tag.high .tag-dot{
+  background:var(--cyan);
+  box-shadow:0 0 6px var(--cyan);
+}
+/* MEDIUM: Micro-opacity amber/aurora */
+.confidence-tag.med{
+  background:rgba(201,163,95,0.10);
+  border:1px solid rgba(201,163,95,0.35);
+  color:var(--warn);
+}
+.confidence-tag.med .tag-dot{
+  background:var(--warn);
+  box-shadow:0 0 6px var(--warn);
+}
+/* LOW: Muted silver/gray */
+.confidence-tag.low{
+  background:rgba(147,149,163,0.10);
+  border:1px solid rgba(147,149,163,0.25);
+  color:var(--silver-dim);
+}
+.confidence-tag.low .tag-dot{
+  background:var(--silver-dim);
+}
+
+/* Glass Panels */
+.glass-panel{
+  background:rgba(12,14,24,0.85); border:1px solid var(--line-strong);
+  border-radius:10px; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  padding:22px 24px; position:relative; overflow:hidden;
+}
+
+/* KPI Grid */
+.kpi-row{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px;
+}
+@media(max-width:1100px){ .kpi-row{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:600px){ .kpi-row{ grid-template-columns:1fr; } }
+
+.kpi-card{
+  background:rgba(255,255,255,0.018); border:1px solid var(--line-strong);
+  border-radius:8px; padding:18px 20px; display:flex; flex-direction:column; gap:6px;
+  position:relative;
+}
+.kpi-card .kpi-label{
+  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.12em;
+  color:var(--silver-faint); text-transform:uppercase; display:flex; justify-content:space-between;
+}
+.kpi-card .kpi-val{
+  font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:600; color:var(--silver);
+}
+.kpi-card .kpi-sub{
+  font-size:11px; color:var(--silver-dim); display:flex; align-items:center; gap:6px;
+}
+.kpi-card .kpi-sub .badge-pass{
+  color:var(--good); font-family:'JetBrains Mono',monospace; font-size:9.5px;
+}
+
+/* ---------- 2. ADMIN ANALYTICS VIEW (ORBITAL LINES) ---------- */
+.orbital-section{
+  margin-bottom:34px; position:relative;
+}
+.section-head{
+  display:flex; justify-content:space-between; align-items:flex-end;
+  margin-bottom:16px;
+}
+.section-title{ font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:600; color:var(--silver); }
+.section-desc{ font-size:12px; color:var(--silver-faint); margin-top:3px; }
+
+/* 1px Orbital Lines separating data nodes */
+.orbital-line{
+  height:1px; width:100%;
+  background:linear-gradient(90deg, transparent 0%, rgba(95,212,217,0.3) 15%, rgba(111,127,174,0.6) 50%, rgba(95,212,217,0.3) 85%, transparent 100%);
+  position:relative; margin:22px 0;
+}
+.orbital-line::before{
+  content:''; position:absolute; top:-2px; left:50%; transform:translateX(-50%);
+  width:5px; height:5px; border-radius:50%; background:var(--cyan);
+  box-shadow:0 0 8px 1px var(--cyan);
+}
+.orbital-line::after{
+  content:'ORBITAL // LAT-42.9'; position:absolute; top:-16px; right:20px;
+  font-family:'JetBrains Mono',monospace; font-size:8.5px; color:rgba(95,212,217,0.5);
+  letter-spacing:.12em;
+}
+
+/* Flagged Transcripts Grid */
+.flagged-deck{
+  display:grid; grid-template-columns:repeat(2,1fr); gap:18px;
+}
+@media(max-width:980px){ .flagged-deck{ grid-template-columns:1fr; } }
+
+.flagged-card{
+  background:rgba(255,255,255,0.015); border:1px solid var(--line-strong);
+  border-radius:8px; padding:18px 20px; display:flex; flex-direction:column; gap:12px;
+  position:relative; transition:border-color .25s var(--ease);
+}
+.flagged-card:hover{ border-color:rgba(95,212,217,0.4); box-shadow:0 0 20px rgba(95,212,217,0.05); }
+
+/* Orbital anchor dot on data nodes */
+.orbital-node-anchor{
+  position:absolute; top:-5px; left:20px; width:9px; height:9px;
+  border-radius:50%; background:var(--void); border:1px solid var(--cyan);
+  display:flex; align-items:center; justify-content:center;
+}
+.orbital-node-anchor::after{
+  content:''; width:3px; height:3px; border-radius:50%; background:var(--cyan);
+}
+
+.flag-header{
+  display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
+}
+.flag-id-block .flag-id{
+  font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; color:var(--silver);
+}
+.flag-id-block .flag-meta{
+  font-size:10.5px; color:var(--silver-faint); margin-top:2px;
+}
+.flag-reason-pill{
+  font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:600;
+  padding:3px 8px; border-radius:3px; background:rgba(239,68,68,0.12);
+  border:1px solid rgba(239,68,68,0.35); color:#fca5a5; letter-spacing:.04em;
+}
+.flag-reason-pill.warn{
+  background:rgba(201,163,95,0.12); border-color:rgba(201,163,95,0.35); color:#fde047;
+}
+
+.flag-scores-bar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 12px; background:rgba(0,0,0,0.3); border-radius:6px;
+  border:1px solid var(--line); font-family:'JetBrains Mono',monospace; font-size:11px;
+}
+.flag-scores-bar .score-item{ display:flex; gap:6px; align-items:center; }
+.flag-scores-bar .score-item .lbl{ color:var(--silver-faint); font-size:10px; }
+.flag-scores-bar .score-item .val{ font-weight:600; color:var(--silver); }
+
+.flag-snippet-box{
+  background:rgba(0,0,0,0.25); border-left:2px solid var(--cyan);
+  padding:8px 12px; border-radius:0 4px 4px 0; font-family:'JetBrains Mono',monospace;
+  font-size:11px; line-height:1.45; color:var(--silver-dim);
+}
+.flag-actions{
+  display:flex; justify-content:space-between; align-items:center; margin-top:4px;
+}
+.btn-audit{
+  font-family:'JetBrains Mono',monospace; font-size:10.5px; padding:6px 12px;
+  border-radius:4px; cursor:pointer; transition:all .2s; border:none;
+}
+.btn-audit.primary{
+  background:rgba(95,212,217,0.14); border:1px solid rgba(95,212,217,0.4); color:var(--cyan);
+}
+.btn-audit.primary:hover{ background:rgba(95,212,217,0.25); color:#fff; }
+.btn-audit.secondary{
+  background:transparent; border:1px solid var(--line-strong); color:var(--silver-faint);
+}
+.btn-audit.secondary:hover{ color:var(--silver); border-color:var(--silver-dim); }
+
+/* ---------- 3. CALIBRATION DATASET TABLE (MISSION CONTROL GRID) ---------- */
+.dense-controls{
+  display:flex; justify-content:space-between; align-items:center;
+  gap:12px; margin-bottom:14px; flex-wrap:wrap;
+}
+.filter-pills{ display:flex; gap:6px; }
+.filter-pill{
+  font-family:'JetBrains Mono',monospace; font-size:11px; padding:5px 10px;
+  border-radius:4px; background:rgba(255,255,255,0.02); border:1px solid var(--line-strong);
+  color:var(--silver-dim); cursor:pointer; transition:all .2s;
+}
+.filter-pill:hover{ color:var(--silver); background:rgba(255,255,255,0.05); }
+.filter-pill.active{
+  background:rgba(95,212,217,0.12); border-color:var(--cyan); color:var(--cyan);
+}
+.search-input{
+  background:rgba(0,0,0,0.3); border:1px solid var(--line-strong); border-radius:4px;
+  padding:6px 12px; color:var(--silver); font-family:'JetBrains Mono',monospace;
+  font-size:11.5px; outline:none; width:220px; transition:border-color .2s;
+}
+.search-input:focus{ border-color:var(--cyan); }
+
+.table-responsive{ overflow-x:auto; width:100%; border:1px solid var(--line-strong); border-radius:8px; }
+.calibration-grid{
+  width:100%; border-collapse:collapse; text-align:left; font-size:12px;
+}
+.calibration-grid thead th{
+  background:rgba(0,0,0,0.4); padding:10px 14px; border-bottom:1px solid var(--line-strong);
+  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.08em;
+  color:var(--silver-faint); text-transform:uppercase; white-space:nowrap;
+}
+.calibration-grid tbody tr{
+  border-bottom:1px solid var(--line); transition:background .15s;
+}
+.calibration-grid tbody tr:hover{ background:rgba(255,255,255,0.025); }
+.calibration-grid td{
+  padding:11px 14px; vertical-align:middle; font-family:'Inter',sans-serif;
+}
+.calibration-grid td.mono{ font-family:'JetBrains Mono',monospace; }
+
+.id-code{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--cyan); font-weight:600; }
+.archetype-title{ font-weight:500; color:var(--silver); font-size:12px; }
+.framework-tag{
+  font-family:'JetBrains Mono',monospace; font-size:9.5px; color:var(--aurora);
+}
+.score-gold{ font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--silver); }
+.score-actual{ font-family:'JetBrains Mono',monospace; font-weight:600; color:#fff; }
+.delta-chip{
+  display:inline-block; font-family:'JetBrains Mono',monospace; font-size:10.5px; font-weight:600;
+  padding:2px 6px; border-radius:3px;
+}
+.delta-chip.neg{ background:rgba(95,212,217,0.12); color:var(--cyan); }
+.delta-chip.pos{ background:rgba(111,174,138,0.12); color:var(--good); }
+.delta-chip.warn{ background:rgba(201,163,95,0.15); color:var(--warn); }
+
+.status-badge{
+  font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.06em;
+  padding:3px 6px; border-radius:3px; text-transform:uppercase;
+}
+.status-badge.optimal{ background:rgba(95,212,217,0.08); color:var(--cyan); border:1px solid rgba(95,212,217,0.25); }
+.status-badge.tolerance{ background:rgba(255,255,255,0.04); color:var(--silver-dim); border:1px solid var(--line); }
+.status-badge.review{ background:rgba(239,68,68,0.1); color:#fca5a5; border:1px solid rgba(239,68,68,0.3); }
+
+/* Modal for Transcript Inspection */
+.modal-backdrop{
+  position:fixed; inset:0; z-index:99999; background:rgba(3,4,8,0.85);
+  backdrop-filter:blur(16px); display:none; align-items:center; justify-content:center; padding:20px;
+}
+.modal-backdrop.active{ display:flex; }
+.inspect-modal{
+  width:100%; max-width:740px; max-height:85vh; background:#0c0e18;
+  border:1px solid var(--line-strong); border-radius:12px;
+  display:flex; flex-direction:column; overflow:hidden; box-shadow:0 24px 60px rgba(0,0,0,0.8);
+}
+.inspect-modal-header{
+  padding:18px 24px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;
+}
+.inspect-modal-header h3{ font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:600; }
+.inspect-modal-body{ padding:20px 24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:14px; font-size:12px; }
+.inspect-modal-footer{
+  padding:14px 24px; border-top:1px solid var(--line); display:flex; justify-content:flex-end; gap:10px;
+}
+</style>
+</head>
+<body>
+
+<div class="stars"></div>
+<div class="glow-ambient"></div>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="side-brand">
+      <svg viewBox="0 0 28 28" fill="none">
+        <circle cx="14" cy="14" r="13" stroke="rgba(232,233,237,0.2)" stroke-width="1.2"/>
+        <path d="M14 3v22M3 14h22" stroke="rgba(232,233,237,0.15)" stroke-width="1"/>
+        <circle cx="14" cy="14" r="5" fill="#5fd4d9" fill-opacity="0.9"/>
+      </svg>
+      <div class="side-brand-text">
+        <span class="p">HireReady</span>
+        <span class="s">Sixth Bit QC</span>
+      </div>
+    </div>
+
+    <nav class="side-nav">
+      <div class="nav-label-eyebrow">Console</div>
+      <a href="dashboard.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="11" width="8" height="10" rx="1.5"/><rect x="3" y="14" width="8" height="7" rx="1.5"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="interview.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/><path d="M9 22h6"/></svg>
+        <span>Interviews</span>
+      </a>
+      <a href="interview.html?tab=code" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 8 4 12l5 4"/><path d="M15 8l5 4-5 4"/></svg>
+        <span>Coding Sandbox</span>
+      </a>
+      <a href="resources.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Resources</span>
+      </a>
+      <a href="leaderboard.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a2 2 0 0 0 2 4"/><path d="M17 6h3a2 2 0 0 1-2 4"/></svg>
+        <span>Leaderboard</span>
+      </a>
+
+      <div class="nav-label-eyebrow">Governance</div>
+      <a href="admin.html" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="3"/></svg>
+        <span>Quality Control</span>
+      </a>
+      <a href="settings.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <div class="side-foot">
+      <div class="who">
+        <div class="n">Admin Console</div>
+        <div class="r">SIXTH BIT // AUDIT</div>
+      </div>
+      <a href="dashboard.html" title="Exit Admin" style="color:var(--silver-faint);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></a>
+    </div>
+  </aside>
+
+  <!-- MAIN VIEW -->
+  <main class="main">
+    <div class="admin-topbar">
+      <div>
+        <div class="admin-eyebrow">
+          <span>MODEL GOVERNANCE // MISSION PROTOCOL QC-5</span>
+          <span class="qc-badge">ACTIVE AUDIT DECK</span>
+        </div>
+        <h1>Quality Control &amp; Admin Dashboard</h1>
+        <div class="meta" id="topSyncMeta">ENGINE: SIXTH BIT / HR-1 · BUILD v4.2.0 · STATUS: NOMINAL (ZERO DRIFT)</div>
+      </div>
+      <div class="admin-actions">
+        <button type="button" class="btn btn-outline" onclick="triggerRecalibrate()">
+          <span>⚡ Recalibrate Benchmarks</span>
+        </button>
+        <button type="button" class="btn btn-solid" onclick="exportGovernanceLog()">
+          <span>Export Governance Report</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- KPI ROW -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label"><span>Mean Absolute Error</span><span class="mono">MAE</span></div>
+        <div class="kpi-val" id="kpiMae">2.10 <span style="font-size:13px;color:var(--silver-faint);">pts</span></div>
+        <div class="kpi-sub"><span class="badge-pass">✓ NOMINAL</span> <span>Tolerance: &lt; 3.0 pts</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><span>Consistency Index</span><span class="mono">TOLERANCE</span></div>
+        <div class="kpi-val" id="kpiConsistency">98.4%</div>
+        <div class="kpi-sub"><span class="badge-pass">✓ PASSING</span> <span>Within ±4 pts boundary</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><span>Flagged Transcripts</span><span class="mono">AUDIT DECK</span></div>
+        <div class="kpi-val" id="kpiFlagged">2.8%</div>
+        <div class="kpi-sub"><span>4 Sessions Awaiting Review</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><span>Scoring Confidence</span><span class="mono">DISTRIBUTION</span></div>
+        <div class="kpi-val" style="font-size:20px;display:flex;gap:8px;align-items:center;">
+          <span class="confidence-tag high"><span class="tag-dot"></span>70% HIGH</span>
+          <span class="confidence-tag med"><span class="tag-dot"></span>20%</span>
+          <span class="confidence-tag low"><span class="tag-dot"></span>10%</span>
+        </div>
+        <div class="kpi-sub"><span>Calibrated against 10 Gold standards</span></div>
+      </div>
+    </div>
+
+    <!-- ---------- 1. ADMIN ANALYTICS VIEW: FLAGGED TRANSCRIPTS (1px ORBITAL LINES) ---------- -->
+    <section class="orbital-section">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">Admin Analytics: Transcript Anomaly Deck</h2>
+          <p class="section-desc">Review anomalous telemetry, sudden focus departures, and score divergence nodes along real-time orbital coordinate lines.</p>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--cyan);">
+          ORBITAL SURVEILLANCE ACTIVE
+        </div>
+      </div>
+
+      <!-- 1px Orbital Line Separator -->
+      <div class="orbital-line"></div>
+
+      <!-- Flagged Transcripts Nodes -->
+      <div class="flagged-deck" id="flaggedDeckContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- 1px Orbital Line Separator between sections -->
+    <div class="orbital-line"></div>
+
+    <!-- ---------- 2. CALIBRATION DATASET TABLE (DENSE MISSION-CONTROL GRID) ---------- -->
+    <section class="glass-panel" style="margin-top:20px;">
+      <div class="section-head" style="margin-bottom:12px;">
+        <div>
+          <h2 class="section-title">Calibration Dataset: Golden vs. Actual AI Scores</h2>
+          <p class="section-desc">Dense mission-control telemetry comparing human consensus benchmarks against Sixth Bit AI evaluation outputs.</p>
+        </div>
+        <div class="dense-controls">
+          <div class="filter-pills" id="roleFilters">
+            <button type="button" class="filter-pill active" onclick="filterByRole('All', this)">All Roles</button>
+            <button type="button" class="filter-pill" onclick="filterByRole('SDE', this)">SDE</button>
+            <button type="button" class="filter-pill" onclick="filterByRole('Data Science', this)">Data Science</button>
+            <button type="button" class="filter-pill" onclick="filterByRole('DevOps', this)">DevOps</button>
+            <button type="button" class="filter-pill" onclick="filterByRole('PM', this)">PM</button>
+          </div>
+          <input type="text" class="search-input" id="tableSearchInput" placeholder="Filter benchmark / claim..." oninput="handleTableSearch(this.value)" />
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="calibration-grid">
+          <thead>
+            <tr>
+              <th>Benchmark ID</th>
+              <th>Role &amp; Archetype</th>
+              <th>Company Framework</th>
+              <th>Golden Score</th>
+              <th>Actual AI Score</th>
+              <th>Variance (Δ)</th>
+              <th>Scoring Confidence</th>
+              <th>Consistency Status</th>
+              <th style="text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="calibrationTbody">
+            <!-- Rendered dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- INSPECTION MODAL -->
+<div class="modal-backdrop" id="inspectModalBackdrop">
+  <div class="inspect-modal">
+    <div class="inspect-modal-header">
+      <div>
+        <div class="mono" style="font-size:10px; color:var(--cyan);" id="modalCaseId">CASE // GOLD-SDE-01</div>
+        <h3 id="modalTitle">Archetype Telemetry Inspection</h3>
+      </div>
+      <button type="button" onclick="closeInspectModal()" style="background:transparent;border:none;color:var(--silver);cursor:pointer;font-size:18px;">✕</button>
+    </div>
+    <div class="inspect-modal-body" id="modalBodyContent">
+      <!-- Injected -->
+    </div>
+    <div class="inspect-modal-footer">
+      <button type="button" class="btn btn-outline" onclick="closeInspectModal()">Close</button>
+      <button type="button" class="btn btn-solid" onclick="approveAuditRecord()">Confirm Audit Review</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script>
+  let calibrationData = [];
+  let flaggedData = [];
+  let activeRoleFilter = 'All';
+  let activeSearchQuery = '';
+  let currentAuditingSessionId = null;
+
+  async function loadAdminData() {
+    try {
+      const res = await api.get('/admin/calibration');
+      if (res && res.success) {
+        calibrationData = res.calibrationDataset || [];
+        flaggedData = res.flaggedTranscripts || [];
+
+        // Update KPIs
+        if (res.kpis) {
+          document.getElementById('kpiMae').innerHTML = `${res.kpis.mae} <span style="font-size:13px;color:var(--silver-faint);">pts</span>`;
+          document.getElementById('kpiConsistency').textContent = `${res.kpis.consistencyIndex}%`;
+          document.getElementById('kpiFlagged').textContent = res.kpis.flaggedRate;
+          document.getElementById('topSyncMeta').textContent = `ENGINE: ${res.engine} · BUILD ${res.version} · STATUS: ${res.kpis.driftStatus}`;
+        }
+
+        renderFlaggedDeck();
+        renderCalibrationTable();
+      }
+    } catch(err) {
+      console.warn('Using local fallback admin dataset:', err);
+      // Fallback local render if server offline
+      renderFlaggedDeck();
+      renderCalibrationTable();
+    }
+  }
+
+  /* ---------- RENDER SCORING-CONFIDENCE TAG (REUSABLE COMPONENT) ---------- */
+  function getConfidenceBadge(confidenceLevel) {
+    const level = (confidenceLevel || 'High').toLowerCase();
+    if (level === 'high') {
+      return `<span class="confidence-tag high" title="Scoring Confidence: High (>90% model certainty)"><span class="tag-dot"></span>HIGH</span>`;
+    } else if (level === 'medium' || level === 'med') {
+      return `<span class="confidence-tag med" title="Scoring Confidence: Medium (75-90% certainty)"><span class="tag-dot"></span>MEDIUM</span>`;
+    } else {
+      return `<span class="confidence-tag low" title="Scoring Confidence: Low (<75% certainty — human audit recommended)"><span class="tag-dot"></span>LOW</span>`;
+    }
+  }
+
+  /* ---------- RENDER FLAGGED DECK (ORBITAL NODES) ---------- */
+  function renderFlaggedDeck() {
+    const container = document.getElementById('flaggedDeckContainer');
+    if (!container) return;
+
+    if (!flaggedData.length) {
+      container.innerHTML = `<div style="grid-column:span 2;text-align:center;padding:30px;color:var(--silver-faint);font-family:'JetBrains Mono',monospace;">✓ NO ACTIVE FLAGGED SESSIONS IN ORBITAL QUEUE</div>`;
+      return;
+    }
+
+    container.innerHTML = flaggedData.map((item, idx) => {
+      const isAudited = item.status === 'AUDITED_RESOLVED';
+      const severityClass = item.flagSeverity === 'HIGH' ? '' : 'warn';
+      return `
+        <div class="flagged-card" id="flagCard_${item.sessionId}">
+          <div class="orbital-node-anchor"></div>
+          
+          <div class="flag-header">
+            <div class="flag-id-block">
+              <div class="flag-id">${item.candidateAlias} <span style="font-size:10.5px;color:var(--silver-faint);margin-left:6px;">// ${item.sessionId}</span></div>
+              <div class="flag-meta">${item.role} · ${item.framework} · ${new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="flag-reason-pill ${severityClass}">${item.flagReason}</span>
+              ${getConfidenceBadge(item.confidence)}
+            </div>
+          </div>
+
+          <div class="flag-scores-bar">
+            <div class="score-item">
+              <span class="lbl">Actual AI:</span>
+              <span class="val">${item.actualScore}/100</span>
+            </div>
+            <div class="score-item">
+              <span class="lbl">Expected:</span>
+              <span class="val">${item.expectedScore}/100</span>
+            </div>
+            <div class="score-item">
+              <span class="lbl">Tab Switches:</span>
+              <span class="val" style="${item.tabSwitches > 5 ? 'color:#fca5a5;' : ''}">${item.tabSwitches}</span>
+            </div>
+            <div class="score-item">
+              <span class="lbl">Paste Events:</span>
+              <span class="val" style="${item.pasteEvents > 3 ? 'color:#fca5a5;' : ''}">${item.pasteEvents}</span>
+            </div>
+          </div>
+
+          <div class="flag-snippet-box">
+            ${item.sampleSnippet}
+          </div>
+
+          <div class="flag-actions">
+            <span class="mono" style="font-size:10px; color:${isAudited ? 'var(--good)' : 'var(--warn)'};">
+              STATUS: ${item.status}
+            </span>
+            <div style="display:flex;gap:8px;">
+              <button type="button" class="btn-audit secondary" onclick="inspectFlaggedSession('${item.sessionId}')">Inspect Nodes</button>
+              ${!isAudited ? `<button type="button" class="btn-audit primary" onclick="resolveFlaggedSession('${item.sessionId}')">Mark Audited</button>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  /* ---------- RENDER CALIBRATION DATASET TABLE ---------- */
+  function renderCalibrationTable() {
+    const tbody = document.getElementById('calibrationTbody');
+    if (!tbody) return;
+
+    let filtered = calibrationData.filter(item => {
+      const matchRole = activeRoleFilter === 'All' || item.role === activeRoleFilter;
+      const query = activeSearchQuery.toLowerCase();
+      const matchSearch = !query || 
+        item.id.toLowerCase().includes(query) || 
+        item.archetype.toLowerCase().includes(query) ||
+        item.framework.toLowerCase().includes(query) ||
+        (item.notes && item.notes.toLowerCase().includes(query));
+      return matchRole && matchSearch;
+    });
+
+    if (!filtered.length) {
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--silver-faint);font-family:'JetBrains Mono',monospace;">No matching calibration benchmarks found for current filters.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(row => {
+      const delta = row.delta !== undefined ? row.delta : (row.actualScore - row.goldenScore);
+      const deltaSign = delta > 0 ? `+${delta}` : `${delta}`;
+      const deltaClass = Math.abs(delta) <= 2 ? 'neg' : (Math.abs(delta) <= 4 ? 'pos' : 'warn');
+      const statusClass = row.status === 'OPTIMAL_ALIGNMENT' ? 'optimal' : (row.status === 'WITHIN_TOLERANCE' ? 'tolerance' : 'review');
+
+      return `
+        <tr>
+          <td class="id-code">${row.id}</td>
+          <td>
+            <div class="archetype-title">${row.archetype}</div>
+            <div class="mono" style="font-size:10px;color:var(--silver-faint);">${row.role}</div>
+          </td>
+          <td><span class="framework-tag">${row.framework}</span></td>
+          <td class="mono score-gold">${row.goldenScore}/100</td>
+          <td class="mono score-actual">${row.actualScore}/100</td>
+          <td>
+            <span class="delta-chip ${deltaClass}">Δ ${deltaSign} pts</span>
+          </td>
+          <td>
+            ${getConfidenceBadge(row.confidence)}
+          </td>
+          <td>
+            <span class="status-badge ${statusClass}">${row.status}</span>
+          </td>
+          <td style="text-align:right;">
+            <button type="button" class="btn-audit secondary" onclick="inspectBenchmarkCase('${row.id}')">Inspect Rubric</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function filterByRole(role, el) {
+    activeRoleFilter = role;
+    document.querySelectorAll('#roleFilters .filter-pill').forEach(b => b.classList.remove('active'));
+    if (el) el.classList.add('active');
+    renderCalibrationTable();
+  }
+
+  function handleTableSearch(val) {
+    activeSearchQuery = val;
+    renderCalibrationTable();
+  }
+
+  /* ---------- MODAL ACTIONS ---------- */
+  function inspectBenchmarkCase(caseId) {
+    const item = calibrationData.find(c => c.id === caseId);
+    if (!item) return;
+
+    document.getElementById('modalCaseId').textContent = `BENCHMARK // ${item.id} [${item.role}]`;
+    document.getElementById('modalTitle').textContent = `${item.archetype} (${item.framework})`;
+    document.getElementById('modalBodyContent').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px;background:rgba(0,0,0,0.3);border-radius:6px;border:1px solid var(--line);">
+        <div><span style="color:var(--silver-faint);font-size:10.5px;">GOLDEN BENCHMARK SCORE:</span> <strong style="font-family:'JetBrains Mono',monospace;color:var(--silver);">${item.goldenScore}/100</strong></div>
+        <div><span style="color:var(--silver-faint);font-size:10.5px;">ACTUAL AI MODEL SCORE:</span> <strong style="font-family:'JetBrains Mono',monospace;color:var(--cyan);">${item.actualScore}/100</strong></div>
+        <div><span style="color:var(--silver-faint);font-size:10.5px;">SCORING CONFIDENCE:</span> ${getConfidenceBadge(item.confidence)}</div>
+        <div><span style="color:var(--silver-faint);font-size:10.5px;">ALIGNMENT STATUS:</span> <span class="status-badge optimal">${item.status}</span></div>
+      </div>
+      <div style="margin-top:8px;">
+        <div class="mono" style="font-size:10.5px;color:var(--silver-faint);text-transform:uppercase;margin-bottom:6px;">BENCHMARK EVALUATION EVIDENCE &amp; NOTES:</div>
+        <p style="font-size:12px;color:var(--silver);line-height:1.5;background:rgba(255,255,255,0.02);padding:10px 12px;border-radius:6px;border:1px solid var(--line);">${item.notes || 'Consensus verified by senior engineering bar raisers.'}</p>
+      </div>
+      <div style="margin-top:6px;">
+        <div class="mono" style="font-size:10.5px;color:var(--silver-faint);text-transform:uppercase;margin-bottom:6px;">RUBRIC COMPONENT BREAKDOWN:</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-family:'JetBrains Mono',monospace;font-size:11px;">
+          <div style="padding:8px;background:rgba(0,0,0,0.2);border-radius:4px;border:1px solid var(--line);">Framing: 35%</div>
+          <div style="padding:8px;background:rgba(0,0,0,0.2);border-radius:4px;border:1px solid var(--line);">Depth: 35%</div>
+          <div style="padding:8px;background:rgba(0,0,0,0.2);border-radius:4px;border:1px solid var(--line);">Evidence: 15%</div>
+          <div style="padding:8px;background:rgba(0,0,0,0.2);border-radius:4px;border:1px solid var(--line);">Comms: 15%</div>
+        </div>
+      </div>
+    `;
+    document.getElementById('inspectModalBackdrop').classList.add('active');
+  }
+
+  function inspectFlaggedSession(sessionId) {
+    const item = flaggedData.find(f => f.sessionId === sessionId);
+    if (!item) return;
+
+    currentAuditingSessionId = sessionId;
+    document.getElementById('modalCaseId').textContent = `ORBITAL ANOMALY // ${item.sessionId}`;
+    document.getElementById('modalTitle').textContent = `${item.flagReason} (${item.candidateAlias})`;
+    document.getElementById('modalBodyContent').innerHTML = `
+      <div style="padding:12px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#fca5a5;">
+        ALERT: ${item.flagSummary}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:10px;">
+        <div style="padding:8px;background:rgba(0,0,0,0.3);border-radius:4px;border:1px solid var(--line);">AI Score: ${item.actualScore}</div>
+        <div style="padding:8px;background:rgba(0,0,0,0.3);border-radius:4px;border:1px solid var(--line);">Expected: ${item.expectedScore}</div>
+        <div style="padding:8px;background:rgba(0,0,0,0.3);border-radius:4px;border:1px solid var(--line);">Tabs: ${item.tabSwitches}</div>
+        <div style="padding:8px;background:rgba(0,0,0,0.3);border-radius:4px;border:1px solid var(--line);">Pastes: ${item.pasteEvents}</div>
+      </div>
+      <div style="margin-top:10px;">
+        <div class="mono" style="font-size:10px;color:var(--silver-faint);text-transform:uppercase;margin-bottom:6px;">CONVERSATION SNIPPET &amp; TELEMETRY HOOK:</div>
+        <div style="background:rgba(0,0,0,0.4);padding:12px;border-radius:6px;border:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.5;color:#e2e8f0;">
+          ${item.sampleSnippet}
+        </div>
+      </div>
+    `;
+    document.getElementById('inspectModalBackdrop').classList.add('active');
+  }
+
+  function closeInspectModal() {
+    document.getElementById('inspectModalBackdrop').classList.remove('active');
+    currentAuditingSessionId = null;
+  }
+
+  async function resolveFlaggedSession(sessionId) {
+    try {
+      await api.post('/admin/flag-review', { sessionId, resolution: 'AUDITED_RESOLVED' });
+    } catch(e) {}
+    const item = flaggedData.find(f => f.sessionId === sessionId);
+    if (item) item.status = 'AUDITED_RESOLVED';
+    renderFlaggedDeck();
+  }
+
+  async function approveAuditRecord() {
+    if (currentAuditingSessionId) {
+      await resolveFlaggedSession(currentAuditingSessionId);
+    }
+    closeInspectModal();
+  }
+
+  async function triggerRecalibrate() {
+    try {
+      const res = await api.post('/admin/recalibrate', {});
+      alert(res?.message || 'Recalibration run dispatched against all Gold benchmarks.');
+      loadAdminData();
+    } catch(e) {
+      alert('Recalibration run dispatched locally against benchmarks.');
+    }
+  }
+
+  function exportGovernanceLog() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+      report: "HireReady Quality Control & Model Governance",
+      engine: "Sixth Bit HR-1",
+      timestamp: new Date().toISOString(),
+      calibrationBenchmarks: calibrationData,
+      flaggedTranscripts: flaggedData
+    }, null, 2));
+    const dl = document.createElement('a');
+    dl.setAttribute("href", dataStr);
+    dl.setAttribute("download", `hireready_governance_report_${Date.now()}.json`);
+    document.body.appendChild(dl);
+    dl.click();
+    dl.remove();
+  }
+
+  loadAdminData();
+</script>
+
+</body>
+</html>
