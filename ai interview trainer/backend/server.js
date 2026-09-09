@@ -40,13 +40,15 @@ app.use('/api/interview/', apiLimiter);
 app.use(cors({
   origin: function(origin, callback) {
     const allowed = [
-      process.env.FRONTEND_URL || 'http://localhost:3000',
+      'https://hire-ready-d5hg.onrender.com',
+      process.env.FRONTEND_URL,
+      'http://localhost:3000',
       'http://localhost:5000',
       'http://127.0.0.1:5500',
       'http://localhost:5500',
       // Allow local file/test tooling
       undefined
-    ];
+    ].filter(Boolean);
     if (!origin || allowed.includes(origin)) return callback(null, true);
     if (process.env.NODE_ENV !== 'production') return callback(null, true);
     callback(new Error('CORS blocked: origin not allowed by policy.'));
