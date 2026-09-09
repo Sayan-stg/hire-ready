@@ -21,21 +21,23 @@
 
 ---
 
-[![Live Demo](https://img.shields.io/badge/LIVE%20DEMO-thefifthbit.onrender.com-00f2fe?style=for-the-badge&logo=render&logoColor=white)](https://thefifthbit.onrender.com)
-[![Google Gemini](https://img.shields.io/badge/AI%20ENGINE-GEMINI%203.5%20FLASH-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
+[![Live Demo](https://img.shields.io/badge/LIVE%20DEMO-hire--ready--d5hg.onrender.com-00f2fe?style=for-the-badge&logo=render&logoColor=white)](https://hire-ready-d5hg.onrender.com)
+[![Google Gemini](https://img.shields.io/badge/AI%20ENGINE-GEMINI%201.5%20FLASH-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
 [![Node.js](https://img.shields.io/badge/BACKEND-NODE%20%2F%20EXPRESS-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
 [![QC & Calibration](https://img.shields.io/badge/MODEL%20GOVERNANCE-MAE%202.1%20PTS%20%2F%20NOMINAL-5fd4d9?style=for-the-badge&logo=target&logoColor=white)](#6--quality-control--admin-dashboard-phase-5)
 [![Security Status](https://img.shields.io/badge/SECURITY-AUDITED%20%26%20ISOLATED-10b981?style=for-the-badge&logo=shield&logoColor=white)](#-security--white-box-audit)
-[![Team](https://img.shields.io/badge/DEVELOPED%20BY-SIXTH%20BIT-6f7fae?style=for-the-badge)](https://github.com/Sayan-stg)
+[![Team](https://img.shields.io/badge/DEVELOPED%20BY-SIXTH%20BIT-6f7fae?style=for-the-badge)](https://github.com/Sayan-stg/hire-ready)
 [![License](https://img.shields.io/badge/LICENSE-MIT-a78bfa?style=for-the-badge)](LICENSE)
 
 <br/>
 
-[🚀 **Launch Live Platform**](https://thefifthbit.onrender.com) &nbsp;•&nbsp;
+[🚀 **Launch Live Platform**](https://hire-ready-d5hg.onrender.com) &nbsp;•&nbsp;
 [⚡ **Quickstart Guide**](#-quickstart-guide) &nbsp;•&nbsp;
 [🎯 **Mission Calibration**](#1--mission-calibration-pre-interview-setup-modal) &nbsp;•&nbsp;
-[📑 **Specialization Panel**](#5--specialization-configuration-panel-phase-4) &nbsp;•&nbsp;
-[📊 **Quality Control & Calibration**](#6--quality-control--admin-dashboard-phase-5) &nbsp;•&nbsp;
+[⚡ **Pressure Mode**](#2--standard-mode-vs--pressure-mode) &nbsp;•&nbsp;
+[💻 **Code Sandbox**](#3--live-coding-sandbox--algorithmic-auditor) &nbsp;•&nbsp;
+[📑 **Resume Grounding**](#5--specialization-configuration-panel-phase-4) &nbsp;•&nbsp;
+[📊 **QC & Admin Console**](#6--quality-control--admin-dashboard-phase-5) &nbsp;•&nbsp;
 [🔒 **Security Architecture**](#-security--white-box-audit)
 
 </div>
@@ -45,6 +47,17 @@
 > [!IMPORTANT]
 > **What makes HireReady different?**  
 > Traditional mock interview tools rely on static multiple-choice questions or pre-recorded generic bots. HireReady operates as an **active, listening technical interviewer** powered by Google Gemini. It parses your spoken architecture explanations, detects hesitation fillers (`um`, `like`), grounds questions on your uploaded resume, inspects your real-time code submissions for $O(N)$ algorithmic complexity, benchmarks score consistency against human gold standards, and actively stress-tests your design assumptions under pressure.
+
+---
+
+## 🌐 Live Deployments & Environments
+
+| Resource | Environment | Live Link |
+| :--- | :--- | :--- |
+| **Production Web App** | Render (Global CDN) | [hire-ready-d5hg.onrender.com](https://hire-ready-d5hg.onrender.com) |
+| **Quality Control & Calibration Console** | Production Admin Deck | [hire-ready-d5hg.onrender.com/pages/admin.html](https://hire-ready-d5hg.onrender.com/pages/admin.html) |
+| **System Health Check** | JSON Diagnostics Endpoint | [hire-ready-d5hg.onrender.com/api/health](https://hire-ready-d5hg.onrender.com/api/health) |
+| **Calibration Metrics API** | Live KPIs & Drift Status | [hire-ready-d5hg.onrender.com/api/admin/calibration](https://hire-ready-d5hg.onrender.com/api/admin/calibration) |
 
 ---
 
@@ -199,7 +212,7 @@ Mission-control governance tracking AI consistency, grading confidence, and tran
   - Live calculation of Mean Absolute Error (MAE: `2.1 pts`) and Consistency Index (`98.4%`).
   - Search filter, role pills, variance delta ($\Delta$), and benchmark detail modals.
 - **Admin Analytics View with 1px Orbital Lines**:
-  - Subtle `1px` gradient orbital lines (`linear-gradient(90deg, transparent, rgba(95,212,217,0.3), rgba(111,127,174,0.6), transparent)`) separating anomalous data nodes.
+  - Subtle `1px` gradient orbital lines separating anomalous data nodes.
   - Real-time audit deck flagging focus-exit spikes, clipboard paste anomalies, and score variance flags.
 
 ---
@@ -224,7 +237,7 @@ graph TD
     end
 
     subgraph Core AI Intelligence & Grounding
-        Gateway -->|"Resume Grounding & Framework Prompts"| Gemini["🧠 Google Gemini API (gemini-3.5-flash-lite)"]
+        Gateway -->|"Resume Grounding & Framework Prompts"| Gemini["🧠 Google Gemini API (gemini-1.5-flash)"]
         Gemini -->|"Dynamic Probes & Scorecards"| Gateway
     end
 
@@ -361,12 +374,16 @@ MONGODB_URI=mongodb://localhost:27017/hireready
 
 ### 4. Launch the Server
 ```bash
+# Production / standard mode
 node server.js
+
+# Or development mode with auto-reload
+npm run dev
 ```
 
 ### 5. Access the Platform
-Visit **[http://localhost:5000](http://localhost:5000)** in Chrome, Edge, or Safari.  
-Access the QC Console at **[http://localhost:5000/pages/admin.html](http://localhost:5000/pages/admin.html)**.
+- Open **[http://localhost:5000](http://localhost:5000)** in Chrome, Edge, or Safari.  
+- Access the QC Calibration Console at **[http://localhost:5000/pages/admin.html](http://localhost:5000/pages/admin.html)**.
 
 <details>
 <summary><b>⚡ Click to expand: Test API Endpoints Directly via cURL</b></summary>
@@ -374,7 +391,10 @@ Access the QC Console at **[http://localhost:5000/pages/admin.html](http://local
 <br/>
 
 ```bash
-# 1. Start a resume-grounded, framework-specific AI session:
+# 1. Health check:
+curl -X GET http://localhost:5000/api/health
+
+# 2. Start a resume-grounded, framework-specific AI session:
 curl -X POST http://localhost:5000/api/interview/start \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer guest_token" \
@@ -387,13 +407,13 @@ curl -X POST http://localhost:5000/api/interview/start \
     "rounds": ["Technical"]
   }'
 
-# 2. Transmit candidate answer:
+# 3. Transmit candidate answer:
 curl -X POST http://localhost:5000/api/interview/message \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer guest_token" \
   -d '{"sessionId":"YOUR_SESSION_ID","content":"I will use Redis for in-memory caching.","pressureMode":true}'
 
-# 3. Retrieve model calibration benchmarks:
+# 4. Retrieve model calibration benchmarks:
 curl -X GET http://localhost:5000/api/admin/calibration
 ```
 
@@ -401,16 +421,39 @@ curl -X GET http://localhost:5000/api/admin/calibration
 
 ---
 
+## 🚀 Deployment (Render)
+
+HireReady is deployed in production on **[Render](https://render.com/)**:
+
+```
+Live URL: https://hire-ready-d5hg.onrender.com
+```
+
+### Render Deployment Configuration:
+1. **Repository**: `https://github.com/Sayan-stg/hire-ready`
+2. **Environment**: `Node`
+3. **Root Directory**: `ai interview trainer/backend`
+4. **Build Command**: `npm install`
+5. **Start Command**: `node server.js`
+6. **Environment Variables Configured**:
+   - `NODE_ENV`: `production`
+   - `PORT`: `10000` (or injected dynamically by Render)
+   - `GEMINI_API_KEY`: *(Your Google AI Studio Gemini API Key)*
+   - `JWT_SECRET`: *(A secure cryptographic random string)*
+   - `MONGODB_URI`: *(Optional: MongoDB Atlas connection string, falls back to in-memory mode)*
+
+---
+
 ## 🛠️ Technology Stack
 
 | Ecosystem | Technology | Purpose |
 | :--- | :--- | :--- |
-| **AI Intelligence** | Google Gemini (`gemini-3.5-flash-lite`) | Natural technical dialogue, critique, resume grounding & pressure probing |
+| **AI Intelligence** | Google Gemini (`gemini-1.5-flash`) | Natural technical dialogue, critique, resume grounding & pressure probing |
 | **Speech Processing**| Web Speech API (`SpeechRecognition`, `speechSynthesis`) | Client-side native audio transcription and natural voice readout |
 | **Backend Runtime** | Node.js & Express.js | High-throughput REST API gateway & upstream security proxy |
 | **Model Governance**| Mission-Control Calibration Engine | Golden vs actual score tracking, MAE calculation & transcript audits |
 | **Security Suite** | Helmet, express-rate-limit, bcryptjs, jsonwebtoken | Attack surface reduction, DDoS mitigation, and credential encryption |
-| **Data Layer** | MongoDB & Mongoose | Persistent storage with fallback in-memory cache |
+| **Data Layer** | MongoDB & Mongoose (with In-Memory Fallback) | Persistent storage with fallback in-memory cache |
 | **Design System** | Custom CSS3 (Obsidian & Starlight Glassmorphism) | Ultra-fast vanilla architecture with zero bulky framework overhead |
 
 ---
