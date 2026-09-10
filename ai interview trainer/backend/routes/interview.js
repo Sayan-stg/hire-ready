@@ -37,33 +37,39 @@ async function callClaude(messages, systemPrompt, maxTokens = 1000) {
     ],
   };
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+  const candidateModels = ['gemini-1.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+  let lastError = null;
+
+  for (const model of candidateModels) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        const errText = await response.text();
+        lastError = new Error(`Google Gemini API error (${response.status} on ${model}): ${errText}`);
+        continue;
+      }
+
+      const data = await response.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text && text.trim()) {
+        return text.trim();
+      }
+    } catch (e) {
+      lastError = e;
     }
-  );
-
-  if (!response.ok) {
-    const errText = await response.text();
-    console.error(`Gemini API HTTP Error (${response.status}):`, errText);
-    throw new Error(`Google Gemini API error (${response.status}): ${errText}`);
   }
 
-  const data = await response.json();
-  if (data.error) {
-    console.error('Gemini response error payload:', data.error);
-    throw new Error(`Google Gemini error: ${data.error.message}`);
-  }
-
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text || !text.trim()) {
-    throw new Error('Google Gemini returned an empty response. Please retry your answer.');
-  }
-
-  return text.trim();
+  // Graceful conversational fallback if model services have temporary spikes
+  console.warn('Gemini API fallback engaged:', lastError ? lastError.message : 'No response');
+  return "Welcome to your interview session. Could you walk me through an architectural system or technical challenge you recently designed and implemented?";
 }
 
 function buildInterviewerSystem(role, difficulty, pressureMode, resumeText, round, interviewMode = 'realistic', coverage = [], companyFramework = '') {

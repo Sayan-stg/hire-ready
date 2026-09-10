@@ -2074,17 +2074,23 @@ func solve(nums []int, target int) []int {
   async function endSession() {
     if (activeSessionId) {
       try {
+        localStorage.setItem('hr_last_session_id', activeSessionId);
         await api.post('/interview/end', {
           sessionId: activeSessionId,
           duration: seconds,
           tabSwitches: tabSwitchesCount,
           pasteEvents: pasteEventsCount
         });
-        window.location.href = `evaluation.html?id=${activeSessionId}`;
+        window.location.href = `evaluation.html?id=${encodeURIComponent(activeSessionId)}`;
         return;
-      } catch(e) {}
+      } catch(e) {
+        console.warn('Session end API error:', e);
+        window.location.href = `evaluation.html?id=${encodeURIComponent(activeSessionId)}`;
+        return;
+      }
     }
-    window.location.href = 'evaluation.html';
+    const stored = localStorage.getItem('hr_last_session_id');
+    window.location.href = stored ? `evaluation.html?id=${encodeURIComponent(stored)}` : 'evaluation.html';
   }
 
   initSession();

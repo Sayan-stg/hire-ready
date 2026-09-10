@@ -13,7 +13,16 @@ const api = {
   async request(method, path, body, isForm = false) {
     const token = Auth.getToken();
     const headers = {};
-    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    } else {
+      let guestId = localStorage.getItem('hr_guest_id');
+      if (!guestId) {
+        guestId = 'guest_' + Math.random().toString(36).substring(2, 10);
+        localStorage.setItem('hr_guest_id', guestId);
+      }
+      headers['x-guest-id'] = guestId;
+    }
     if (!isForm) headers['Content-Type'] = 'application/json';
 
     const opts = { method, headers, credentials: 'include' };

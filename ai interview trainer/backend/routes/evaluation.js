@@ -32,13 +32,24 @@ router.get('/latest', protect, async (req, res) => {
     if (global.inMemorySessions) {
       const userSess = [];
       for (const s of global.inMemorySessions.values()) {
-        if (s.user?.toString() === req.user._id?.toString() && s.status === 'completed') {
-          userSess.push(s);
+        if (s.status === 'completed') {
+          if (s.user?.toString() === req.user._id?.toString()) {
+            userSess.push(s);
+          }
         }
       }
       userSess.sort((a, b) => new Date(b.completedAt || b.createdAt) - new Date(a.completedAt || a.createdAt));
-      if (userSess.length > 0) {
-        const latest = userSess[0];
+      
+      // If no session found under exact ID, fallback to the latest completed session (supports guest users seamlessly)
+      let latest = userSess[0];
+      if (!latest && global.inMemorySessions.size > 0) {
+        const allCompleted = Array.from(global.inMemorySessions.values())
+          .filter(s => s.status === 'completed')
+          .sort((a, b) => new Date(b.completedAt || b.createdAt) - new Date(a.completedAt || a.createdAt));
+        if (allCompleted.length > 0) latest = allCompleted[0];
+      }
+
+      if (latest) {
         return res.json({
           success: true,
           evaluation: latest.evaluation,

@@ -433,7 +433,7 @@ button{ font-family:inherit; }
 
   async function loadEvaluation() {
     const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
+    const id = params.get('id') || localStorage.getItem('hr_last_session_id');
     try {
       const data = id ? await api.get(`/evaluation/${id}`).catch(() => null) : await api.get('/evaluation/latest').catch(() => null);
       if (data?.evaluation) {

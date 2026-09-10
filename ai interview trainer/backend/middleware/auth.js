@@ -17,10 +17,22 @@ const protect = async (req, res, next) => {
     }
 
     if (!token) {
+      // Look for a persistent guest identifier cookie or header
+      let guestId = req.headers['x-guest-id'] || (req.cookies && req.cookies.hr_guest_id);
+      if (!guestId) {
+        guestId = 'guest_' + Math.random().toString(36).substring(2, 10);
+        res.cookie('hr_guest_id', guestId, {
+          maxAge: 30 * 24 * 60 * 60 * 1000,
+          httpOnly: false,
+          sameSite: 'lax',
+          secure: process.env.NODE_ENV === 'production'
+        });
+      }
+
       req.user = {
-        _id: 'guest_' + Date.now(),
+        _id: guestId,
         name: 'Guest Cadet',
-        email: 'guest@sixthbit.space',
+        email: `${guestId}@sixthbit.space`,
         targetRole: 'SDE',
         role: 'user',
         streak: 1,
@@ -36,7 +48,8 @@ const protect = async (req, res, next) => {
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET || 'hireready_cosmic_jwt_secret_sixthbit_2026');
     } catch (e) {
-      decoded = { id: 'guest_' + Date.now() };
+      let guestId = req.headers['x-guest-id'] || (req.cookies && req.cookies.hr_guest_id) || ('guest_' + Math.random().toString(36).substring(2, 10));
+      decoded = { id: guestId };
     }
 
     // If MongoDB is connected, find in DB
