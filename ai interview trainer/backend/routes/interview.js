@@ -4,6 +4,7 @@ const { protect } = require('../middleware/auth');
 const Session = require('../models/Session');
 const User = require('../models/User');
 const mongoose = require('mongoose');
+const { selectKnowledge, publicCatalog } = require('../data/interviewKnowledge');
 
 // ─── AI API Helper (Direct Google Gemini 1.5 Flash Engine) ───────────────
 async function callClaude(messages, systemPrompt, maxTokens = 1000) {
@@ -94,6 +95,8 @@ function buildInterviewerSystem(role, difficulty, pressureMode, resumeText, roun
   const coverageContext = coverage.length
     ? `COMPETENCY PLAN: ${coverage.map(item => `${item.label} (${item.status})`).join('; ')}. Test the item marked up-next next; do not repeat a tested item unless requested.`
     : '';
+  const curriculum = selectKnowledge(role, round, difficulty);
+  const curriculumContext = `CURRICULUM ANCHOR (${curriculum.label}): Focus this interview on ${curriculum.topic}. Use this primary prompt only if the topic has not yet been covered: "${curriculum.question}". ${curriculum.probes} After the candidate addresses it, move to a related adaptive follow-up instead of repeating it. Adapt everything to the candidate's resume and prior answers; do not quote the curriculum or mention its source to the candidate.`;
 
   return `You are a Principal Engineering Interviewer at a top tier technology company conducting a ${round} interview for a ${role} position.
   
@@ -102,6 +105,7 @@ Round: ${round}
 ${frameworkInstructions}
 ${modeInstructions}
 ${coverageContext}
+${curriculumContext}
 ${pressureInstructions}
 
 MANDATORY ACTIVE-LISTENING INSTRUCTIONS:
@@ -113,6 +117,11 @@ MANDATORY ACTIVE-LISTENING INSTRUCTIONS:
 4. CADENCE: Ask ONE focused question at a time. Keep responses concise (2 to 4 sentences maximum).
 5. Do NOT give final scores, pass/fail ratings, or break character during the interview.`;
 }
+
+// Public, attribution-only catalog for product UI and administration. Question prompts stay server-side.
+router.get('/curriculum', (req, res) => {
+  res.json({ success: true, tracks: publicCatalog() });
+});
 
 function buildCompetencyPlan(role, round) {
   const normalizedRound = (round || 'Technical').toLowerCase();
@@ -248,6 +257,7 @@ router.post('/start', protect, async (req, res) => {
     const selectedMode = interviewMode === 'practice' ? 'practice' : 'realistic';
     const competencyPlan = buildCompetencyPlan(userRole, selectedRound);
     const competencyCoverage = deriveCoverage(competencyPlan, []);
+    const curriculum = selectKnowledge(userRole, selectedRound, difficulty || 'Medium');
 
     // Generate opening question
     const systemPrompt = buildInterviewerSystem(
@@ -281,7 +291,7 @@ router.post('/start', protect, async (req, res) => {
         messages: [{ role: 'assistant', content: openingMsg }],
         status: 'in-progress',
       });
-      return res.json({ success: true, sessionId: session._id, message: openingMsg, competencyCoverage });
+      return res.json({ success: true, sessionId: session._id, message: openingMsg, competencyCoverage, curriculum: { id: curriculum.id, label: curriculum.label } });
     }
 
     // In-memory session fallback
@@ -305,7 +315,7 @@ router.post('/start', protect, async (req, res) => {
       createdAt: new Date(),
     };
     global.inMemorySessions.set(sessId, session);
-    return res.json({ success: true, sessionId: sessId, message: openingMsg, competencyCoverage });
+    return res.json({ success: true, sessionId: sessId, message: openingMsg, competencyCoverage, curriculum: { id: curriculum.id, label: curriculum.label } });
   } catch (err) {
     console.error('Start interview error:', err);
     res.status(500).json({ error: err.message || 'Failed to start interview session.' });
