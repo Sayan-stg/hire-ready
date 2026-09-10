@@ -154,6 +154,18 @@ button{ font-family:inherit; }
 .tag.filler{ color:var(--warn); border-color:rgba(201,163,95,.4); }
 .tag.strong{ color:var(--good); border-color:rgba(111,174,138,.4); }
 .tag.pause{ color:var(--silver-faint); border-color:var(--line-strong); }
+.staff-answer-card{
+  margin-top:10px; padding:14px; border:1px solid rgba(184,119,219,.32); border-left:2px solid #b877db;
+  border-radius:5px; background:linear-gradient(135deg, rgba(184,119,219,.09), rgba(95,212,217,.035));
+}
+.staff-answer-card .staff-kicker{ font:9px 'JetBrains Mono',monospace; letter-spacing:.11em; color:#b877db; text-transform:uppercase; margin-bottom:9px; }
+.staff-answer-card .review-line{ font-size:11px; color:var(--silver-dim); line-height:1.55; margin:5px 0; }
+.staff-answer-card .review-line strong{ color:var(--silver); }
+.staff-answer-card .model-label{ display:block; margin:12px 0 6px; color:var(--cyan); font:10px 'JetBrains Mono',monospace; letter-spacing:.08em; }
+.staff-answer-card .model-answer{ font-size:11px; color:var(--silver-dim); line-height:1.6; }
+.staff-answer-card .model-answer p{ margin:0 0 7px; }.staff-answer-card .model-answer p:last-child{ margin-bottom:0; }
+.retry-answer-btn{ margin-top:11px; color:var(--cyan); border-color:rgba(95,212,217,.42); }
+.retry-answer-btn:hover{ background:rgba(95,212,217,.1); }
 
 /* scoring confidence indicator */
 .confidence-tag{
@@ -375,6 +387,19 @@ button{ font-family:inherit; }
 <script>
   let retryDrill = null;
   let retrySourceSessionId = null;
+  function retryAnswer(question) {
+    if (!question) return;
+    const params = new URLSearchParams({ start: 'auto', retryQuestion: question, retryTarget: '85' });
+    if (retrySourceSessionId) params.set('retrySourceSessionId', retrySourceSessionId);
+    window.location.href = `interview.html?${params.toString()}`;
+  }
+
+  function staffModelAnswer(question, missing) {
+    return `
+      <p>I would start by framing the objective for <strong>${question}</strong>: define the user-facing outcome, the success metric, and the hard constraint before choosing an implementation. I would make the operating assumptions explicit so the interviewer can challenge them early.</p>
+      <p>My primary approach would use a clear data flow with bounded state, then quantify the expected throughput, latency, and memory envelope. I would explain why this choice is appropriate at the current scale and identify the observability signals that prove it is working in production.</p>
+      <p>Finally, I would name the trade-off: ${missing || 'the relevant capacity, failure-mode, and validation risk'}. If the input becomes streamed or grows beyond memory, I would switch to a bounded or partitioned design, validate the edge cases, and state exactly how I would test the fallback.</p>`;
+  }
   // Replay waveform bars
   const replayWave = document.getElementById('replayWave');
   let waveHtml = '';
@@ -487,6 +512,18 @@ button{ font-family:inherit; }
             const fillers = m.fillerWords && m.fillerWords.length ? `<span class="tag filler">${m.fillerWords.map(esc).join(', ')}</span>` : '';
             const answerReview = !isAi ? ev.answerEvaluations?.[answerIndex++] : null;
             const scoreTag = answerReview ? `<span class="tag strong">ANSWER ${answerReview.score}%</span>` : '';
+            const isWeak = answerReview && Number(answerReview.score) < 70;
+            const missing = answerReview?.missedPoints?.join('; ') || 'Memory constraints, stream ingestion, and edge-case validation were not addressed.';
+            const retryQuestion = answerReview?.question || '';
+            const staffAnswer = isWeak ? `
+              <div class="staff-answer-card">
+                <div class="staff-kicker">🌟 Staff-Level Model Answer</div>
+                <div class="review-line"><strong>Your Answer:</strong> ${esc(m.content)} <span class="tag filler">Score: ${answerReview.score}%</span></div>
+                <div class="review-line"><strong>What Was Missing:</strong> ${esc(missing)}</div>
+                <span class="model-label">GOLD-STANDARD RESPONSE</span>
+                <div class="model-answer">${staffModelAnswer(esc(retryQuestion || 'this problem'), esc(missing))}</div>
+                <button class="add-btn retry-answer-btn" type="button" data-question="${esc(retryQuestion)}" onclick="retryAnswer(this.dataset.question)">Re-record this answer → target 85%</button>
+              </div>` : '';
             return `
               <div class="a-line ${isAi ? 'ai' : 'you'}">
                 <div class="a-meta">
@@ -495,6 +532,7 @@ button{ font-family:inherit; }
                   ${scoreTag}
                 </div>
                 <div class="a-text">${esc(m.content)}</div>
+                ${staffAnswer}
               </div>
             `;
           }).join('');

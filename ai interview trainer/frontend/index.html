@@ -376,6 +376,15 @@ a{ color:inherit; text-decoration:none; }
 .code-editor .fn{ color:var(--cyan); }
 .code-editor .str{ color:#6ee7b7; }
 .code-editor .com{ color:var(--silver-faint); font-style:italic; }
+.sandbox-tabs{ display:flex; gap:7px; padding:10px 20px; border-bottom:1px solid var(--line); background:rgba(255,255,255,0.012); }
+.sandbox-tab{ border:1px solid var(--line-strong); background:rgba(255,255,255,0.02); color:var(--silver-faint); border-radius:3px; padding:6px 11px; font:10px 'JetBrains Mono',monospace; letter-spacing:.08em; cursor:pointer; transition:all .2s var(--ease); }
+.sandbox-tab:hover,.sandbox-tab.active{ color:var(--cyan); border-color:var(--cyan); background:rgba(95,212,217,0.09); box-shadow:0 0 12px rgba(95,212,217,0.13); }
+.sandbox-problem{ padding:13px 24px; border-bottom:1px solid var(--line); font-size:12px; line-height:1.55; color:var(--silver-dim); }
+.sandbox-problem strong{ color:var(--silver); font-family:'Space Grotesk',sans-serif; }
+.sandbox-output{ margin-top:16px; min-height:72px; padding:11px 12px; border:1px solid rgba(95,212,217,0.18); border-radius:4px; background:rgba(0,0,0,0.28); font:10.5px/1.7 'JetBrains Mono',monospace; color:var(--silver-dim); white-space:pre-line; }
+.sandbox-output .pass{ color:var(--good); }.sandbox-output .fail{ color:var(--rec); }.sandbox-output .ast{ color:var(--cyan); }
+.sandbox-run{ width:100%; justify-content:center; margin-top:12px; background:rgba(95,212,217,0.1); border-color:rgba(95,212,217,0.5); color:var(--cyan); }
+.sandbox-run:disabled{ opacity:.6; cursor:wait; }
 
 .code-telemetry{
   padding:24px; display:flex; flex-direction:column; justify-content:space-between;
@@ -731,34 +740,28 @@ footer{ border-top:1px solid var(--line); padding:60px 0 40px; background:rgba(3
       <div class="window-dots">
         <span></span><span></span><span></span>
       </div>
-      <div class="mono" style="font-size:10.5px; color:var(--silver-faint);">
-        ring_buffer.rs // LOCK-FREE CONCURRENCY BENCHMARK
-      </div>
-      <div class="mono" style="font-size:10px; color:var(--good);">AST: OPTIMAL</div>
+      <div class="mono" id="sandboxFile" style="font-size:10.5px; color:var(--silver-faint);">two_sum.py // INTERVIEW EXERCISE</div>
+      <div class="mono" id="sandboxAst" style="font-size:10px; color:var(--good);">AST: READY</div>
     </div>
+
+    <div class="sandbox-tabs" role="tablist" aria-label="Sandbox language">
+      <button class="sandbox-tab active" type="button" onclick="switchSandbox('python', this)" role="tab" aria-selected="true">PYTHON</button>
+      <button class="sandbox-tab" type="button" onclick="switchSandbox('javascript', this)" role="tab" aria-selected="false">JAVASCRIPT</button>
+      <button class="sandbox-tab" type="button" onclick="switchSandbox('sql', this)" role="tab" aria-selected="false">SQL</button>
+    </div>
+    <div class="sandbox-problem" id="sandboxProblem"><strong>Two Sum</strong> — return the two indices whose values add to the target. Explain the lookup trade-off as you code.</div>
 
     <div class="code-layout">
       <!-- Code preview -->
-      <div class="code-editor">
-<span class="com">// Single-Producer Single-Consumer Lock-Free Ring Buffer</span>
-<span class="kw">pub struct</span> <span class="fn">AtomicRingBuffer</span>&lt;T, <span class="kw">const</span> CAP: usize&gt; {
-    buffer: [*<span class="kw">mut</span> T; CAP],
-    head: <span class="fn">AtomicUsize</span>,  <span class="com">// Cache-line aligned (64 bytes)</span>
-    tail: <span class="fn">AtomicUsize</span>,  <span class="com">// Prevent false sharing anomalies</span>
-}
-
-<span class="kw">impl</span>&lt;T, <span class="kw">const</span> CAP: usize&gt; <span class="fn">AtomicRingBuffer</span>&lt;T, CAP&gt; {
-    <span class="kw">pub fn</span> <span class="fn">push</span>(&amp;<span class="kw">self</span>, val: T) -&gt; <span class="fn">Result</span>&lt;(), T&gt; {
-        <span class="kw">let</span> head = <span class="kw">self</span>.head.load(<span class="fn">Ordering</span>::Acquire);
-        <span class="kw">let</span> tail = <span class="kw">self</span>.tail.load(<span class="fn">Ordering</span>::Relaxed);
-        <span class="kw">if</span> (tail + 1) % CAP == head {
-            <span class="kw">return</span> <span class="fn">Err</span>(val); <span class="com">// Buffer saturated</span>
-        }
-        <span class="kw">self</span>.tail.store((tail + 1) % CAP, <span class="fn">Ordering</span>::Release);
-        <span class="fn">Ok</span>(())
-    }
-}
-      </div>
+      <pre class="code-editor" id="sandboxCode"><span class="com"># Find a pair in one pass</span>
+<span class="kw">def</span> <span class="fn">two_sum</span>(nums, target):
+    seen = {}
+    <span class="kw">for</span> index, value <span class="kw">in</span> enumerate(nums):
+        complement = target - value
+        <span class="kw">if</span> complement <span class="kw">in</span> seen:
+            <span class="kw">return</span> [seen[complement], index]
+        seen[value] = index
+    <span class="kw">return</span> []</pre>
 
       <!-- Code telemetry stats -->
       <div class="code-telemetry">
@@ -769,24 +772,26 @@ footer{ border-top:1px solid var(--line); padding:60px 0 40px; background:rgba(3
 
           <div class="telemetry-row">
             <span class="tl">TIME COMPLEXITY</span>
-            <span class="tv optimal mono">O(1) CONSTANT</span>
+            <span class="tv optimal mono" id="sandboxBadge">Time: O(N) | Space: O(N)</span>
           </div>
           <div class="telemetry-row">
-            <span class="tl">SPACE OVERHEAD</span>
-            <span class="tv optimal mono">O(CAP) ZERO-ALLOC</span>
+            <span class="tl">INTERVIEW PROMPT</span>
+            <span class="tv optimal mono" id="sandboxStatus">TWO SUM</span>
           </div>
           <div class="telemetry-row">
-            <span class="tl">FALSE SHARING MITIGATION</span>
-            <span class="tv optimal mono">VERIFIED (CACHE-LINE)</span>
+            <span class="tl">TEST HARNESS</span>
+            <span class="tv optimal mono">BROWSER SIMULATION</span>
           </div>
           <div class="telemetry-row">
-            <span class="tl">MEMORY ORDERING PRAGMAS</span>
-            <span class="tv mono">ACQUIRE / RELEASE</span>
+            <span class="tl">EDGE-CASE REVIEW</span>
+            <span class="tv mono">PENDING</span>
           </div>
           <div class="telemetry-row">
-            <span class="tl">COMPILER DEADLOCK CHECK</span>
-            <span class="tv optimal mono">PASSED (LOCK-FREE)</span>
+            <span class="tl">AI REVIEW</span>
+            <span class="tv optimal mono">STANDBY</span>
           </div>
+          <div class="sandbox-output" id="sandboxOutput"><span class="ast">AST telemetry ready.</span> Choose a language, then run the evaluation.</div>
+          <button class="btn btn-outline btn-sm sandbox-run" id="sandboxRun" type="button" onclick="runSandboxEvaluation()">Run &amp; Evaluate →</button>
         </div>
 
         <div style="border-top:1px solid var(--line); padding-top:16px; margin-top:24px;">
@@ -1112,6 +1117,58 @@ footer{ border-top:1px solid var(--line); padding:60px 0 40px; background:rgba(3
         });
       }
     }, 18);
+  }
+
+  // Interactive sandbox preview: language-specific interview exercises and a local test-run simulation.
+  const sandboxExercises = {
+    python: {
+      file: 'two_sum.py // INTERVIEW EXERCISE',
+      problem: '<strong>Two Sum</strong> — return the two indices whose values add to the target. Explain the lookup trade-off as you code.',
+      badge: 'Time: O(N) | Space: O(N)', status: 'TWO SUM',
+      code: `<span class="com">01 | # Find a pair in one pass</span>\n<span class="kw">02 | def</span> <span class="fn">two_sum</span>(nums, target):\n03 |     seen = {}\n<span class="kw">04 |     for</span> index, value <span class="kw">in</span> enumerate(nums):\n05 |         complement = target - value\n<span class="kw">06 |         if</span> complement <span class="kw">in</span> seen:\n<span class="kw">07 |             return</span> [seen[complement], index]\n08 |         seen[value] = index\n<span class="kw">09 |     return</span> []`,
+      output: '✓ Test 1: Passed (4ms)\n✓ Test 2: Passed (6ms)\n✗ Test 3: Failed on edge case [] → Expected [], got None\n<span class="ast">AST: hash lookup + early return verified · Ask candidate to defend empty-input behavior.</span>'
+    },
+    javascript: {
+      file: 'debounce.js // ASYNC EVENT LOOP EXERCISE',
+      problem: '<strong>Debounce</strong> — delay a search request until input settles; describe why the callback stays off the call stack.',
+      badge: 'Non-blocking | Web API Handled', status: 'DEBOUNCE',
+      code: `<span class="com">01 | // Collapse bursts without blocking input</span>\n<span class="kw">02 | function</span> <span class="fn">debounce</span>(fn, delay = 250) {\n03 |   <span class="kw">let</span> timer;\n<span class="kw">04 |   return</span> (...args) => {\n05 |     clearTimeout(timer);\n06 |     timer = setTimeout(() => fn(...args), delay);\n07 |   };\n08 | }`,
+      output: '✓ Test 1: Passed (3ms)\n✓ Test 2: Passed (5ms)\n✗ Test 3: Failed on rapid unmount → Expected timer cleanup, got pending callback\n<span class="ast">AST: closure + Web API queue detected · Ask candidate about cancellation and stale requests.</span>'
+    },
+    sql: {
+      file: 'retention.sql // ANALYTICS EXERCISE',
+      problem: '<strong>Rolling 7-day retention</strong> — calculate users who returned within seven days of their first active day.',
+      badge: 'Query Cost: Optimal | Index Scan', status: '7-DAY RETENTION',
+      code: `<span class="kw">01 | WITH</span> first_seen <span class="kw">AS</span> (\n02 |   <span class="kw">SELECT</span> user_id, MIN(event_date) first_day\n03 |   <span class="kw">FROM</span> user_events <span class="kw">GROUP BY</span> user_id\n04 | )\n<span class="kw">05 | SELECT</span> f.first_day, COUNT(DISTINCT e.user_id) retained\n<span class="kw">06 | FROM</span> first_seen f <span class="kw">JOIN</span> user_events e <span class="kw">ON</span> e.user_id = f.user_id\n07 |   <span class="kw">AND</span> e.event_date <span class="kw">BETWEEN</span> f.first_day + INTERVAL <span class="str">'1 day'</span>\n08 |   <span class="kw">AND</span> f.first_day + INTERVAL <span class="str">'7 days'</span>\n09 | <span class="kw">GROUP BY</span> f.first_day;`,
+      output: '✓ Test 1: Passed (4ms)\n✓ Test 2: Passed (6ms)\n✗ Test 3: Failed on same-day return → Expected exclusion, got included\n<span class="ast">AST: indexed join path verified · Ask candidate to state timezone and cohort-boundary assumptions.</span>'
+    }
+  };
+
+  let activeSandbox = 'python';
+  function switchSandbox(language, tab) {
+    activeSandbox = language;
+    const exercise = sandboxExercises[language];
+    document.querySelectorAll('.sandbox-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+    tab.classList.add('active'); tab.setAttribute('aria-selected', 'true');
+    document.getElementById('sandboxFile').textContent = exercise.file;
+    document.getElementById('sandboxProblem').innerHTML = exercise.problem;
+    document.getElementById('sandboxCode').innerHTML = exercise.code;
+    document.getElementById('sandboxBadge').textContent = exercise.badge;
+    document.getElementById('sandboxStatus').textContent = exercise.status;
+    document.getElementById('sandboxAst').textContent = 'AST: READY';
+    document.getElementById('sandboxOutput').innerHTML = '<span class="ast">AST telemetry ready.</span> Run the language-specific test suite.';
+  }
+
+  function runSandboxEvaluation() {
+    const button = document.getElementById('sandboxRun');
+    const output = document.getElementById('sandboxOutput');
+    button.disabled = true; button.textContent = 'Analyzing AST + edge cases…';
+    output.innerHTML = '<span class="ast">AST telemetry streaming…</span> Inspecting control flow, complexity, and test boundaries.';
+    setTimeout(() => {
+      output.innerHTML = sandboxExercises[activeSandbox].output;
+      document.getElementById('sandboxAst').textContent = 'AST: ANALYZED';
+      button.disabled = false; button.textContent = 'Run & Evaluate →';
+    }, 700);
   }
 
   // Before vs After Diagnostic Scrubber
