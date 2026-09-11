@@ -498,15 +498,6 @@ td.score{ font-family:'JetBrains Mono',monospace; }
         const s = statsData.stats;
         document.getElementById('streakVal').innerHTML = `${s.streak || 0}<span style="font-size:14px; color:var(--silver-faint); font-weight:400;"> days</span>`;
         document.getElementById('sessionsVal').textContent = s.totalSessions || 0;
-        if (s.avgScore) document.getElementById('avgScoreVal').textContent = s.avgScore + '%';
-        if (s.avgScore) {
-          document.getElementById('gaugeVal').textContent = s.avgScore;
-          const circ = document.getElementById('gaugeCircle');
-          if (circ) {
-            const offset = 326.7 - (326.7 * (s.avgScore / 100));
-            circ.setAttribute('stroke-dashoffset', offset);
-          }
-        }
 
         // Streak dots binding
         const dotsEl = document.getElementById('streakDots');
@@ -565,7 +556,7 @@ td.score{ font-family:'JetBrains Mono',monospace; }
         const tbody = document.getElementById('sessionsTbody');
         tbody.innerHTML = sessionsList.slice(0, 5).map(sess => {
           const dt = sess.completedAt || sess.createdAt ? new Date(sess.completedAt || sess.createdAt).toLocaleDateString('en-US', { month:'short', day:'numeric' }) : 'Today';
-          const score = sess.evaluation?.overallScore ? sess.evaluation.overallScore + '%' : '—';
+          const score = sess.evaluation?.overallScore != null ? sess.evaluation.overallScore + '%' : '—';
           const dur = sess.duration ? Math.floor(sess.duration/60) + 'm' : '—';
           const scoreCls = (sess.evaluation?.overallScore || 0) >= 80 ? 'high' : 'mid';
           return `
@@ -591,7 +582,25 @@ td.score{ font-family:'JetBrains Mono',monospace; }
           if (document.getElementById('rPct3')) document.getElementById('rPct3').textContent = `${fitAvg}%`;
           if (document.getElementById('rBar3')) document.getElementById('rBar3').style.width = `${fitAvg}%`;
 
-          // Practice context, never an integrity score.
+          // Compute avgScore directly from sessions list — more reliable than stats API
+          const scores = completedSessions.map(s => s.evaluation?.overallScore).filter(v => v != null);
+          const computedAvg = scores.length
+            ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+            : (statsData?.stats?.avgScore || 0);
+
+          // Update Avg Score card
+          document.getElementById('avgScoreVal').textContent = computedAvg + '%';
+
+          // Update Role Readiness gauge
+          document.getElementById('gaugeVal').textContent = computedAvg;
+          document.getElementById('gaugeRoleText').textContent = `Based on ${completedSessions.length} completed session${completedSessions.length !== 1 ? 's' : ''}.`;
+          const circ = document.getElementById('gaugeCircle');
+          if (circ) {
+            const offset = 326.7 - (326.7 * (computedAvg / 100));
+            circ.setAttribute('stroke-dashoffset', offset);
+          }
+
+          // Practice context
           const totalTabs = completedSessions.reduce((acc, sess) => acc + (sess.evaluation?.focusTelemetry?.tabSwitches ?? sess.tabSwitches ?? 0), 0);
           const totalPastes = completedSessions.reduce((acc, sess) => acc + (sess.evaluation?.focusTelemetry?.pasteEvents ?? sess.pasteEvents ?? 0), 0);
           const valEl = document.getElementById('dashIntegVal');
