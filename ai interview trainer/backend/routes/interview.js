@@ -7,14 +7,103 @@ const mongoose = require('mongoose');
 const { selectKnowledge, publicCatalog } = require('../data/interviewKnowledge');
 
 // ─── AI API Helper (Direct Google Gemini Engine with Adaptive Fallback) ───────
-function generateContextualProbe(messages = [], systemPrompt = '') {
+
+// Competency-specific question banks for the fallback engine
+const COMPETENCY_QUESTIONS = {
+  // Technical round competencies
+  'clarify': [
+    "Before diving in — what clarifying questions would you ask about scale, read/write ratios, and latency budget for this system?",
+    "What assumptions are you making about the request volume and data size? Walk me through your clarifying questions.",
+  ],
+  'design': [
+    "Walk me through your high-level system design: what are the major components and how do they communicate?",
+    "Sketch out the data flow for this system — where does data enter, how is it processed, and where does it persist?",
+  ],
+  'trade-offs': [
+    "What are the key trade-offs in your design? Where did you choose availability over consistency, or throughput over latency?",
+    "If traffic suddenly spikes 10x, which parts of your design break first and how would you handle that?",
+  ],
+  'resilience': [
+    "Walk me through your failure modes — what happens when a key service goes down, and how does the system recover?",
+    "How do you handle partial failures, retries, and circuit breaking to prevent cascading outages?",
+  ],
+  // Behavioral round competencies
+  'story': [
+    "Tell me about a technically challenging project you owned end-to-end. Use the STAR format.",
+    "Describe a time you had to make a difficult technical decision with incomplete information.",
+  ],
+  'impact': [
+    "What was the measurable business or engineering impact of that work? Give me specific numbers.",
+    "How did you quantify success on that project? What metrics did you track?",
+  ],
+  'conflict': [
+    "Tell me about a disagreement with a teammate or stakeholder over a technical approach. How did you resolve it?",
+    "How do you align cross-functional teams when there are competing priorities?",
+  ],
+  'reflection': [
+    "Looking back, what would you do differently on that project?",
+    "What was the biggest lesson you learned from a project that didn't go as planned?",
+  ],
+  // Coding round competencies
+  'approach': [
+    "Walk me through your algorithmic approach — what data structures are you using and why?",
+    "Before coding, what are the two or three approaches you're considering and what are their trade-offs?",
+  ],
+  'complexity': [
+    "What is the time and space complexity of your solution? Can you optimize it further?",
+    "Is your current approach O(n log n) or better? What's the bottleneck?",
+  ],
+  'edge-cases': [
+    "What edge cases does your solution handle? Walk me through: empty input, duplicates, overflow, null.",
+    "How does your solution behave at the boundary conditions — what happens with the largest possible input?",
+  ],
+  // Phase 2 — deeper cross-cutting questions after plan complete
+  '__phase2__': [
+    "Now let's go deeper: how would you design the monitoring and alerting strategy for this system?",
+    "How would you roll out a breaking change to this architecture with zero downtime?",
+    "What security considerations apply here — authentication, authorization, and data encryption at rest and in transit?",
+    "How would you load test this system, and what metrics would you use to define 'production ready'?",
+    "If you had to reduce the operational cost of this system by 40%, what would you cut or optimize first?",
+    "Walk me through your database migration strategy — how would you evolve the schema without downtime?",
+    "How does observability differ from monitoring in this context, and what would your SLI/SLO look like?",
+    "If a P0 incident fires at 3am, walk me through your incident response: detection, diagnosis, and mitigation.",
+  ]
+};
+
+function generateContextualProbe(messages = [], systemPrompt = '', coverage = []) {
   const lastUserMsg = [...messages].reverse().find(m => m.role === 'user')?.content || '';
   const lower = lastUserMsg.toLowerCase();
 
+  // Opening greeting — no user message yet
   if (!lastUserMsg || messages.length <= 1) {
     return "Hello! Welcome to your technical interview session. Can you walk me through the architecture of a high-throughput distributed system you recently designed and deployed?";
   }
 
+  // ── Coverage-aware question selection ──────────────────────────────────────
+  if (coverage && coverage.length > 0) {
+    const upNext = coverage.find(item => item.status === 'up-next');
+    if (upNext) {
+      // Ask the next competency's question
+      const bank = COMPETENCY_QUESTIONS[upNext.id];
+      if (bank && bank.length > 0) {
+        // Pick based on message count so we don't always use index 0
+        const idx = Math.floor(messages.filter(m => m.role === 'user').length / 1) % bank.length;
+        return bank[idx];
+      }
+    }
+
+    // All competencies covered → Phase 2 deeper questions
+    const allTested = coverage.every(item => item.status === 'tested');
+    if (allTested) {
+      const phase2 = COMPETENCY_QUESTIONS['__phase2__'];
+      // Rotate through Phase 2 questions based on how many answers we've given beyond the plan
+      const extraAnswers = messages.filter(m => m.role === 'user').length - coverage.length;
+      const idx = Math.max(0, extraAnswers) % phase2.length;
+      return phase2[idx];
+    }
+  }
+
+  // ── Keyword-based contextual follow-ups (when coverage unavailable) ─────────
   if (/\b(redis|cache|memcached|lru|ttl)\b/i.test(lower)) {
     return "When scaling that caching tier, how do you handle cache invalidation, key eviction policies, and thundering herd stampedes during sudden traffic surges?";
   }
@@ -27,18 +116,20 @@ function generateContextualProbe(messages = [], systemPrompt = '') {
   if (/\b(docker|kubernetes|k8s|pod|cluster|container)\b/i.test(lower)) {
     return "How do you configure liveness probes, rolling update budgets, and circuit breakers to prevent cascading failure across service boundaries?";
   }
-  if (lastUserMsg.length < 25 || /\b(i don't know|dont know|not sure|lets end it|end|ok)\b/i.test(lower)) {
-    return "Let's break this down into the core engineering fundamentals: what data structures, latency bounds, and storage trade-offs would you evaluate first?";
+
+  // Short/minimal answer — encourage depth (last resort)
+  if (lastUserMsg.trim().split(/\s+/).length < 6) {
+    return "That's a good start — can you go deeper? Walk me through the specific data structures, failure modes, and trade-offs you'd consider.";
   }
 
   return "That provides clear context. From a production reliability standpoint, what p99 latency SLA would you guarantee, and what is your fallback if a downstream dependency degrades?";
 }
 
-async function callClaude(messages, systemPrompt, maxTokens = 1000) {
+async function callClaude(messages, systemPrompt, maxTokens = 1000, coverage = []) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === 'your_gemini_api_key_here') {
     console.warn('GEMINI_API_KEY not configured; engaging adaptive curriculum interview engine.');
-    return generateContextualProbe(messages, systemPrompt);
+    return generateContextualProbe(messages, systemPrompt, coverage);
   }
 
   // Convert messages to Gemini contents format
@@ -97,7 +188,7 @@ async function callClaude(messages, systemPrompt, maxTokens = 1000) {
 
   // Graceful conversational fallback if model services have temporary spikes
   console.warn('Gemini API fallback engaged:', lastError ? lastError.message : 'No response');
-  return generateContextualProbe(messages, systemPrompt);
+  return generateContextualProbe(messages, systemPrompt, coverage);
 }
 
 function buildInterviewerSystem(role, difficulty, pressureMode, resumeText, round, interviewMode = 'realistic', coverage = [], companyFramework = '') {
@@ -412,7 +503,7 @@ router.post('/message', protect, async (req, res) => {
       session.companyFramework || ''
     );
 
-    const aiResponse = await callClaude(claudeMsgs, systemPrompt, 1000);
+    const aiResponse = await callClaude(claudeMsgs, systemPrompt, 1000, session.competencyCoverage || []);
 
     session.messages.push({ role: 'assistant', content: aiResponse, timestamp: new Date() });
     if (session.save) await session.save();
