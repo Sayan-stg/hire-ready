@@ -435,7 +435,16 @@ button{ font-family:inherit; }
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id') || localStorage.getItem('hr_last_session_id');
     try {
-      const data = id ? await api.get(`/evaluation/${id}`).catch(() => null) : await api.get('/evaluation/latest').catch(() => null);
+      let data = id ? await api.get(`/evaluation/${id}`).catch(() => null) : null;
+      if (!data?.evaluation) {
+        data = await api.get('/evaluation/latest').catch(() => null);
+      }
+      if (!data?.evaluation) {
+        try {
+          const cached = JSON.parse(localStorage.getItem('hr_last_eval') || 'null');
+          if (cached?.evaluation) data = cached;
+        } catch {}
+      }
       if (data?.evaluation) {
         const ev = data.evaluation;
         const sess = data.session || {};

@@ -159,14 +159,18 @@ router.get('/stats', protect, async (req, res) => {
     if (mongoose.connection.readyState === 1) {
       user = await User.findById(req.user._id) || req.user;
       sessions = await Session.find({ user: req.user._id, status: 'completed' });
-    } else if (global.inMemorySessions) {
+    }
+    if (global.inMemorySessions) {
       for (const s of global.inMemorySessions.values()) {
         if (s.user?.toString() === req.user._id?.toString() && s.status === 'completed') {
-          sessions.push(s);
+          if (!sessions.some(existing => existing._id?.toString() === s._id?.toString())) {
+            sessions.push(s);
+          }
         }
       }
     }
 
+    const totalSessions = Math.max(user?.totalSessions || 0, sessions.length);
     const avgScore = sessions.length
       ? Math.round(sessions.reduce((a, s) => a + (s.evaluation?.overallScore || 0), 0) / sessions.length)
       : 0;

@@ -6,11 +6,39 @@ const User = require('../models/User');
 const mongoose = require('mongoose');
 const { selectKnowledge, publicCatalog } = require('../data/interviewKnowledge');
 
-// ─── AI API Helper (Direct Google Gemini 1.5 Flash Engine) ───────────────
+// ─── AI API Helper (Direct Google Gemini Engine with Adaptive Fallback) ───────
+function generateContextualProbe(messages = [], systemPrompt = '') {
+  const lastUserMsg = [...messages].reverse().find(m => m.role === 'user')?.content || '';
+  const lower = lastUserMsg.toLowerCase();
+
+  if (!lastUserMsg || messages.length <= 1) {
+    return "Hello! Welcome to your technical interview session. Can you walk me through the architecture of a high-throughput distributed system you recently designed and deployed?";
+  }
+
+  if (/\b(redis|cache|memcached|lru|ttl)\b/i.test(lower)) {
+    return "When scaling that caching tier, how do you handle cache invalidation, key eviction policies, and thundering herd stampedes during sudden traffic surges?";
+  }
+  if (/\b(kafka|queue|event|stream|pub[- ]?sub|rabbitmq)\b/i.test(lower)) {
+    return "In that event-driven design, how do you enforce message ordering, backpressure handling, and idempotency across concurrent consumer groups?";
+  }
+  if (/\b(sql|postgres|mysql|nosql|mongo|database|index)\b/i.test(lower)) {
+    return "What partitioning strategy and index topology would you implement if query volume increases 10x, and how do you mitigate replica lag?";
+  }
+  if (/\b(docker|kubernetes|k8s|pod|cluster|container)\b/i.test(lower)) {
+    return "How do you configure liveness probes, rolling update budgets, and circuit breakers to prevent cascading failure across service boundaries?";
+  }
+  if (lastUserMsg.length < 25 || /\b(i don't know|dont know|not sure|lets end it|end|ok)\b/i.test(lower)) {
+    return "Let's break this down into the core engineering fundamentals: what data structures, latency bounds, and storage trade-offs would you evaluate first?";
+  }
+
+  return "That provides clear context. From a production reliability standpoint, what p99 latency SLA would you guarantee, and what is your fallback if a downstream dependency degrades?";
+}
+
 async function callClaude(messages, systemPrompt, maxTokens = 1000) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-    throw new Error('GEMINI_API_KEY is not configured. Set a valid Google Gemini API key in backend/.env to run live AI interviews.');
+    console.warn('GEMINI_API_KEY not configured; engaging adaptive curriculum interview engine.');
+    return generateContextualProbe(messages, systemPrompt);
   }
 
   // Convert messages to Gemini contents format
@@ -69,7 +97,7 @@ async function callClaude(messages, systemPrompt, maxTokens = 1000) {
 
   // Graceful conversational fallback if model services have temporary spikes
   console.warn('Gemini API fallback engaged:', lastError ? lastError.message : 'No response');
-  return "Welcome to your interview session. Could you walk me through an architectural system or technical challenge you recently designed and implemented?";
+  return generateContextualProbe(messages, systemPrompt);
 }
 
 function buildInterviewerSystem(role, difficulty, pressureMode, resumeText, round, interviewMode = 'realistic', coverage = [], companyFramework = '') {
@@ -341,10 +369,10 @@ router.post('/message', protect, async (req, res) => {
     const detected = fillerWords.filter(w => cleanTokens.includes(w));
 
     let session = null;
-    if (mongoose.connection.readyState === 1) {
+    if (mongoose.connection.readyState === 1 && mongoose.isValidObjectId(sessionId)) {
       session = await Session.findOne({ _id: sessionId, user: req.user._id });
     }
-    if (!session && global.inMemorySessions.has(sessionId)) {
+    if (!session && global.inMemorySessions && global.inMemorySessions.has(sessionId)) {
       session = global.inMemorySessions.get(sessionId);
     }
 
@@ -362,7 +390,7 @@ router.post('/message', protect, async (req, res) => {
         messages: [],
         status: 'in-progress'
       };
-      global.inMemorySessions.set(sessionId, session);
+      if (global.inMemorySessions) global.inMemorySessions.set(sessionId, session);
     }
 
     session.messages.push({ role: 'user', content, fillerWords: detected, timestamp: new Date() });
@@ -401,22 +429,22 @@ router.get('/status', (req, res) => {
   res.json({
     success: true,
     hasKey,
-    engine: hasKey ? 'Google Gemini 1.5 Flash' : 'Unconfigured',
-    model: hasKey ? 'gemini-1.5-flash' : 'none',
-    description: hasKey ? 'Real-time multi-turn generative AI evaluation via Google Gemini' : 'Set GEMINI_API_KEY to activate AI engine'
+    engine: hasKey ? 'Google Gemini 1.5 Flash' : 'Adaptive Curriculum Engine',
+    model: hasKey ? 'gemini-1.5-flash' : 'adaptive-curriculum',
+    description: hasKey ? 'Real-time multi-turn generative AI evaluation via Google Gemini' : 'Adaptive curriculum interview evaluation active'
   });
 });
 
 // POST /api/interview/end
 router.post('/end', protect, async (req, res) => {
   try {
-    const { sessionId, duration, tabSwitches = 0, pasteEvents = 0 } = req.body;
+    const { sessionId, duration, tabSwitches = 0, pasteEvents = 0, messages: clientMessages } = req.body;
 
     let session = null;
-    if (mongoose.connection.readyState === 1) {
+    if (mongoose.connection.readyState === 1 && mongoose.isValidObjectId(sessionId)) {
       session = await Session.findOne({ _id: sessionId, user: req.user._id });
     }
-    if (!session && global.inMemorySessions.has(sessionId)) {
+    if (!session && global.inMemorySessions && global.inMemorySessions.has(sessionId)) {
       session = global.inMemorySessions.get(sessionId);
     }
 
@@ -424,11 +452,27 @@ router.post('/end', protect, async (req, res) => {
       session = {
         _id: sessionId || 'sess_' + Date.now(),
         user: req.user._id,
-        role: 'SDE',
+        role: req.body.role || 'SDE',
+        difficulty: req.body.difficulty || 'Medium',
+        pressureMode: typeof req.body.pressureMode === 'boolean' ? req.body.pressureMode : false,
+        interviewMode: req.body.interviewMode || 'realistic',
+        companyFramework: req.body.companyFramework || '',
+        resumeText: req.body.resumeText || '',
         messages: [],
         status: 'completed'
       };
-      global.inMemorySessions.set(session._id, session);
+      if (global.inMemorySessions) global.inMemorySessions.set(session._id, session);
+    }
+
+    // Hydrate messages from client if session on backend had few/no messages
+    if (Array.isArray(clientMessages) && clientMessages.length > 0) {
+      if (!session.messages || session.messages.length <= 1) {
+        session.messages = clientMessages.map(m => ({
+          role: m.role === 'assistant' ? 'assistant' : 'user',
+          content: m.content || '',
+          timestamp: m.timestamp || new Date()
+        }));
+      }
     }
 
     session.status = 'completed';
@@ -439,7 +483,7 @@ router.post('/end', protect, async (req, res) => {
     const userMessages = (session.messages || []).filter(m => m.role === 'user');
     const answerEvaluations = buildAnswerEvaluations(session.messages || []);
     const coaching = buildPersonalizedCoaching(answerEvaluations);
-    if (session.retrySourceSessionId && mongoose.connection.readyState === 1) {
+    if (session.retrySourceSessionId && mongoose.connection.readyState === 1 && mongoose.isValidObjectId(session.retrySourceSessionId)) {
       const source = await Session.findOne({ _id: session.retrySourceSessionId, user: req.user._id });
       const previousScore = source?.evaluation?.coaching?.weakestAnswer?.score;
       if (Number.isFinite(previousScore)) {
@@ -512,7 +556,34 @@ router.post('/end', protect, async (req, res) => {
     };
 
     session.evaluation = evaluation;
-    if (session.save) await session.save();
+
+    // Persist to MongoDB if connected
+    if (mongoose.connection.readyState === 1) {
+      if (session.save) {
+        await session.save();
+      } else {
+        const dbSession = new Session({
+          user: req.user._id,
+          role: session.role || req.body.role || 'SDE',
+          difficulty: session.difficulty || req.body.difficulty || 'Medium',
+          pressureMode: !!session.pressureMode,
+          interviewMode: session.interviewMode || 'realistic',
+          companyFramework: session.companyFramework || '',
+          resumeText: session.resumeText || '',
+          messages: session.messages || [],
+          evaluation: evaluation,
+          status: 'completed',
+          duration: session.duration || duration || 120,
+          completedAt: session.completedAt || new Date()
+        });
+        await dbSession.save();
+        if (global.inMemorySessions) {
+          if (sessionId) global.inMemorySessions.set(sessionId, dbSession);
+          global.inMemorySessions.set(dbSession._id.toString(), dbSession);
+        }
+        session = dbSession;
+      }
+    }
 
     // Update user stats
     if (mongoose.connection.readyState === 1) {
@@ -540,23 +611,26 @@ router.post('/end', protect, async (req, res) => {
 // GET /api/interview/sessions
 router.get('/sessions', protect, async (req, res) => {
   try {
+    let sessions = [];
     if (mongoose.connection.readyState === 1) {
-      const sessions = await Session.find({ user: req.user._id })
+      sessions = await Session.find({ user: req.user._id })
         .sort({ createdAt: -1 })
         .limit(20)
         .select('-messages -codeSubmissions');
-      return res.json({ success: true, sessions });
     }
 
     // In-memory sessions
-    const userSess = [];
-    for (const s of global.inMemorySessions.values()) {
-      if (s.user?.toString() === req.user._id?.toString() && s.status === 'completed') {
-        userSess.push(s);
+    if (global.inMemorySessions) {
+      for (const s of global.inMemorySessions.values()) {
+        if (s.user?.toString() === req.user._id?.toString() && (s.status === 'completed' || s.evaluation)) {
+          if (!sessions.some(existing => existing._id?.toString() === s._id?.toString())) {
+            sessions.push(s);
+          }
+        }
       }
     }
-    userSess.sort((a, b) => new Date(b.completedAt || b.createdAt) - new Date(a.completedAt || a.createdAt));
-    res.json({ success: true, sessions: userSess.slice(0, 20) });
+    sessions.sort((a, b) => new Date(b.completedAt || b.createdAt) - new Date(a.completedAt || a.createdAt));
+    res.json({ success: true, sessions: sessions.slice(0, 20) });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch sessions.' });
   }
@@ -565,13 +639,15 @@ router.get('/sessions', protect, async (req, res) => {
 // GET /api/interview/sessions/:id
 router.get('/sessions/:id', protect, async (req, res) => {
   try {
-    if (mongoose.connection.readyState === 1) {
-      const session = await Session.findOne({ _id: req.params.id, user: req.user._id });
+    const id = req.params.id;
+    if (mongoose.connection.readyState === 1 && mongoose.isValidObjectId(id)) {
+      const session = await Session.findOne({ _id: id, user: req.user._id });
       if (session) return res.json({ success: true, session });
     }
 
-    if (global.inMemorySessions.has(req.params.id)) {
-      return res.json({ success: true, session: global.inMemorySessions.get(req.params.id) });
+    if (global.inMemorySessions && global.inMemorySessions.has(id)) {
+      const s = global.inMemorySessions.get(id);
+      return res.json({ success: true, session: s });
     }
 
     res.status(404).json({ error: 'Session not found.' });

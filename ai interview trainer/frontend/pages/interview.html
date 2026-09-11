@@ -1286,10 +1286,12 @@ button{ font-family:inherit; }
       activeSessionId = 'sess_' + Date.now();
     }
 
-    try {
       const data = await api.post('/interview/message', { 
         sessionId: activeSessionId, 
         content: txt,
+        role: currentRole,
+        difficulty: currentDifficulty,
+        companyFramework: selectedFramework,
         pressureMode: isPressureMode,
         interviewMode: currentInterviewMode
       });
@@ -2072,25 +2074,53 @@ func solve(nums []int, target int) []int {
   }
 
   async function endSession() {
-    if (activeSessionId) {
-      try {
-        localStorage.setItem('hr_last_session_id', activeSessionId);
-        await api.post('/interview/end', {
-          sessionId: activeSessionId,
-          duration: seconds,
-          tabSwitches: tabSwitchesCount,
-          pasteEvents: pasteEventsCount
-        });
-        window.location.href = `evaluation.html?id=${encodeURIComponent(activeSessionId)}`;
-        return;
-      } catch(e) {
-        console.warn('Session end API error:', e);
-        window.location.href = `evaluation.html?id=${encodeURIComponent(activeSessionId)}`;
-        return;
+    // Harvest messages from the transcript
+    const clientMessages = [];
+    document.querySelectorAll('#transcriptScroll .t-line').forEach(el => {
+      const isAi = el.classList.contains('ai');
+      const text = el.querySelector('.t-text')?.innerText?.trim();
+      if (text && !text.includes('Analyzing candidate architecture') && !text.includes('Calibrating neural connection') && !text.includes('Session awaiting parameters')) {
+        clientMessages.push({ role: isAi ? 'assistant' : 'user', content: text });
       }
+    });
+
+    const sessionIdToSend = activeSessionId || localStorage.getItem('hr_last_session_id') || ('sess_' + Date.now());
+
+    try {
+      localStorage.setItem('hr_last_session_id', sessionIdToSend);
+      const res = await api.post('/interview/end', {
+        sessionId: sessionIdToSend,
+        duration: seconds,
+        tabSwitches: tabSwitchesCount,
+        pasteEvents: pasteEventsCount,
+        messages: clientMessages,
+        role: currentRole,
+        difficulty: currentDifficulty,
+        companyFramework: selectedFramework
+      });
+
+      const finalId = res?.sessionId || sessionIdToSend;
+      if (res?.evaluation) {
+        localStorage.setItem('hr_last_eval', JSON.stringify({
+          evaluation: res.evaluation,
+          session: {
+            role: currentRole,
+            difficulty: currentDifficulty,
+            duration: seconds,
+            completedAt: new Date().toISOString(),
+            id: finalId,
+            messages: clientMessages
+          }
+        }));
+      }
+      localStorage.setItem('hr_last_session_id', finalId);
+      window.location.href = `evaluation.html?id=${encodeURIComponent(finalId)}`;
+      return;
+    } catch(e) {
+      console.warn('Session end API error:', e);
+      window.location.href = sessionIdToSend ? `evaluation.html?id=${encodeURIComponent(sessionIdToSend)}` : 'evaluation.html';
+      return;
     }
-    const stored = localStorage.getItem('hr_last_session_id');
-    window.location.href = stored ? `evaluation.html?id=${encodeURIComponent(stored)}` : 'evaluation.html';
   }
 
   initSession();
