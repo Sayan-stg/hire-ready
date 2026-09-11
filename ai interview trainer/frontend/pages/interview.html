@@ -1286,6 +1286,7 @@ button{ font-family:inherit; }
       activeSessionId = 'sess_' + Date.now();
     }
 
+    try {
       const data = await api.post('/interview/message', { 
         sessionId: activeSessionId, 
         content: txt,
